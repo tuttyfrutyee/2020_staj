@@ -1,0 +1,8 @@
+1) https://arxiv.org/pdf/2001.05673.pdf -> stanford nuscenes contest
+2) http://www.cse.psu.edu/~rtc12/CSE598C/datassocPart1.pdf -> data association part1
+3) http://www.cse.psu.edu/~rtc12/CSE598C/datassocPart2.pdf -> data association part2
+4) http://www.control.isy.liu.se/student/graduate/TargetTracking/IMMderivation.pdf -> imm filter derivation
+5) https://www.kalmanfilter.net/default.aspx -> kalman filter tutorial
+6) http://www.cse.psu.edu/~rtc12/CSE598C/ -> lecture notes for tracking
+7) http://dsp-book.narod.ru/HMDF/2379ch08.pdf -> pdaf tutorial
+

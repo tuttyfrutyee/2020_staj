@@ -6,6 +6,7 @@ from filterpy.kalman import MerweScaledSigmaPoints
 
 import numpy as np
 
+maxChange = 0
 
 def f_unscented_turnRateModel(x_, dt):
     
@@ -16,9 +17,11 @@ def f_unscented_turnRateModel(x_, dt):
     
     X_new = np.copy(x)
 
+    print(dt*x[4] / np.pi * 180)
     
+    maxChange = max(maxChange, dt*x[4])
     
-    if(dt * x[4] < np.pi /2):
+    if(dt * x[4] < np.pi / 4):
         
         x_new = x[0] + x[3] / x[4] * ( -np.sin(x[2]) + np.sin( x[2] + dt * x[4] ) )
         y_new = x[1] + x[3] / x[4] * ( np.cos(x[2])  - np.cos( x[2] + dt * x[4] ) )
@@ -26,6 +29,8 @@ def f_unscented_turnRateModel(x_, dt):
         phi_new = x[2] + dt * x[4] 
         
     else:
+        
+        print("cutted")
         
         x_new = x[0] + x[3] / x[4] * ( -np.sin(x[2])  )
         y_new = x[1] + x[3] / x[4] * ( np.cos(x[2])  )
@@ -41,14 +46,18 @@ def f_unscented_turnRateModel(x_, dt):
     
     return X_new
 
+
+
+
+
 def putAngleInRange(angle):
     
-    angle = angle % np.pi
+    angle = angle % (2*np.pi)
     
-    if(angle > (np.pi/2)):
-        angle -= np.pi
-    elif(angle < (-np.pi/2)):
-        angle += np.pi
+    if(angle > (np.pi)):
+        angle -= 2*np.pi
+    elif(angle < (-np.pi)):
+        angle += 2*np.pi
         
     return angle
     
@@ -104,14 +113,14 @@ class Tracker_SingleTarget_LinearSingleModel(object):
         self.updatedPredictions = []        
         
         self.kf = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_turnRateModel, hx=h_unscented_turnRateModel, points=points)
-        
+
         self.kf.x = np.array([0.01, 0.01, 0.01, 0.01, 0.001])
         
         self.kf.P = np.eye(5) * (measurementNoiseStd**2)
         
         self.kf.R = np.eye(2) * (measurementNoiseStd**2)
         
-        self.kf.Q = np.diag([1e-3, 1e-3, 1e-4, 4e-3, 8e-14])
+        self.kf.Q = np.diag([1e-24, 1e-24, 5e-5, 5e-3, 5e-4])
                 
         
   def predictAndUpdate(self, measurement):

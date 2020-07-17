@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-# -*- coding: utf-8 -*-
-
-from filterpy.kalman import KalmanFilter
 from filterpy.kalman import UnscentedKalmanFilter
 from filterpy.kalman import MerweScaledSigmaPoints
+from filterpy.kalman import IMMEstimator
 
 import numpy as np
 
+maxChange = 0
 
 def f_unscented_turnRateModel(x_, dt):
+    
+    global maxChange
     
     x = np.copy(x_)
     
@@ -19,8 +20,9 @@ def f_unscented_turnRateModel(x_, dt):
     X_new = np.copy(x)
 
     
+    maxChange = max(maxChange, dt*x[4])
     
-    if(dt * x[4] < np.pi /2):
+    if(dt * x[4] < np.pi / 4):
         
         x_new = x[0] + x[3] / x[4] * ( -np.sin(x[2]) + np.sin( x[2] + dt * x[4] ) )
         y_new = x[1] + x[3] / x[4] * ( np.cos(x[2])  - np.cos( x[2] + dt * x[4] ) )
@@ -28,6 +30,8 @@ def f_unscented_turnRateModel(x_, dt):
         phi_new = x[2] + dt * x[4] 
         
     else:
+        
+        print("cutted")
         
         x_new = x[0] + x[3] / x[4] * ( -np.sin(x[2])  )
         y_new = x[1] + x[3] / x[4] * ( np.cos(x[2])  )
@@ -43,14 +47,32 @@ def f_unscented_turnRateModel(x_, dt):
     
     return X_new
 
+def f_unscented_linearModel(x_, dt):
+    
+    x = np.copy(x_)
+    
+    x[2] = putAngleInRange(x[2])
+    
+    X_new = np.copy(x)
+
+    x_new = x[0] + x[3] * dt * np.sin(x[2])
+    y_new = x[1] + x[3] * dt * np.cos(x[2])
+    
+    X_new[0] = x_new
+    X_new[1] = y_new
+
+    return X_new
+
+
+
 def putAngleInRange(angle):
     
-    angle = angle % np.pi
+    angle = angle % (2*np.pi)
     
-    if(angle > (np.pi/2)):
-        angle -= np.pi
-    elif(angle < (-np.pi/2)):
-        angle += np.pi
+    if(angle > (np.pi)):
+        angle -= 2*np.pi
+    elif(angle < (-np.pi)):
+        angle += 2*np.pi
         
     return angle
     
@@ -58,68 +80,95 @@ def putAngleInRange(angle):
 def h_unscented_turnRateModel(x):
     return x[0:2]
     
+def h_unscented_linearModel(x):
+    return x[0:2]
 
 
-class Tracker_SingleTarget_LinearSingleModel(object):
+
+class Tracker_SingleTarget_MultipleModel(object):
   """
   This class tracks object point(single target) with a linear model assumption
   """
   
-  def __init__(self, modelType, deltaT, measurementNoiseStd ):
+  def __init__(self, deltaT, measurementNoiseStd ):
+      
+    self.updatedPredictions = []
+    self.mus = []
+      
+
     """
-    Initialises a tracker using initial bounding box.
+        First init constant linear model
     """
     
-    if(modelType == 0): #use contant linear velocity model
-        
-        # x = [x, y, ax, ay]
-        
-        self.updatedPredictions = []
-        
-        self.kf = KalmanFilter(dim_x = 4, dim_z = 2)
-        
-        self.kf.F = np.array([
-                [1, 0, deltaT, 0],
-                [0, 1, 0, deltaT],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1]
-            ])
-        
-        self.kf.H = np.array([
-            [1, 0, 0, 0],
-            [0, 1, 0, 0]
-            ])
-        
-        self.kf.x = np.array([0.01, 0.01, 0.01, 0.01])
-        self.kf.P *= measurementNoiseStd**2
-        self.kf.Q *= 0.005
-        self.kf.R *= measurementNoiseStd**2
-        
-    elif(modelType == 1): 
-        """
-            Use constant turn rate, constant linear velocity
-        use unscented kalman filter        
-        """
-        
-        points = MerweScaledSigmaPoints(5, alpha=0.0025, beta=2., kappa=0)
-        
-        self.updatedPredictions = []        
-        
-        self.kf = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_turnRateModel, hx=h_unscented_turnRateModel, points=points)
-        
-        self.kf.x = np.array([0.01, 0.01, 0.01, 0.01, 0.001])
-        
-        self.kf.P = np.eye(5) * (measurementNoiseStd**2)
-        
-        self.kf.R = np.eye(2) * (measurementNoiseStd**2)
-        
-        self.kf.Q = np.diag([1e-3, 1e-3, 1e-4, 4e-3, 8e-14])
-                
+    points1 = MerweScaledSigmaPoints(5, alpha=0.0015, beta=2., kappa=0)
+         
+    
+    self.constantLinearModel = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_turnRateModel, hx=h_unscented_linearModel, points=points1)
+
+    self.constantLinearModel.x = np.array([0.01, 0.01, 0.01, 0.01, 0])
+    
+    self.constantLinearModel.P = np.eye(5) * (measurementNoiseStd**2) / 2.0
+    
+    self.constantLinearModel.R = np.eye(2) * (measurementNoiseStd**2)
+    
+    self.constantLinearModel.Q = np.diag([0.003, 0.003, 6e-4, 0.004, 0])   
+    
+    """
+        Second init constant turn rate model
+    """
+    
+    points2 = MerweScaledSigmaPoints(5, alpha=0.001, beta=2., kappa=0)
+         
+    
+    self.constantTurnRateModel = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_turnRateModel, hx=h_unscented_turnRateModel, points=points2)
+
+    self.constantTurnRateModel.x = np.array([0.01, 0.01, 0.01, 0.001, 1e-5])
+    
+    self.constantTurnRateModel.P = np.eye(5) * (measurementNoiseStd**2) / 2.0
+    
+    self.constantTurnRateModel.R = np.eye(2) * (measurementNoiseStd**2)
+    
+    self.constantTurnRateModel.Q = np.diag([1e-24, 1e-24, 1e-3, 2e-3,  1e-10])  
+    
+    filters = [self.constantLinearModel, self.constantTurnRateModel]
+    
+    mu = [0.5, 0.5]
+    
+    trans = np.array([[0.9, 0.1], [0.1, 0.9]])
+    
+    self.imm =  IMMEstimator(filters, mu, trans)
+    
         
   def predictAndUpdate(self, measurement):
         
-    self.kf.predict()
-    self.kf.update(measurement)
+    self.imm.P = 1/2.0*(self.imm.P + self.imm.P.T)  
+      
+        
+    self.imm.predict()
+    self.imm.update(measurement)
     
-    self.updatedPredictions.append(np.array(( self.kf.x_post[0], self.kf.x_post[1] )) )
-    
+    self.updatedPredictions.append(np.array(( self.imm.x_post[0], self.imm.x_post[1] )) )
+    self.mus.append(self.imm.mu)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

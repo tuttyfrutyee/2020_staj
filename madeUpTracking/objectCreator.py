@@ -217,7 +217,7 @@ def addNoiseToPaths(objectPaths_, std, noiseMode):
     return noisyObjectPaths
     
     
-def generateObjectPaths(objectCount, std, pointDistance, frame, noiseMode="uniform", points=None, random=True, plot=False):
+def generateObjectPaths(objectCount, std, pointDistance, frame, pathInnerPointCount, noiseMode="uniform", points=None, random=True, plot=False):
     
     noisyObjectPaths = []
     originalObjectPaths = []
@@ -225,32 +225,40 @@ def generateObjectPaths(objectCount, std, pointDistance, frame, noiseMode="unifo
     maxW = frame["w"]
     maxH = frame["h"]
     
+    
+    
     if(random):
-        points = np.array([])
         
         for i in range(objectCount):
             
             x = np.array([])
             y = np.array([])
-            for k in range(3):
+            for k in range(pathInnerPointCount + 2):
                 x = np.append(x, math.floor(np.random.rand() * (maxW-1) * 2 - maxW))
                 y = np.append(y, math.floor(np.random.rand() * (maxH-1) * 2 - maxH))
             
-            x = x.reshape((3,1))
-            y = y.reshape((3,1))
+            x = x.reshape((pathInnerPointCount + 2,1))
+            y = y.reshape((pathInnerPointCount + 2,1))
             
             if(i == 0):
-                points = np.concatenate((x,y), axis=1)
+                
+                points = [np.concatenate((x,y), axis=1)]
                 
             else:
-                points = np.stack((points, np.concatenate((x,y), axis=1)) )
+                
+                points.append(np.concatenate((x,y), axis = 1))
+                          
+                        
+                          
+        points = np.array(points).reshape(len(points), pathInnerPointCount + 2, 2)
+    
+        print("points shape : ", points.shape)
+                
         
-    print(points.shape)
     for i,point in enumerate(points):
-        
-        print(point)
-        x = [point[0][0], point[1][0], point[2][0] ]
-        y = [point[0][1], point[1][1], point[2][1] ]
+    
+        x = point[:,0].tolist()
+        y = point[:,1].tolist()
         sp = Spline2D(x, y)
         s = np.arange(0, sp.s[-1], pointDistance)
         
@@ -261,9 +269,7 @@ def generateObjectPaths(objectCount, std, pointDistance, frame, noiseMode="unifo
             ry.append(iy)
             ryaw.append(sp.calc_yaw(i_s))
             rk.append(sp.calc_curvature(i_s))
-            
-        print(x[0], x[1], x[2])
-        print(rx[0], rx[1], rx[2])
+        
         
         if(plot):
             flg, ax = plt.subplots(i)
@@ -280,11 +286,13 @@ def generateObjectPaths(objectCount, std, pointDistance, frame, noiseMode="unifo
         ry = np.array(ry).reshape((len(rx),1))
         
         if(i == 0):
-            originalObjectPaths = np.concatenate((rx, ry), axis=1)
-            
+            originalObjectPaths = [np.concatenate((rx,ry), axis = 1)]
+        
         else:
-            #originalObjectPaths = np.stack((originalObjectPaths, np.concatenate((rx, ry), axis=1)) )     
-            originalObjectPaths = (originalObjectPaths, np.concatenate((rx,ry), axis=1))
+            
+            originalObjectPaths.append(np.concatenate((rx,ry), axis=1))
+            
+        
             
     noisyObjectPaths = addNoiseToPaths(originalObjectPaths, std, noiseMode)
         
@@ -312,8 +320,8 @@ def main():
          -40.0, -54.8, -57.0, -57.0, -57.0]
     """
     
-    x = [1,3,2]
-    y = [5,8,3]     
+    x = [1,3,2,8]
+    y = [5,8,3,9]     
     sp = Spline2D(x, y)
     s = np.arange(0, sp.s[-1], 0.1)
     

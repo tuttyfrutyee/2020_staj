@@ -63,6 +63,10 @@ def f_unscented_linearModel(x_, dt):
 
     return X_new
 
+def f_unscented_randomModel(x_, dt):
+    
+    return x_
+
 
 
 def putAngleInRange(angle):
@@ -83,6 +87,8 @@ def h_unscented_turnRateModel(x):
 def h_unscented_linearModel(x):
     return x[0:2]
 
+def h_unscented_randomModel(x):
+    return x[0:2]
 
 
 class Tracker_SingleTarget_MultipleModel(object):
@@ -100,10 +106,10 @@ class Tracker_SingleTarget_MultipleModel(object):
         First init constant linear model
     """
     
-    points1 = MerweScaledSigmaPoints(5, alpha=0.0015, beta=2., kappa=0)
+    points1 = MerweScaledSigmaPoints(5, alpha=0.0025, beta=2., kappa=0)
          
     
-    self.constantLinearModel = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_turnRateModel, hx=h_unscented_linearModel, points=points1)
+    self.constantLinearModel = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_linearModel, hx=h_unscented_linearModel, points=points1)
 
     self.constantLinearModel.x = np.array([0.01, 0.01, 0.01, 0.01, 0])
     
@@ -117,7 +123,7 @@ class Tracker_SingleTarget_MultipleModel(object):
         Second init constant turn rate model
     """
     
-    points2 = MerweScaledSigmaPoints(5, alpha=0.001, beta=2., kappa=0)
+    points2 = MerweScaledSigmaPoints(5, alpha=0.0025, beta=2., kappa=0)
          
     
     self.constantTurnRateModel = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_turnRateModel, hx=h_unscented_turnRateModel, points=points2)
@@ -128,15 +134,49 @@ class Tracker_SingleTarget_MultipleModel(object):
     
     self.constantTurnRateModel.R = np.eye(2) * (measurementNoiseStd**2)
     
-    self.constantTurnRateModel.Q = np.diag([1e-24, 1e-24, 1e-3, 2e-3,  1e-10])  
+    self.constantTurnRateModel.Q = np.diag([1e-24, 1e-24, 1e-3, 4e-3,  1e-10])
     
-    filters = [self.constantLinearModel, self.constantTurnRateModel]
     
-    mu = [0.5, 0.5]
+    """
+        Third init random motion model
+    """
+    points3 = MerweScaledSigmaPoints(5, alpha=0.0025, beta=2., kappa=0)
     
-    trans = np.array([[0.9, 0.1], [0.1, 0.9]])
+    self.randomModel = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_randomModel, hx=h_unscented_randomModel, points=points3)
+
+    self.randomModel.x = np.array([0.01, 0.01, 0.01, 0.001, 1e-5])
     
-    self.imm =  IMMEstimator(filters, mu, trans)
+    self.randomModel.P = np.eye(5) * (measurementNoiseStd**2) / 2.0
+    
+    self.randomModel.R = np.eye(2) * (measurementNoiseStd**2)
+    
+    self.randomModel.Q = np.diag([1, 1, 1e-24, 1e-24,  1e-24])    
+    
+    #############################33
+    
+    if(1):
+        
+        filters = [self.constantLinearModel, self.constantTurnRateModel]
+        
+        
+        mu = [0.5, 0.5]
+        
+        trans = np.array([[0.9, 0.1], [0.1, 0.9]])
+        
+        self.imm =  IMMEstimator(filters, mu, trans)        
+        
+    else:
+        
+        filters = [self.constantLinearModel, self.constantTurnRateModel, self.randomModel]
+        
+        
+        mu = [0.34, 0.33, 0.33]
+        
+        trans = np.array([[0.9, 0.05, 0.05], [0.05, 0.9, 0.05], [0.05, 0.05, 0.9]])
+        
+        self.imm =  IMMEstimator(filters, mu, trans)
+    
+    
     
         
   def predictAndUpdate(self, measurement):

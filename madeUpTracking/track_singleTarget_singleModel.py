@@ -68,6 +68,11 @@ def f_unscented_linearModel(x_, dt):
 
     return X_new
 
+def f_unscented_randomModel(x_, dt):
+    
+    return x_
+
+
 
 
 def putAngleInRange(angle):
@@ -87,6 +92,10 @@ def h_unscented_turnRateModel(x):
     
 def h_unscented_linearModel(x):
     return x[0:2]
+
+def h_unscented_randomModel(x):
+    return x[0:2]
+
 
 
 class Tracker_SingleTarget_SingleModel(object):
@@ -132,45 +141,66 @@ class Tracker_SingleTarget_SingleModel(object):
             
         """
         
-        points = MerweScaledSigmaPoints(5, alpha=0.001, beta=2., kappa=1)
+        points1 = MerweScaledSigmaPoints(5, alpha=0.001, beta=2., kappa=0)
         
         self.updatedPredictions = []        
         
-        self.kf = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_turnRateModel, hx=h_unscented_turnRateModel, points=points)
+        self.kf = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_turnRateModel, hx=h_unscented_turnRateModel, points=points1)
 
-        self.kf.x = np.array([0.01, 0.01, 0.01, 0.001, 1e-5])
+        self.kf.x = np.array([1e-3, 1e-3, 1e-3, 1e-5, 1e-10])
         
-        self.kf.P = np.eye(5) * (measurementNoiseStd**2) / 2.
+        self.kf.P = np.eye(5) * (measurementNoiseStd**2)/2.0
         
-        self.kf.R = np.eye(2) * (measurementNoiseStd**2)
+        self.kf.R = np.eye(2) * (measurementNoiseStd**2) 
         
-        self.kf.Q = np.diag([1e-24, 1e-24, 1e-3, 2e-3,  1e-10])
+        self.kf.Q = np.diag([1e-24, 1e-24, 1e-3, 4e-3,  1e-10])
             
     elif(modelType == 2):
         """
             Constant linear velocity model
         """
         
-        points = MerweScaledSigmaPoints(5, alpha=0.0015, beta=2., kappa=0)
+        points1 = MerweScaledSigmaPoints(5, alpha=0.001, beta=2., kappa=0)
+        
         
         self.updatedPredictions = []                
          
         self.kf = []        
     
-        self.kf = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_linearModel, hx=h_unscented_linearModel, points=points)
+        self.kf = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_linearModel, hx=h_unscented_linearModel, points=points1)
     
-        self.kf.x = np.array([0.01, 0.01, 0.01, 0.01, 0])
+        self.kf.x = np.array([1e-3, 1e-3, 1e-3, 1e-5, 0])
         
-        self.kf.P = np.eye(5) * (measurementNoiseStd**2) / 2.
+        self.kf.P = np.eye(5) * (measurementNoiseStd**2) / 2.0
         
-        self.kf.R = np.eye(2) * (measurementNoiseStd**2)    
+        self.kf.R = np.eye(2) * (measurementNoiseStd**2)  
         
-        self.kf.Q = np.diag([0.003, 0.003, 6e-4, 0.004, 0])           
+        self.kf.Q = np.diag([0.003, 0.003, 6e-4, 0.004, 0])       
         
+    elif(modelType == 3):
+        """
+            Random Motion Model
+        """
+        
+        points1 = MerweScaledSigmaPoints(5, alpha=0.001, beta=2., kappa=0)
+        
+        
+        self.updatedPredictions = []                
+         
+        self.kf = []        
+    
+        self.kf = UnscentedKalmanFilter(dim_x=5, dim_z=2, dt=deltaT, fx=f_unscented_randomModel, hx=h_unscented_randomModel, points=points1)
+    
+        self.kf.x = np.array([1e-3, 1e-3, 1e-3, 1e-5, 0])
+        
+        self.kf.P = np.eye(5) * (measurementNoiseStd**2) / 2.0
+        
+        self.kf.R = np.eye(2) * (measurementNoiseStd**2)  
+        
+        self.kf.Q = np.diag([1, 1, 1e-24, 1e-24,  1e-24])           
         
   def predictAndUpdate(self, measurement):
       
-    self.kf.P = 1/2.0*(self.kf.P + self.kf.P.T)  
 
     self.kf.predict()
     self.kf.update(measurement)

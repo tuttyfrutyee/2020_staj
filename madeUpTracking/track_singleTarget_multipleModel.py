@@ -93,7 +93,6 @@ def h_unscented_randomModel(x):
 
 class Tracker_SingleTarget_MultipleModel(object):
   """
-  This class tracks object point(single target) with a linear model assumption
   """
   
   def __init__(self, deltaT, measurementNoiseStd ):

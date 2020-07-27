@@ -7,9 +7,10 @@ import math
 
 
 """
-    Index:
+    References:
 
     [BYL95] : MultiTarget-Multisensor Tracking Yaakov Bar-Shalom 1995
+    [AR07] : Masters Thesis: 3D-LIDAR Multi Object Tracking for Autonomous Driving
 
 """
 
@@ -17,9 +18,68 @@ def generateAssociationEvents(validationMatrix):
 
     events = []
 
-    for validationVector in validationMatrix:
+    numberOfMeasurements = validationMatrix.shape[0]
+    exhaustedMeasurements = np.zeros((numberOfMeasurements), dtype=int)
+
+    usedTrackers = None
+    previousEvent = np.zeros(shape = (numberOfMeasurements), dtype = int) - 1
+    burnCurrentEvent = None
+
+    while(not exhaustedMeasurements[0]):
+
+        event = np.zeros(shape = (numberOfMeasurements), dtype=int)
+        burnCurrentEvent = False
+        usedTrackers = []
+
+        for i,validationVector in enumerate(validationMatrix):
+            
+
+            if(previousEvent[i] == -1):
+                event[i] = 0
+            else:
+
+                nextMeasurementIndex = i+1
+                if(nextMeasurementIndex == numberOfMeasurements or exhaustedMeasurements[nextMeasurementIndex]):
+
+                    if(nextMeasurementIndex != numberOfMeasurements):
+                        exhaustedMeasurements[nextMeasurementIndex:] = 0
+                        previousEvent[nextMeasurementIndex:] = -1
+
+                    
+                    nextTrackIndex = previousEvent[i]
+                    
+                    
+                    while(validationVector.shape[0]-1 > nextTrackIndex):
+                        if(nextTrackIndex != previousEvent[i]):
+                            if((nextTrackIndex not in usedTrackers) and (validationVector[nextTrackIndex])):
+                                break
+                        nextTrackIndex +=1
+                        
+                    if(not validationVector[nextTrackIndex] or nextTrackIndex == previousEvent[i] or nextTrackIndex in usedTrackers):
+                        burnCurrentEvent = True
+                        exhaustedMeasurements[i] = 1
+                        break
+                    
+
+                    usedTrackers.append(nextTrackIndex)
+                    event[i] = nextTrackIndex
+                
+                else:
+                    event[i] = previousEvent[i]
+                    usedTrackers.append(previousEvent[i])
+            
+        if(burnCurrentEvent):
+            
+
+
+            continue
+
+        previousEvent = np.copy(event)
         
 
+        events.append(event)
+    
+    return events
 
 def createValidationMatrix(measurements, tracks, gateThreshold):
 
@@ -103,7 +163,7 @@ def mahalanobisDistanceSquared(x, mean, cov):
     return dist
 
 
-def calculateJointAssociationProbability(jAE, spatialDensity, PD):
+def calculateJointAssociationProbability(jAE, measurements, tracks, spatialDensity, PD):
 
     """
         Description:
@@ -114,6 +174,10 @@ def calculateJointAssociationProbability(jAE, spatialDensity, PD):
             One needs to divide this returned value with the sum of all joint association probabilities to normalize
 
             [page 317, (6.2.4-4) BYL95]
+
+        'measurements' : numpy array of shape (m,)
+
+        'tracks' : numpy array of shape (Nt,)
                                                                                    
         'jAE' : "jointAssociationEvent" :
 
@@ -135,53 +199,23 @@ def calculateJointAssociationProbability(jAE, spatialDensity, PD):
 
     """
 
-    print("todo: calculateJointAssociationProbability")
+    numberOfDetections = np.sum(jAE>0)
 
-def calculateTargetDetectionIndicatorVector(jAE):
+    measurementProbabilities = 1
 
-    """
-        Description:
-            Returns a vector such that each element of it shows if that index related target is detected
+    for measurementIndex, associatedTrack in enumerate(jAE):
 
-            [page 313, (6.2.2-6) BYL95]
+        trackPriorMean = tracks[associatedTrack].z_priorMean
+        trackS = tracks[associatedTrack].S
 
-        'jAE' : "jointAssociationEvent" :
+        measurementProbabilities *= calculateTheProbabilityOfTheMeasurementRelatedWithTrack(measurements[measurementIndex], trackPriorMean, trackS)
+        measurementProbabilities /= spatialDensity
 
-            It is a matrix of shape ( MeasurementsInSurvelience, NumberOfTracks+1 )
-            The elements of the matrix show if corresponding row(measurement) and column(tracker) are associated
-            jAE = [w^jt]    
-            
-            [page 312, (6.2.2-3) BYL95]        
-
-    """
-
-    print("todo : calculateTargetDetectionIndicatorVector")
-
-
-def calculateMeasurementAssociationIndicatorVector(jAE):
-
-    """
-        Description:
-            Returns a vector such that each element of it shows if that index related measurement is associated with a target
-
-            [page 313, (6.2.2-7) BYL95]
-
-        'jAE' : "jointAssociationEvent" :
-
-            It is a matrix of shape ( MeasurementsInSurvelience, NumberOfTracks+1 )
-            The elements of the matrix show if corresponding row(measurement) and column(tracker) are associated
-            jAE = [w^jt]    
-            
-            [page 312, (6.2.2-3) BYL95]        
-
-    """
-
-    print("todo : calculateMeasurementAssociationIndicatorVector")
+    return measurementProbabilities * pow(PD, numberOfDetections) * pow(1-PD, tracks.shape[0] - numberOfDetections)
 
 
 
-
-def calculateTheProbabilityOfTheMeasurementRelatedWithTarget(measurement, targetPriorMean, targetPriorS):
+def calculateTheProbabilityOfTheMeasurementRelatedWithTrack(measurement, trackPriorMean, trackS):
 
     """
 
@@ -192,12 +226,61 @@ def calculateTheProbabilityOfTheMeasurementRelatedWithTarget(measurement, target
 
     """
 
-    if targetPriorMean is not None:
-        flat_targetPriorMean = np.asarray(targetPriorMean).flatten()
+    if trackPriorMean is not None:
+        flat_targetPriorMean = np.asarray(trackPriorMean).flatten()
     else:
         flat_targetPriorMean = None
 
     flat_measurement = np.asarray(measurement).flatten()
 
 
-    return multivariate_normal.pdf(flat_measurement, flat_targetPriorMean, targetPriorS, True)
+    return multivariate_normal.pdf(flat_measurement, flat_targetPriorMean, trackS, True)
+
+
+
+def calculateMarginalAssociationProbabilities(events, measurements, tracks, spatialDensity, PD):
+
+    """
+        Description:
+            Calculates the marginal association probabilities, ie. Beta(j,t) for each measurement and tracks.
+            Note that the value returned from the calculateJointAssociationProbability function is not normalized
+            Hence one needs to normalize the calculated probabilities.
+
+            calculation : [page 317, (6.2.5-1) BYL95]
+            normalization : [page 39, (3-45) AR07]
+
+        'measurements' : numpy array of shape (m,)
+
+        'tracks' : numpy array of shape (Nt,)
+    
+        'spatialDensity': 
+
+            The poisson parameter that represents the number of false measurements in a unit volume
+
+            [page 317, (6.2.4-1) BYL95]
+
+        "PD" :
+
+            Detection probability            
+
+    """
+    
+    numberOfMeasurements = measurements.shape[0]
+    numberOfTracks = tracks.shape[0]
+
+    marginalAssociationProbabilities = np.zeros((numberOfMeasurements, numberOfTracks))
+
+    sumOfEventProbabilities = 0 #will be used to normalize the calculated probabilities
+
+    for event in events:
+
+        eventProbability = calculateJointAssociationProbability(event, measurements, tracks, spatialDensity, PD)
+        sumOfEventProbabilities += eventProbability
+
+        for measurementIndex, trackIndex in enumerate(event):
+
+            marginalAssociationProbabilities[measurementIndex, trackIndex] += eventProbability
+
+    marginalAssociationProbabilities /= sumOfEventProbabilities #normalize the probabilites
+
+    return marginalAssociationProbabilities

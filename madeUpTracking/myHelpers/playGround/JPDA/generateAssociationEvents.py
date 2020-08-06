@@ -9,6 +9,15 @@ Created on Mon Jul 27 13:49:36 2020
 import numpy as np
 import time
 
+
+print_generateAssociationEvents = False
+
+def print_(*element):
+    if(print_generateAssociationEvents):
+        print(element)
+
+
+
 meas1 = [1,1,1]
 meas2 = [1,1,1]
 meas3 = [1,1,1]
@@ -20,6 +29,7 @@ validationMatrix = []
 for meas in measurements:
     validationMatrix.append(np.array(meas))
 validationMatrix = np.array(validationMatrix)
+
 
 
 
@@ -93,4 +103,4 @@ def generateAssociationEvents(validationMatrix):
 
 
 events = generateAssociationEvents(validationMatrix)
-print(events)
+print_(events)

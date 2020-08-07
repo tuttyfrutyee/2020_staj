@@ -18,7 +18,7 @@ def generateUnscentedWeights(L, alpha, beta, kappa):
     Wsi = 0.5 / (L + lambda_)
     Wci = 0.5 / (L + lambda_)
 
-    return ([Ws0, Wsi],[Wc0, Wci])
+    return ([Ws0, Wsi],[Wc0, Wci], lambda_)
 
 def generateSigmaPoints(stateMean, stateCovariance, lambda_):
 
@@ -35,10 +35,11 @@ def generateSigmaPoints(stateMean, stateCovariance, lambda_):
     sqrtMatrix = cholesky((L + lambda_) * stateCovariance)
 
     for i in range(L):
-        sigmaPoints.append( stateMean + sqrtMatrix[i])
-        sigmaPoints.append( stateMean - sqrtMatrix[i])
+        sigmaPoints.append( stateMean + np.expand_dims(sqrtMatrix[i],axis=1) )
+        sigmaPoints.append( stateMean - np.expand_dims(sqrtMatrix[i],axis=1) )
+        
 
-    return sigmaPoints
+    return np.array(sigmaPoints, dtype="float")
 
 
 def calculatePriorState(forwardFunc, measureFunc, sigmaPoints, Ws, Wc, processNoise, measurementNoise):
@@ -80,8 +81,8 @@ def calculatePriorState(forwardFunc, measureFunc, sigmaPoints, Ws, Wc, processNo
 
     stateCovariance += processNoise
     Pzz += measurementNoise
-
-    kalmanGain = np.dot(Pxz, np.linalg.pinv(Pzz))
+    
+    kalmanGain = np.dot(Pxz, np.linalg.pinv(Pzz ))
 
     return (stateMean, stateCovariance, Pzz, measureMean, kalmanGain)
 

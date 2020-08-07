@@ -26,7 +26,7 @@ def generateSigmaPoints(stateMean, stateCovariance, lambda_):
         sigmaPoints.append( stateMean - np.expand_dims(sqrtMatrix[i],axis=1) )
         
 
-    return np.array(sigmaPoints, dtype=object)
+    return np.array(sigmaPoints, dtype="float")
 
 
 

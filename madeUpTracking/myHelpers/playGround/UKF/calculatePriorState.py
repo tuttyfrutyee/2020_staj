@@ -50,8 +50,8 @@ def calculatePriorState(forwardFunc, measureFunc, sigmaPoints, Ws, Wc, processNo
 
     stateCovariance += processNoise
     Pzz += measurementNoise
-
-    kalmanGain = np.dot(Pxz, np.linalg.pinv(Pzz))
+    
+    kalmanGain = np.dot(Pxz, np.linalg.pinv(Pzz ))
 
     return (stateMean, stateCovariance, Pzz, measureMean, kalmanGain)
 
@@ -74,3 +74,19 @@ measurementNoise = np.eye(dimZ)
 
 stateMean, stateCovariance, Pzz, measureMean, kalmanGain = \
     calculatePriorState(forwardFunc, measureFunc, gSP.sigmaPoints, gUW.Ws, gUW.Wc, processNoise, measurementNoise)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

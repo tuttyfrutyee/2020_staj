@@ -7,6 +7,10 @@ Created on Mon Jul 27 13:49:36 2020
 """
 
 import numpy as np
+import sys
+sys.path.append("../")
+import commonVariables as common
+
 import time
 
 
@@ -17,51 +21,44 @@ def print_(*element):
         print(element)
 
 
-
-meas1 = [1,1,1]
-meas2 = [1,1,1]
-meas3 = [1,1,1]
-meas4 = [1,1,1]
-
-measurements = [meas1, meas2, meas3, meas4]
-
-validationMatrix = []
-for meas in measurements:
-    validationMatrix.append(np.array(meas))
-validationMatrix = np.array(validationMatrix)
-
-
-
-
-
 def generateAssociationEvents(validationMatrix):
+    
+    """
+        Description:
+            ---
+        Input:
+            validationMatrix: np.array(shape = (m_k, Nr+1))
+        Output:
+            associationEvents : np.array(shape = (numberOfEvents(not known in advance), m_k, 1))
+    """
+    
+    associationEvents = []
 
-    events = []
-
-    numberOfMeasurements = validationMatrix.shape[0]
-    exhaustedMeasurements = np.zeros((numberOfMeasurements), dtype=int)
+    m_k = validationMatrix.shape[0]
+    exhaustedMeasurements = np.zeros((m_k), dtype=int)
 
     usedTrackers = None
-    previousEvent = np.zeros(shape = (numberOfMeasurements), dtype = int) - 1
+    previousEvent = np.zeros(shape = (m_k), dtype = int) - 1
     burnCurrentEvent = None
 
     while(not exhaustedMeasurements[0]):
 
-        event = np.zeros(shape = (numberOfMeasurements), dtype=int)
+        event = np.zeros(shape = (m_k), dtype=int)
         burnCurrentEvent = False
         usedTrackers = []
 
         for i,validationVector in enumerate(validationMatrix):
             
+            #Note: validationVector corresponds to a measurement -> measurement_validationVector : [val?_t0, val?_t1, ..., val?_tNr]
 
             if(previousEvent[i] == -1):
-                event[i] = 0
+                event[i] = 0 #first t_0 will be considered, note it always a choice since measurement can be not related with any track
             else:
 
                 nextMeasurementIndex = i+1
-                if(nextMeasurementIndex == numberOfMeasurements or exhaustedMeasurements[nextMeasurementIndex]):
+                if(nextMeasurementIndex == m_k or exhaustedMeasurements[nextMeasurementIndex]):
 
-                    if(nextMeasurementIndex != numberOfMeasurements):
+                    if(nextMeasurementIndex != m_k):
                         exhaustedMeasurements[nextMeasurementIndex:] = 0
                         previousEvent[nextMeasurementIndex:] = -1
 
@@ -90,17 +87,13 @@ def generateAssociationEvents(validationMatrix):
             
         if(burnCurrentEvent):
             
-
-
             continue
 
         previousEvent = np.copy(event)
-        
-
-        events.append(event)
+        associationEvents.append(event)
     
-    return events
+    return np.array(associationEvents, dtype=int)
 
 
-events = generateAssociationEvents(validationMatrix)
-print_(events)
+associationEvents = generateAssociationEvents(common.validationMatrix)
+print_(associationEvents)

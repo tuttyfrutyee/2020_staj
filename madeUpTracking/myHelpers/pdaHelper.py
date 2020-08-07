@@ -17,8 +17,6 @@ def pdaPass(kalmanGain, associationProbs, measurements, priorStateMean, priorSta
         priorStateMean : np.array(shape = (dim(x), 1))
         priorStateMeasuredMean : np.array(shape = (dim(z), 1) )
         priorStateCovariance : np.array( shape = (dim(x), dim(x)) )
-        
-        [page 132, 3.4.2-8 ---> 3.4.2-12, BYL95]
 
     """
 
@@ -45,9 +43,16 @@ def pdaPass(kalmanGain, associationProbs, measurements, priorStateMean, priorSta
             runningCovariance += associationProbs[i] * (np.dot(vk[i], vk[i].T))
 
 
+    print_("runningCovariance.shape = ", runningCovariance.shape)
+    print_("v_fused.shape = ", v_fused.shape)
+    print_("v_fused dot v_fused.T shape = ", np.dot(v_fused, v_fused.T).shape)
+
     P_tilda = np.dot(kalmanGain, np.dot( (runningCovariance - np.dot(v_fused, v_fused.T)) , kalmanGain.T))
 
     x_final = priorStateMean + np.dot(kalmanGain, v_fused)
     P_final = B0 * priorStateCovariance + [1-B0] * P_c  + P_tilda
 
     return (x_final, P_final)
+
+
+

@@ -1,19 +1,32 @@
 from scipy.linalg import cholesky
 import numpy as np
 
-print_generateSigmaPoints = False
+import generateUnscentedWeights as gUW
+
+import sys
+sys.path.append("../")
+import commonVariables as commonVar
+
+print_generateSigmaPoints = True
 
 def print_(*element):
     if(print_generateSigmaPoints):
         print(element)
 
-def generateSigmaPoints(stateMean, stateCovariance, lambda_):
+def generateSigmaPoints(stateMean, stateCovariance, lambda_): #checkCount : 1
 
     """
-        stateMean : np.array(shape = (dimX,1))
-        stateCovariance : np.array(shape = (dimX, dimX))
-        lambda_ : float
-    """
+        Description:
+            [WR00 Equation 15]
+        Input:
+            stateMean: np.array(shape = (dimX,1))
+            stateCovariance: np.array(shape = (dimX, dimX))
+            lambda_: float
+            
+        Output:
+            sigmaPoints : np.array(shape = (dimX*2 + 1, dimX, 1))
+        
+    """ 
 
     L = stateMean.shape[0]
 
@@ -26,19 +39,10 @@ def generateSigmaPoints(stateMean, stateCovariance, lambda_):
         sigmaPoints.append( stateMean - np.expand_dims(sqrtMatrix[i],axis=1) )
         
 
-    return np.array(sigmaPoints, dtype="float")
+    return np.squeeze(np.array(sigmaPoints, dtype="float"))
 
 
 
-dimX = 5
-lambda_ = (0.01 **2) * (dimX + 0) - dimX
 
-stateMean = np.random.randn(dimX,1)
-stateCovariance = np.random.randn(dimX, dimX)
-stateCovariance = 0.5*(stateCovariance + stateCovariance.T) / ( np.max(abs(stateCovariance))) + dimX * np.eye(dimX)
-
-print_(stateCovariance)
-
-
-sigmaPoints = generateSigmaPoints(stateMean, stateCovariance, lambda_)
+sigmaPoints = generateSigmaPoints(np.expand_dims(commonVar.stateMeans[0],axis=1), commonVar.stateCovariances[0], gUW.lambda_)
 print_(sigmaPoints.shape)

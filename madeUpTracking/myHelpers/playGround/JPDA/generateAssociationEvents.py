@@ -8,13 +8,17 @@ Created on Mon Jul 27 13:49:36 2020
 
 import numpy as np
 import sys
+
+import createValidationMatrix as cVM
+
+
 sys.path.append("../")
-import commonVariables as common
+import commonVariables as commonVar
 
 import time
 
 
-print_generateAssociationEvents = False
+print_generateAssociationEvents = True
 
 def print_(*element):
     if(print_generateAssociationEvents):
@@ -40,6 +44,9 @@ def generateAssociationEvents(validationMatrix):
     usedTrackers = None
     previousEvent = np.zeros(shape = (m_k), dtype = int) - 1
     burnCurrentEvent = None
+    
+    if(m_k == 0):
+        return None
 
     while(not exhaustedMeasurements[0]):
 
@@ -95,5 +102,5 @@ def generateAssociationEvents(validationMatrix):
     return np.array(associationEvents, dtype=int)
 
 
-associationEvents = generateAssociationEvents(common.validationMatrix)
-print_(associationEvents)
+associationEvents = generateAssociationEvents(cVM.validationMatrix)
+print_("associationEvents : ", associationEvents)

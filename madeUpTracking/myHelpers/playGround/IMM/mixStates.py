@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 sys.path.append("../")
-import commonVariables as common
+import commonVariables as commonVar
 
 print_mixStates = True
 
@@ -18,14 +18,14 @@ def mixStates(stateMeans, stateCovariances, transitionMatrix, modeProbs):
             [DIMM Equation 5-6]
 
         Input: 
-        stateMeans : np.array(shape = (Nr, dimX))
-        stateCovariances : np.array(shape = (Nr, dimX, dimX))
-        transitionMatrix : np.array(shape = (Nr, Nr))
-        modeProbs : np.array(shape = (Nr,1))
+            stateMeans : np.array(shape = (Nr, dimX))
+            stateCovariances : np.array(shape = (Nr, dimX, dimX))
+            transitionMatrix : np.array(shape = (Nr, Nr))
+            modeProbs : np.array(shape = (Nr,1))
 
         Output:
-        mixedMeans : np.array(shape = (Nr, dimX))
-        mixedCovariances : np.array(shape = (Nr, dimX, dimX))
+            mixedMeans : np.array(shape = (Nr, dimX))
+            mixedCovariances : np.array(shape = (Nr, dimX, dimX))
     """
 
     mixingRatios = (transitionMatrix * modeProbs) / np.dot(modeProbs.T, transitionMatrix)
@@ -57,7 +57,7 @@ def mixStates(stateMeans, stateCovariances, transitionMatrix, modeProbs):
 
 
 
-mixedMeans, mixedCovariances = mixStates(common.stateMeans, common.stateCovariances, common.transitionMatrix, common.modeProbs)
+mixedMeans, mixedCovariances = mixStates(commonVar.stateMeans, commonVar.stateCovariances, commonVar.transitionMatrix, commonVar.modeProbs)
 
 # playground
-mixingRatios = (common.transitionMatrix * common.modeProbs) / np.dot(common.modeProbs.T, common.transitionMatrix)
+mixingRatios = (commonVar.transitionMatrix * commonVar.modeProbs) / np.dot(commonVar.modeProbs.T, commonVar.transitionMatrix)

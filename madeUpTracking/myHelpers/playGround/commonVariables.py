@@ -36,7 +36,7 @@ measurements = np.random.randn(m_k, dimZ)
 likelihoods = abs(np.random.randn(Nr, m_k))
 #likelihoods = likelihoods / (np.expand_dims(np.sum(likelihoods, axis=1), axis=1))
 
-gateThreshold = 0.7
+gateThreshold = 0.8
 
 PD = 0.9
 
@@ -44,25 +44,51 @@ previousModeProbabilities = abs(np.random.randn(Nr, 1))
 previousModeProbabilities = previousModeProbabilities / np.sum(previousModeProbabilities)
 
 #JPDA
-meas1 = [1,0,1]
-meas2 = [1,1,0]
-meas3 = [1,1,1]
-meas4 = [1,0,1]
-
-measurements_ = [meas1, meas2, meas3, meas4]
-
-validationMatrix = []
-for meas in measurements_:
-    validationMatrix.append(np.array(meas))
-validationMatrix = np.array(validationMatrix)
 
 class Track(object):
-  def __init__(self, z_prior, S_prior):
+  def __init__(self, z_prior, S):
     self.z_prior = z_prior
-    self.S_prior = S_prior
+    self.S = S
 
 tracks = []
+maxDet = 0
 for i in range(Nr):
     z_prior = np.random.randn(dimZ, 1)
-    S_prior = generateRandomCovariance_positiveDefinite(dimZ)
-    tracks.append(Track(z_prior, S_prior))
+    S = generateRandomCovariance_positiveDefinite(dimZ)
+    det = np.linalg.det(S)
+    if(det > maxDet):
+        maxDet = det
+    tracks.append(Track(z_prior, S))
+    
+
+spatialDensity = 0.1
+
+    
+#PDA
+
+kalmanGain = np.random.randn(dimX, dimZ)
+priorStateMean = np.random.randn(dimX,1)
+priorStateMeasuredMean = np.random.randn(dimZ,1)
+priorStateCovariance = np.random.randn(dimX, dimX)
+Pzz = np.random.randn(dimZ, dimZ)
+
+#UKF
+
+L = dimX
+alpha = 0.01
+beta = 2    
+kappa = 0
+
+
+processNoise = generateRandomCovariance_positiveDefinite(dimX)
+measurementNoise = generateRandomCovariance_positiveDefinite(dimZ)
+
+
+
+
+
+
+
+
+
+

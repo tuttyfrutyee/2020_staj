@@ -1,7 +1,8 @@
 import numpy as np
 import sys
 sys.path.append("../")
-import commonVariables as common
+import commonVariables as commonVar
+import common as common
 
 print_updateModeProbabilities_PDA = True
 
@@ -9,20 +10,7 @@ def print_(*element):
     if(print_updateModeProbabilities_PDA):
         print(element)
         
-def calculateNDimensionalUnitVolume(n): #checkCount : 1, confident
-    return np.power(np.pi, n/2) / gamaFunc(n/2 + 1)
-
-def gamaFunc(n): #checkCount : 1, confident
-
-    gama_1over2 = np.sqrt(np.pi)
-    runningProduct = 1
-    
-    while(n > 1):
-        runningProduct *= (n-1)
-        n = n - 1
-    if(n == 0.5):
-        runningProduct *= gama_1over2
-    return runningProduct        
+  
 
 def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 0
 
@@ -31,16 +19,16 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
             It calculates the new mode probabilities using probability data association [BYL95 page211 4.4.1-2]
 
         Input:
-        modePzzs : np.array(shape = (Nr, dimZ, dimZ))
-        measurements : np.array(shape = (m_k, dimZ))
-        likelihoods : np.array(shape = (Nr, m_k)
-        gateThreshold : float between(0,1)
-        PD : float between(0,1)
-        transitionMatrix : np.array(shape = (Nr, Nr))
-        previousModeProbabilities : np.array(shape = (Nr,1))
+            modePzzs : np.array(shape = (Nr, dimZ, dimZ))
+            measurements : np.array(shape = (m_k, dimZ))
+            likelihoods : np.array(shape = (Nr, m_k)
+            gateThreshold : float between(0,1)
+            PD : float between(0,1)
+            transitionMatrix : np.array(shape = (Nr, Nr))
+            previousModeProbabilities : np.array(shape = (Nr,1))
 
         Output:
-        updatedModeProbabilities : np.array(shape = (Nr,1))
+            updatedModeProbabilities : np.array(shape = (Nr,1))
     """
 
 
@@ -53,7 +41,7 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
             maxPzzDeterminant = det
 
     nz = modePzzs[0].shape[0]
-    maximumVolume = calculateNDimensionalUnitVolume(nz) * np.power(gateThreshold, nz/2) * np.sqrt(maxPzzDeterminant) #[BYL95 page 130 3.4.1-6]
+    maximumVolume = common.calculateGatedVolume(nz, gateThreshold, maxPzzDeterminant) 
     
     m_k = measurements.shape[0]
 
@@ -73,11 +61,9 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
 
 #playground:
 
-print_(calculateNDimensionalUnitVolume(1), "should be = ",2)
-print_(calculateNDimensionalUnitVolume(2), "should be = ",np.pi)
-print_(calculateNDimensionalUnitVolume(3), "should be = ", np.pi * 4 / 3)
 
-updatedModeProbabilities = updateModeProbabilities_PDA(common.modePzzs, common.measurements, common.likelihoods, common.gateThreshold, common.PD, common.transitionMatrix, common.previousModeProbabilities)
+
+updatedModeProbabilities = updateModeProbabilities_PDA(commonVar.modePzzs, commonVar.measurements, commonVar.likelihoods, commonVar.gateThreshold, commonVar.PD, commonVar.transitionMatrix, commonVar.previousModeProbabilities)
 print_(updatedModeProbabilities)
 print_(np.sum(updatedModeProbabilities))
 

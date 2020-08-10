@@ -8,10 +8,10 @@ Created on Fri Aug  7 15:03:53 2020
 import numpy as np
 import sys
 sys.path.append("../")
-import commonVariables as common
+import commonVariables as commonVar
 
 
-print_createValidationMatrix = False
+print_createValidationMatrix = True
 
 def print_(*element):
     if(print_createValidationMatrix):
@@ -53,7 +53,7 @@ def createValidationMatrix(measurements, tracks, gateThreshold):
                 tracks : list of len = Nr of track objects
                 gateThreshold : float(0,1)
 
-            Returns:
+            Output:
 
                 validateMeasurementsIndexes: np.array(shape = (numOfSuceesfulGatedMeasurements(not known in advance),1))
                     
@@ -80,7 +80,7 @@ def createValidationMatrix(measurements, tracks, gateThreshold):
 
         for track in tracks:
 
-            mahalanobisDistanceSquared_ = mahalanobisDistanceSquared(measurement, track.z_prior, track.S_prior)
+            mahalanobisDistanceSquared_ = mahalanobisDistanceSquared(measurement, track.z_prior, track.S)
 
             if(mahalanobisDistanceSquared_ < gateThreshold):
                 validationVector.append(1)
@@ -101,9 +101,13 @@ def createValidationMatrix(measurements, tracks, gateThreshold):
 
 
 
-validatedMeasurementIndexes, validationMatrix = createValidationMatrix(common.measurements, common.tracks, common.gateThreshold)
-
-
-
+validatedMeasurementIndexes, validationMatrix = createValidationMatrix(commonVar.measurements, commonVar.tracks, commonVar.gateThreshold)
+if(validatedMeasurementIndexes.shape[0] > 0):
+    validatedMeasurements = commonVar.measurements[validatedMeasurementIndexes[:,0]]
+else: 
+    validatedMeasurements = None
+print_("validationMatrix: ", validationMatrix)
+print_("validatedMeasurementIndexes : ", validatedMeasurementIndexes[:,0])
+print_("validated m_k = ", validatedMeasurements.shape[0])
 
 

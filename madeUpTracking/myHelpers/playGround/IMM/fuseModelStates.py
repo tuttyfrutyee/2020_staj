@@ -3,7 +3,7 @@ import numpy as np
 
 import sys
 sys.path.append("../")
-import commonVariables as common
+import commonVariables as commonVar
 
 print_fuseModelStates = True
 
@@ -20,13 +20,13 @@ def fuseModelStates(stateMeans, stateCovariances, modeProbabilities): #checkCoun
             [DIMM Equation 53]
         
         Input:
-        stateMeans : np.array(shape = (Nr, dimX))
-        stateCovariances : np.array(shape = (Nr, dimX, dimX))
-        modeProbabilities : np.array(shape = (Nr,1))
+            stateMeans : np.array(shape = (Nr, dimX))
+            stateCovariances : np.array(shape = (Nr, dimX, dimX))
+            modeProbabilities : np.array(shape = (Nr,1))
 
         Output:
-        fusedStateMean : np.array(shape = (dimX, 1))
-        fusedStateCovariance : np.array(shape = (dimX, dimX))
+            fusedStateMean : np.array(shape = (dimX, 1))
+            fusedStateCovariance : np.array(shape = (dimX, dimX))
     """
     
     fusedStateMean = np.dot(stateMeans.T, modeProbabilities)
@@ -46,4 +46,4 @@ def fuseModelStates(stateMeans, stateCovariances, modeProbabilities): #checkCoun
 
 
 
-fusedStateMean, fusedStateCovariance = fuseModelStates(common.stateMeans, common.stateCovariances, common.modeProbs)
+fusedStateMean, fusedStateCovariance = fuseModelStates(commonVar.stateMeans, commonVar.stateCovariances, commonVar.modeProbs)

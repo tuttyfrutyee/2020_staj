@@ -10,15 +10,18 @@ Created on Fri Aug  7 15:50:01 2020
 import numpy as np
 from scipy.stats import norm, multivariate_normal
 
+import generateAssociationEvents as gAE
+
 import sys
 sys.path.append("../")
-import commonVariables as common
+import commonVariables as commonVar
+import common as common
 
 
-print_createValidationMatrix = False
+print_calculateAssociationProbability = False
 
 def print_(*element):
-    if(print_createValidationMatrix):
+    if(print_calculateAssociationProbability):
         print(element)
         
         
@@ -44,7 +47,7 @@ def calculateTheProbabilityOfTheMeasurement(measurement, z, S):
     return multivariate_normal.pdf(measurement.flatten(), z.flatten(), S, True)        
         
         
-def calculateJointAssociationProbability_parametric(jAE, measurements, tracks, spatialDensity, PD):
+def calculateJointAssociationProbability_parametric(jAE, measurements, tracks, spatialDensity, PD): #checkCount : 1
 
     """
         Description:
@@ -58,21 +61,21 @@ def calculateJointAssociationProbability_parametric(jAE, measurements, tracks, s
         
         Input:
  
-        jAE : np.array(shape : (m_k, 1))
-            "The elements of the vector represents the targetIndexes the measurements are associated with" [page 312, (6.2.2-3) BYL95]  
-           
-        measurements : np.array(shape=(m_k,1))
-           
-        tracks: list of len = Nr of track objects
-
-        spatialDensity : float
-           "The poisson parameter that represents the number of false measurements in a unit volume" [page 317, (6.2.4-1) BYL95]
-
-        PD: float
-           "Detection probability"           
-        
-        Output:
-            associationProbability : float
+            jAE : np.array(shape : (m_k, 1))
+                "The elements of the vector represents the targetIndexes the measurements are associated with" [page 312, (6.2.2-3) BYL95]  
+               
+            measurements : np.array(shape=(m_k,1))
+               
+            tracks: list of len = Nr of track objects
+    
+            spatialDensity : float
+               "The poisson parameter that represents the number of false measurements in a unit volume" [page 317, (6.2.4-1) BYL95]
+    
+            PD: float
+               "Detection probability"           
+            
+            Output:
+                associationProbability : float
     """
 
     numberOfDetections = np.sum(jAE>0)
@@ -80,17 +83,19 @@ def calculateJointAssociationProbability_parametric(jAE, measurements, tracks, s
     measurementProbabilities = 1
 
     for measurementIndex, associatedTrack in enumerate(jAE):
+        
+        if(associatedTrack != 0):
 
-        trackPriorMean = tracks[associatedTrack].z_prior
-        trackPriorS = tracks[associatedTrack].S_prior
+            trackPriorMean = tracks[associatedTrack-1].z_prior
+            trackS = tracks[associatedTrack-1].S
+    
+            measurementProbabilities *= calculateTheProbabilityOfTheMeasurement(measurements[measurementIndex], trackPriorMean, trackS)
+            measurementProbabilities /= spatialDensity
 
-        measurementProbabilities *= calculateTheProbabilityOfTheMeasurement(measurements[measurementIndex], trackPriorMean, trackPriorS)
-        measurementProbabilities /= spatialDensity
-
-    return measurementProbabilities * pow(PD, numberOfDetections) * pow(1-PD, tracks.shape[0] - numberOfDetections)
+    return measurementProbabilities * pow(PD, numberOfDetections) * pow(1-PD, len(tracks) - numberOfDetections)
 
 
-def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracks, volume, PD):
+def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracks, volume, PD): #checkCount : 1
 
     """
         Description:
@@ -104,20 +109,21 @@ def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracks
         
         Input:
  
-        jAE : np.array(shape : (m_k, 1))
-            "The elements of the vector represents the targetIndexes the measurements are associated with" [page 312, (6.2.2-3) BYL95]  
-           
-        measurements : np.array(shape=(m_k,1))
-           
-        tracks: list of len = Nr of track objects
-
-        volume : float
-           "volume of the surveillance region" [page 314, (6.2.3-5) BYL95]
-
-        PD: float
-           "Detection probability"           
+            jAE : np.array(shape : (m_k, 1))
+                "The elements of the vector represents the targetIndexes the measurements are associated with" [page 312, (6.2.2-3) BYL95]  
+               
+            measurements : np.array(shape=(m_k,1))
+               
+            tracks: list of len = Nr of track objects
+    
+            volume : float
+               "volume of the surveillance region" [page 314, (6.2.3-5) BYL95]
+    
+            PD: float
+               "Detection probability"           
         
         Output:
+            
             associationProbability : float
     """
 
@@ -133,17 +139,32 @@ def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracks
         return a
 
     for measurementIndex, associatedTrack in enumerate(jAE):
+        
+        if(associatedTrack != 0):
 
-        trackPriorMean = tracks[associatedTrack].z_priorMean
-        trackS = tracks[associatedTrack].S
+            trackPriorMean = tracks[associatedTrack-1].z_prior
+            trackS = tracks[associatedTrack-1].S
+    
+            measurementProbabilities *= calculateTheProbabilityOfTheMeasurement(measurements[measurementIndex], trackPriorMean, trackS)
+            measurementProbabilities *= volume
 
-        measurementProbabilities *= calculateTheProbabilityOfTheMeasurement(measurements[measurementIndex], trackPriorMean, trackS)
-        measurementProbabilities *= volume
-
-    return measurementProbabilities * fact(m_k - numberOfDetections) * pow(PD, numberOfDetections) * pow(1-PD, tracks.shape[0] - numberOfDetections)
-
-
+    return measurementProbabilities * fact(m_k - numberOfDetections) * pow(PD, numberOfDetections) * pow(1-PD, len(tracks) - numberOfDetections)
 
 
+
+#playground
+
+jAE = gAE.associationEvents[-1]
+print_(jAE)
+
+assocProb_parametric = calculateJointAssociationProbability_parametric(jAE, commonVar.measurements, commonVar.tracks, commonVar.spatialDensity, commonVar.PD)
+assocProb_nonParametric = calculateJointAssociationProbability_nonParametric(jAE, commonVar.measurements, commonVar.tracks, common.gatedVolume, commonVar.PD)
+
+print_("assocProb_parametric", assocProb_parametric)
+print_("assocProb_nonParametric", assocProb_nonParametric)
+
+# Note  that it is okey that assocProb_parametric != assocProb_nonParametric, they are unnormalized
+# Further it is also okey that their normalized outputs are not same, since it all depends what
+# have selected as spatialDensity, and what we have used as surveillance volume.
 
 

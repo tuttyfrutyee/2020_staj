@@ -1,11 +1,25 @@
-print_generateUnscentedWeights = False
+import sys
+sys.path.append("../")
+import commonVariables as commonVar
+
+print_generateUnscentedWeights = True
 
 def print_(*element):
     if(print_generateUnscentedWeights):
         print(element)
 
 
-def generateUnscentedWeights(L, alpha, beta, kappa):
+def generateUnscentedWeights(L, alpha, beta, kappa): #checkCount : 1
+
+    """
+        Description:
+            [WR00 Equation 15]
+        Input:
+            L: float
+            alpha: float
+            beta: float
+            kappa: float
+    """
 
     lambda_ = (alpha ** 2) * (L + kappa) - L
 
@@ -19,12 +33,9 @@ def generateUnscentedWeights(L, alpha, beta, kappa):
     return ([Ws0, Wsi],[Wc0, Wci], lambda_)
 
 
-L = 5
-alpha = 0.01
-beta = 2
-kappa = 0
 
-Ws, Wc, lambda_ = generateUnscentedWeights(L, alpha, beta, kappa)
+
+Ws, Wc, lambda_ = generateUnscentedWeights(commonVar.L, commonVar.alpha, commonVar.beta, commonVar.kappa)
 print_("Ws : ",Ws)
 print_("Wc : ", Wc)
 print_("lambda : ", lambda_)

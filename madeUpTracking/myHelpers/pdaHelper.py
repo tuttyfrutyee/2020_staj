@@ -8,16 +8,24 @@ import numpy as np
 
 """
 
-def pdaPass(kalmanGain, associationProbs, measurements, priorStateMean, priorStateMeasuredMean, priorStateCovariance, Pzz):
+def pdaPass(kalmanGain, associationProbs, measurements, priorStateMean, priorStateMeasuredMean, priorStateCovariance, Pzz): #checkCount : 1
 
     """
-        kalmanGain : np.array( shape = (dim(x), dim(z)) )
-        associationProbs : [B_1t, B_2t, ..., B_m(k)t]
-        measurements : np.array(shape = (m(k), dim(z), 1) )
-        priorStateMean : np.array(shape = (dim(x), 1))
-        priorStateMeasuredMean : np.array(shape = (dim(z), 1) )
-        priorStateCovariance : np.array( shape = (dim(x), dim(x)) )
-
+        Description:
+            It is the update function for one track with multiple measurements using probability data association
+            [page 132, 3.4.2-8 to 3.4.2-12, BYL95]
+        Input:
+            kalmanGain : np.array( shape = (dimX, dimZ) )
+            associationProbs : np.array(shape = ([B_1t, B_2t, ..., B_m_kt]
+            measurements : np.array(shape = (m_k, dimZ) )
+            priorStateMean : np.array(shape = (dimX, 1))
+            priorStateMeasuredMean : np.array(shape = (dimZ, 1) )
+            priorStateCovariance : np.array( shape = (dimX, dimX) )
+            Pzz : np.array(shape = (dimZ, dimZ) )
+        
+        Output:
+            x_updated : np.array(shape = (dimX,1))
+            P_updated : np.array(shape = (dimX, dimX))
     """
 
     vk = []
@@ -28,12 +36,12 @@ def pdaPass(kalmanGain, associationProbs, measurements, priorStateMean, priorSta
     P_c = priorStateCovariance - np.dot(kalmanGain, np.dot(Pzz, kalmanGain.T))
     P_tilda = None
     runningCovariance = None
-    
-    P_final = None
-    x_final = None  
+
 
     for i,measurement in enumerate(measurements):
+        measurement = np.expand_dims(measurement, axis=1)
         vk.append(measurement - priorStateMeasuredMean)
+
 
         if(v_fused is None):
             v_fused = associationProbs[i] * vk[i]
@@ -43,16 +51,11 @@ def pdaPass(kalmanGain, associationProbs, measurements, priorStateMean, priorSta
             runningCovariance += associationProbs[i] * (np.dot(vk[i], vk[i].T))
 
 
-    print_("runningCovariance.shape = ", runningCovariance.shape)
-    print_("v_fused.shape = ", v_fused.shape)
-    print_("v_fused dot v_fused.T shape = ", np.dot(v_fused, v_fused.T).shape)
+    P_tilda = np.dot(kalmanGain, np.dot( runningCovariance - np.dot(v_fused, v_fused.T) , kalmanGain.T))
+    x_updated = priorStateMean + np.dot(kalmanGain, v_fused)
+    P_updated = B0 * priorStateCovariance + [1-B0] * P_c  + P_tilda
 
-    P_tilda = np.dot(kalmanGain, np.dot( (runningCovariance - np.dot(v_fused, v_fused.T)) , kalmanGain.T))
-
-    x_final = priorStateMean + np.dot(kalmanGain, v_fused)
-    P_final = B0 * priorStateCovariance + [1-B0] * P_c  + P_tilda
-
-    return (x_final, P_final)
+    return (x_updated, P_updated)
 
 
 

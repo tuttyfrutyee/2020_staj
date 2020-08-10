@@ -1,5 +1,5 @@
 import numpy as np
-
+import common as common
 """
     References : 
 
@@ -19,14 +19,14 @@ def mixStates(stateMeans, stateCovariances, transitionMatrix, modeProbs): #check
             [DIMM Equation 5-6]
 
         Input: 
-        stateMeans : np.array(shape = (Nr, dimX))
-        stateCovariances : np.array(shape = (Nr, dimX, dimX))
-        transitionMatrix : np.array(shape = (Nr, Nr))
-        modeProbs : np.array(shape = (Nr,1))
+            stateMeans : np.array(shape = (Nr, dimX))
+            stateCovariances : np.array(shape = (Nr, dimX, dimX))
+            transitionMatrix : np.array(shape = (Nr, Nr))
+            modeProbs : np.array(shape = (Nr,1))
 
         Output:
-        mixedMeans : np.array(shape = (Nr, dimX))
-        mixedCovariances : np.array(shape = (Nr, dimX, dimX))
+            mixedMeans : np.array(shape = (Nr, dimX))
+            mixedCovariances : np.array(shape = (Nr, dimX, dimX))
     """
 
     mixingRatios = (transitionMatrix * modeProbs) / np.dot(modeProbs.T, transitionMatrix)
@@ -64,13 +64,13 @@ def fuseModelStates(stateMeans, stateCovariances, modeProbabilities): #checkCoun
             [DIMM Equation 53]
         
         Input:
-        stateMeans : np.array(shape = (Nr, dimX))
-        stateCovariances : np.array(shape = (Nr, dimX, dimX))
-        modeProbabilities : np.array(shape = (Nr,1))
+            stateMeans : np.array(shape = (Nr, dimX))
+            stateCovariances : np.array(shape = (Nr, dimX, dimX))
+            modeProbabilities : np.array(shape = (Nr,1))
 
         Output:
-        fusedStateMean : np.array(shape = (dimX, 1))
-        fusedStateCovariance : np.array(shape = (dimX, dimX))
+            fusedStateMean : np.array(shape = (dimX, 1))
+            fusedStateCovariance : np.array(shape = (dimX, dimX))
     """
 
     fusedStateMean = np.dot(stateMeans.T, modeProbabilities)
@@ -99,16 +99,16 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
             It calculates the new mode probabilities using probability data association [BYL95 page211 4.4.1-2]
 
         Input:
-        modePzzs : np.array(shape = (Nr, dimZ, dimZ))
-        measurements : np.array(shape = (m_k, dimZ))
-        likelihoods : np.array(shape = (Nr, m_k)
-        gateThreshold : float between(0,1)
-        PD : float between(0,1)
-        transitionMatrix : np.array(shape = (Nr, Nr))
-        previousModeProbabilities : np.array(shape = (Nr,1))
+            modePzzs : np.array(shape = (Nr, dimZ, dimZ))
+            measurements : np.array(shape = (m_k, dimZ))
+            likelihoods : np.array(shape = (Nr, m_k)
+            gateThreshold : float between(0,1)
+            PD : float between(0,1)
+            transitionMatrix : np.array(shape = (Nr, Nr))
+            previousModeProbabilities : np.array(shape = (Nr,1))
 
         Output:
-        updatedModeProbabilities : np.array(shape = (Nr,1))
+            updatedModeProbabilities : np.array(shape = (Nr,1))
     """
 
 
@@ -121,7 +121,7 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
             maxPzzDeterminant = det
 
     nz = modePzzs[0].shape[0]
-    maximumVolume = calculateNDimensionalUnitVolume(nz) * np.power(gateThreshold, nz/2) * np.sqrt(maxPzzDeterminant) #[BYL95 page 130 3.4.1-6]
+    maximumVolume = common.calculateNDimensionalUnitVolume(nz) * np.power(gateThreshold, nz/2) * np.sqrt(maxPzzDeterminant) #[BYL95 page 130 3.4.1-6]
     
     m_k = measurements.shape[0]
 
@@ -137,21 +137,6 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
 
     return updatedModeProbabilities
 
-
-def calculateNDimensionalUnitVolume(n): #checkCount : 1, confident
-    return np.power(np.pi, n/2) / gamaFunc(n/2 + 1)
-
-def gamaFunc(n): #checkCount : 1, confident
-
-    gama_1over2 = np.sqrt(np.pi)
-    runningProduct = 1
-    
-    while(n > 1):
-        runningProduct *= (n-1)
-        n = n - 1
-    if(n == 0.5):
-        runningProduct *= gama_1over2
-    return runningProduct
 
 
 

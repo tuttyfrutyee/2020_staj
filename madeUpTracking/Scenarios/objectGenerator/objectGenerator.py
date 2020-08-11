@@ -1,11 +1,30 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+sys.path.append("./Scenarios/objectGenerator")
 from pathDraw import drawPath
 
 
 
-class Object(object):
+class Object_(object):
+    
+    """
+
+        xCornerPoints : [x1, x2, ..., xn] -> the points x values where curvatures are drawn w.r.t
+        yCornerPoints : [y1, y2, ..., yn] -> the points y values where curvatures are drawn w.r.t
+
+        xPath : List -> the all path(xvalues) #ground truth values
+        yPath : List -> the all path(yvalues) #ground truth values
+
+        xNoisyPath : List -> the all path measured(xvalues) -> note that these values may containt None, if corruption is selected
+        yNoisyPath : List -> the all path measured(yvalues) -> note that these values may containt None, if corruption is selected
+
+        corruptedPoints_x : the x value of the corrupted points -> reason for this is to see what would the measurements would look like
+        corruptedPoints_y : the y value of the corrupted points -> reason for this is to see what would the measurements would look like
+
+
+    """
 
     maxW = 200 # -> generated x points satisfy |x| < maxW
     maxH = 200 # -> generated y points satisfy |y| < maxH
@@ -48,9 +67,12 @@ class Object(object):
         self.yNoisyPath = self.yPath.copy()
 
         #add noise
-        for i,_ in enumerate(self.xNoisyPath):
-            self.xNoisyPath[i] += np.random.normal(0, std) 
-            self.yNoisyPath[i] += np.random.normal(0, std)  
+        self.xNoisyPath += np.random.normal(0, std, (len(self.xNoisyPath)))
+        self.xNoisyPath = self.xNoisyPath.tolist()
+
+        self.yNoisyPath += np.random.normal(0, std, (len(self.yNoisyPath)))
+        self.yNoisyPath = self.yNoisyPath.tolist()
+
 
         #add corruption
         if(corruptionCount and corruptionCount > 0):

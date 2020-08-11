@@ -98,7 +98,7 @@ def h_unscented_randomModel(x):
 
 
 
-class Tracker_SingleTarget_SingleModel(object):
+class Tracker_SingleTarget_SingleModel_filterpy(object):
   """
   This class tracks object point(single target) with a linear model assumption
   """
@@ -109,6 +109,8 @@ class Tracker_SingleTarget_SingleModel(object):
     """
     
     self.measurementNoiseStd = measurementNoiseStd
+    
+    self.modelType = modelType
     
     if(modelType == 0): #use contant linear velocity model
         

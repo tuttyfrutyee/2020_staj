@@ -1,4 +1,4 @@
-import objectGenerator as oG
+import objectGenerator.objectGenerator as oG
 
 class Scenario(object):
     
@@ -31,13 +31,13 @@ class Scenario(object):
                 
                 #generate object points randomly      
     
-                newObject = oG.Object(color, None, None, 4, stepSize)
+                newObject = oG.Object_(color, None, None, 4, stepSize)
 
                 newObject.generateNoisyMeasurements(std, corruptionCount, corruptionLength)                
                 
             else:
                 
-                newObject = oG.Object(color, objectPointCorners[0], objectPointCorners[1], None, stepSize)
+                newObject = oG.Object_(color, objectPointCorners[0], objectPointCorners[1], None, stepSize)
 
                 newObject.generateNoisyMeasurements(std, corruptionCount, corruptionLength)
                 

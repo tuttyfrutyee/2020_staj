@@ -15,7 +15,7 @@ def print_(*element):
         print(element)
 
 
-def calculatePredictedState(forwardFunc, measureFunc, sigmaPoints, Ws, Wc, processNoise, measurementNoise):
+def calculatePredictedState(forwardFunc, dt, measureFunc, sigmaPoints, Ws, Wc, processNoise, measurementNoise):
 
     """
     
@@ -41,14 +41,20 @@ def calculatePredictedState(forwardFunc, measureFunc, sigmaPoints, Ws, Wc, proce
             
     """
 
-    sigmaStarPoints_state = forwardFunc(sigmaPoints)
-    sigmaStarPoints_measure = measureFunc(sigmaStarPoints_state)
+    sigmaStarPoints_state = []
+    sigmaStarPoints_measure = []
+    
+    for sigmaPoint in sigmaPoints:
+        
+        sigmaStarPoint_state = forwardFunc(sigmaPoint,dt)
+        sigmaStarPoint_measure = measureFunc(sigmaStarPoint_state)
+
+        sigmaStarPoints_state.append(sigmaStarPoint_state)
+        sigmaStarPoints_measure.append(sigmaStarPoint_measure)
 
     predictedStateMean = Ws[0] * sigmaStarPoints_state[0] + Ws[1] * np.sum(sigmaStarPoints_state[1:], axis = 0)
     predictedMeasureMean = Ws[0] * sigmaStarPoints_measure[0] + Ws[1] * np.sum(sigmaStarPoints_measure[1:], axis = 0)
     
-    predictedStateMean = np.expand_dims(predictedStateMean, axis=1)
-    predictedMeasureMean = np.expand_dims(predictedMeasureMean, axis=1)
     
 
 
@@ -58,8 +64,6 @@ def calculatePredictedState(forwardFunc, measureFunc, sigmaPoints, Ws, Wc, proce
 
     for i,sigmaStarPoint_state in enumerate(sigmaStarPoints_state):
 
-        sigmaStarPoint_measure = np.expand_dims(sigmaStarPoints_measure[i], axis=1)
-        sigmaStarPoint_state = np.expand_dims(sigmaStarPoint_state, axis=1)
 
         if(predictedStateCovariance is None):
             predictedStateCovariance = Wc[0] * np.dot((sigmaStarPoint_state - predictedStateMean), (sigmaStarPoint_state-predictedStateMean).T)
@@ -82,15 +86,15 @@ def calculatePredictedState(forwardFunc, measureFunc, sigmaPoints, Ws, Wc, proce
 
 
 
-def forwardFunc(sigmaPoints):
+def forwardFunc(sigmaPoints, dt):
     return sigmaPoints
 
 def measureFunc(sigmaPoints):
-    return np.array(sigmaPoints)[:,0:commonVar.dimZ]
+    return np.array(sigmaPoints)[0:commonVar.dimZ]
 
 
 predictedStateMean, predictedStateCovariance, Pzz, predictedMeasureMean, kalmanGain = \
-    calculatePredictedState(forwardFunc, measureFunc, gSP.sigmaPoints, gUW.Ws, gUW.Wc, commonVar.processNoise, commonVar.measurementNoise)
+    calculatePredictedState(forwardFunc, commonVar.dt, measureFunc, gSP.sigmaPoints, gUW.Ws, gUW.Wc, commonVar.processNoise, commonVar.measurementNoise)
     
     
     

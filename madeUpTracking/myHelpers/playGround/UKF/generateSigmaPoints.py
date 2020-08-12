@@ -38,8 +38,8 @@ def generateSigmaPoints(stateMean, stateCovariance, lambda_): #checkCount : 1
         sigmaPoints.append( stateMean + np.expand_dims(sqrtMatrix[i],axis=1) )
         sigmaPoints.append( stateMean - np.expand_dims(sqrtMatrix[i],axis=1) )
         
-
-    return np.squeeze(np.array(sigmaPoints, dtype="float"))
+    
+    return np.array(sigmaPoints, dtype = "float")
 
 
 

@@ -37,7 +37,7 @@ scn.scenario_0.plotScenario()
 predictions = []
 
 dt = 0.1
-tracker = allMe_SingleTarget_SingleModel.Tracker_SingleTarget_SingleModel_allMe(0)
+tracker = allMe_SingleTarget_SingleModel.Tracker_SingleTarget_SingleModel_allMe(1)
 
 measurements = []
 
@@ -55,7 +55,7 @@ predictions = np.squeeze(predictions)
 measurements = np.array(measurements)
 
 plt.plot(measurements[:,0], measurements[:,1])    
-plt.plot(predictions[:,0], predictions[:,1])
+plt.plot(predictions[:,0], predictions[:,1], linewidth=2)
 
 
 

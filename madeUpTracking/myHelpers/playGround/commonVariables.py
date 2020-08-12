@@ -21,6 +21,7 @@ def generateRandomCovariances_positiveDefinite(n, dim):
 
 #IMM
 stateMeans = np.random.randn(Nr, dimX)
+stateMean = np.random.randn(dimX,1)
 
 stateCovariances = generateRandomCovariances_positiveDefinite(Nr, dimX)
 
@@ -79,6 +80,7 @@ alpha = 0.01
 beta = 2    
 kappa = 0
 
+dt = 0.1
 
 processNoise = generateRandomCovariance_positiveDefinite(dimX)
 measurementNoise = generateRandomCovariance_positiveDefinite(dimZ)

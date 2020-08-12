@@ -1,10 +1,30 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import myHelpers.unscentedHelper as uH
 
 
 measurementNoiseStd = 2
 Q_0 = 0.005
+
+#helpers
+
+def putAngleInRange(angle):
+    
+    angle = angle % (2*np.pi)
+    
+    if(angle > (np.pi)):
+        angle -= 2*np.pi
+    elif(angle < (-np.pi)):
+        angle += 2*np.pi
+        
+    return angle
+
+def massageToCovariance(P, scale):
+    return 1/2*(P + P.T) + np.eye(P.shape[0]) * scale
+
+########
+
 
 MeasurementNoiseCovs = [
     #modeltype 0
@@ -32,7 +52,14 @@ ProcessNoiseCovs = [
         [0, 0, 0, Q_0]
     ],
     #modeltype 1
-    [],
+    [
+        [Q_0, 0, 0, 0, 0],
+        [0, Q_0, 0, 0, 0],
+        [0, 0, Q_0 / 1e2, 0, 0],
+        [0, 0, 0, Q_0, 0],
+        [0, 0, 0, 0, Q_0 / 1e8]        
+
+    ],
     #modeltype 2
     [],
 ]
@@ -42,9 +69,46 @@ for i,noiseCov in enumerate(MeasurementNoiseCovs):
 for i, noiseCov in enumerate(ProcessNoiseCovs):
     ProcessNoiseCovs[i] = np.array(noiseCov, dtype = float)
 
+InitialStartCovs_withoutTimeDivision = [
+    #modeltype 0
+    [
+        [MeasurementNoiseCovs[0][0][0], 0, MeasurementNoiseCovs[0][0][0], 0],
+        [0, MeasurementNoiseCovs[0][1][1], 0, MeasurementNoiseCovs[0][1][1]],
+        [MeasurementNoiseCovs[0][0][0], 0, 2*MeasurementNoiseCovs[0][0][0], 0],
+        [0, MeasurementNoiseCovs[0][1][1], 0, 2*MeasurementNoiseCovs[0][1][1]]
+    ],
+    #modeltype1
+    [
+        [1.99997780e+00, 2.49414716e-04, 1.73227766e-04, 3.88280668e-04,
+                0],
+        [2.49414716e-04, 1.99980348e+00, 6.09740973e-05, 3.55028270e-04,
+            0],
+        [1.73227766e-04, 6.09740973e-05, 8.22416384e-01, 5.66820017e-04,
+            0],
+        [3.88280668e-04, 3.55028270e-04, 5.66820017e-04, 7.99940698e+00,
+            0],
+        [0, 0, 0, 0,
+            0]
+    ],
+    #modeltype2
+    [
+        [1.99997780e+00, 2.49414716e-04, 1.73227766e-04, 3.88280668e-04,
+                2.97819194e-04],
+        [2.49414716e-04, 1.99980348e+00, 6.09740973e-05, 3.55028270e-04,
+            1.49555161e-04],
+        [1.73227766e-04, 6.09740973e-05, 8.22416384e-01, 5.66820017e-04,
+            7.52457415e-01],
+        [3.88280668e-04, 3.55028270e-04, 5.66820017e-04, 7.99940698e+00,
+            6.98653089e-04],
+        [2.97819194e-04, 1.49555161e-04, 7.52457415e-01, 6.98653089e-04,
+            1.50502254e+00]        
+    ]
+
+]
+
 
 #############
-# Linear model
+# Model 0
 #############
 def f_predict_model0(x, P, dt):
 
@@ -65,7 +129,61 @@ def h_measure_model0(x):
         [0, 1, 0, 0]
     ]))
 
+############
+# Model 1
+############
+def f_predict_model1(x_, dt):
 
+    x = np.copy(x_)
+    
+    x[2] = putAngleInRange(x[2])
+    
+    X_new = np.copy(x)
+
+    x_new = x[0] + x[3] * dt * np.sin(x[2])
+    y_new = x[1] + x[3] * dt * np.cos(x[2])
+    
+    X_new[0] = x_new
+    X_new[1] = y_new
+
+    return X_new
+
+def h_measure_model1(x):
+    return x[0:2]
+
+############
+# Model 2
+############
+def f_predict_model2(x_, dt):
+
+    
+    x = np.copy(x_)
+    
+    x[2] = putAngleInRange(x[2])
+    x[4] = putAngleInRange(x[4])
+    
+    X_new = np.copy(x)
+    
+
+        
+    x_new = x[0] + x[3] / x[4] * ( -np.sin(x[2]) + np.sin( x[2] + dt * x[4] ) )
+    y_new = x[1] + x[3] / x[4] * ( np.cos(x[2])  - np.cos( x[2] + dt * x[4] ) )
+    
+    phi_new = x[2] + dt * x[4] 
+    
+
+    phi_new = putAngleInRange(phi_new)
+    
+    X_new[0] = x_new
+    X_new[1] = y_new
+    X_new[2] = phi_new
+    
+    return X_new
+
+def h_measure_model2(x):
+    return x[0:2]
+
+###########
 
 class Track(object):
 
@@ -86,6 +204,11 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
 
         self.measurements = []
 
+        self.unscentedWeights = None
+
+        if(modelType == 1 or modelType == 2):
+            self.Ws, self.Wc, self.lambda_ = uH.generateUnscentedWeights(L = 5, alpha = 1e-3, beta = 2, kappa = 0)
+
     def feedMeasurement(self, measurement, dt):
 
         self.measurements.append(measurement)
@@ -96,17 +219,11 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
             if(self.modelType == 0): #linearModel, constant velocity, constant direction
                 dx = (self.measurements[-1][0] - self.measurements[-2][0]) / dt
                 dy = (self.measurements[-1][1] - self.measurements[-2][1]) / dt
-                x0 = [self.measurements[-1][0], self.measurements[-1][0] , dx, dy]
+                x0 = np.array([self.measurements[-1][0], self.measurements[-1][1] , dx, dy]).reshape((4,1))
 
-                R1 = MeasurementNoiseCovs[0][0][0]
-                R2 = MeasurementNoiseCovs[0][1][1]
+                P0 = np.array(InitialStartCovs_withoutTimeDivision[0]) * [[1,1,1/dt,1],[1,1,1,1/dt],[1/dt,1,1/(dt**2),1],[1,1/dt,1,1/(dt**2)]]
+                P0 = massageToCovariance(P0, 1e-6)
 
-                P0 = [
-                    [R1, 0, R1/dt, 0],
-                    [0, R2, 0, R2/dt],
-                    [R1/dt, 0, 2*R1/(dt*dt), 0],
-                    [0, R2/dt, 0, 2*R2/(dt*dt)]
-                ]
                 self.track = Track(x0, P0)
                 self.track.z, _ = h_measure_model0(self.track.x)
                 
@@ -117,6 +234,20 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
                 phi = np.arctan(dy / dx)
                 vel = np.sqrt(dx**2, dy**2)
                 dphi = 0
+
+                x0 = np.array([self.measurements[-1][0], self.measurements[-1][1], phi, vel, dphi]).reshape((5,1))
+
+                P0 = np.array(InitialStartCovs_withoutTimeDivision[1]) * \
+                    [[1,1,1,1/dt,1/dt],
+                    [1,1,1,1/dt,1/dt],
+                    [1,1,1,1/dt,1/dt],
+                    [1/dt,1/dt,1/dt,1/(dt**2),1/(dt**2)],
+                    [1/dt,1/dt,1/dt,1/(dt**2),1/(dt**2)]]
+
+                P0 = massageToCovariance(P0, 1e-6)
+
+                self.track = Track(x0, P0)
+                self.track.z = h_measure_model1(self.track.x)                
                 
             elif(self.modelType == 1): #nonLinearModel, constant veloctiy, contant turn rate
                 if(len(self.measurements) > 2):
@@ -132,6 +263,22 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
                     
                     vel = np.sqrt(dx2**2, dy2**2)
                     dphi = phi2 - phi1
+
+                    x0 = np.array([self.measurements[-1][0], self.measurements[-1][1], phi, vel, dphi]).reshape((5,1))
+
+                    P0 = np.array(InitialStartCovs_withoutTimeDivision[1]) * \
+                        [[1,1,1,1/dt,1/dt],
+                        [1,1,1,1/dt,1/dt],
+                        [1,1,1,1/dt,1/dt],
+                        [1/dt,1/dt,1/dt,1/(dt**2),1/(dt**2)],
+                        [1/dt,1/dt,1/dt,1/(dt**2),1/(dt**2)]]
+
+                    P0 = massageToCovariance(P0, 1e-6)
+
+
+                    self.track = Track(x0, P0)
+                    self.track.z = h_measure_model2(self.track.x)                                     
+                        
 
         elif(self.track is not None):
 
@@ -152,6 +299,18 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
 
 
             elif(self.modelType == 1):
-                print("todo modeltype 1")
+                #make sure cov matrix is symetric
+                self.track.P = massageToCovariance(self.track.P, 1e-6)
+                #generate sigma points and then predict
+                sigmaPoints = uH.generateSigmaPoints(self.track.x, self.track.P, self.lambda_)
+                self.track.x_predict, self.track.P_predict, Pzz, predictedMeasureMean, kalmanGain = uH.calculatePredictedState(f_predict_model1, dt, h_measure_model1, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1], MeasurementNoiseCovs[1])
+
+                #update
+                diff = measurement - predictedMeasureMean
+                self.track.x = self.track.x_predict + np.dot(kalmanGain, diff)
+                self.track.P = self.track.P_predict - np.dot(kalmanGain, np.dot(Pzz, kalmanGain.T))
+                self.track.z = h_measure_model1(self.track.x)
+
+
             elif(self.modelType == 2):
                 print("todo modeltype 2")

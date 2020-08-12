@@ -3,13 +3,18 @@
 import numpy as np
 
 
-def findCovariance(Rx, Ry, iterationCount):
+def findCovariance(Rx, Ry, iterationCount, dt=None):
     
     counter = 0
     
     covRunning = 0
     
+    decade = int(iterationCount / 10)
+    
     while(counter < iterationCount):
+        
+        if(counter % decade == 0):
+            print("Progress : ", counter / iterationCount * 100, "% is done")
         
         x3 = np.random.normal(0, np.sqrt(Rx))
         x2 = np.random.normal(0, np.sqrt(Rx))
@@ -33,10 +38,17 @@ def findCovariance(Rx, Ry, iterationCount):
         covRunning = covRunning * ( counter / (counter+1) ) + cov / (counter + 1)
         
         counter += 1
+        
+        
+    if(dt):
+        T = []
     
     return covRunning
 
 
+cov = findCovariance(2,2,1e6)
+cov1 = findCovariance(2,2, 1e7)
+cov2 = findCovariance(2,2, 1e8)
 
-cov1 = findCovariance(2,2, 1e6)
-cov2 = findCovariance(2,2, 1e7)
+print(np.max(abs(cov-cov1)) / np.max(abs(cov1)))
+print(np.max(abs(cov1-cov2)) / np.max(abs(cov2)))

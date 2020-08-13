@@ -12,15 +12,14 @@ def print_(*element):
         
   
 
-def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 0
+def updateModeProbabilities_PDA(modeSs, likelihoods, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 0
 
     """
         Description : 
             It calculates the new mode probabilities using probability data association [BYL95 page211 4.4.1-2]
 
         Input:
-            modePzzs : np.array(shape = (Nr, dimZ, dimZ))
-            measurements : np.array(shape = (m_k, dimZ))
+            modeSs : np.array(shape = (Nr, dimZ, dimZ))
             likelihoods : np.array(shape = (Nr, m_k)
             gateThreshold : float between(0,1)
             PD : float between(0,1)
@@ -35,15 +34,15 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
     maximumVolume = None
 
     maxPzzDeterminant = 0
-    for modePzz in modePzzs:
-        det = np.linalg.det(modePzz)
+    for modeS in modeSs:
+        det = np.linalg.det(modeS)
         if(det > maxPzzDeterminant):
             maxPzzDeterminant = det
 
-    nz = modePzzs[0].shape[0]
-    maximumVolume = common.calculateGatedVolume(nz, gateThreshold, maxPzzDeterminant) 
+    nz = modeSs[0].shape[0]
+    maximumVolume = common.calculateNDimensionalUnitVolume(nz) * np.power(gateThreshold, nz/2) * np.sqrt(maxPzzDeterminant) #[BYL95 page 130 3.4.1-6]
     
-    m_k = measurements.shape[0]
+    m_k = likelihoods.shape[1]
 
     summedLikelihoods = np.expand_dims(np.sum(likelihoods, axis = 1), axis=1)
 
@@ -63,7 +62,7 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
 
 
 
-updatedModeProbabilities = updateModeProbabilities_PDA(commonVar.modePzzs, commonVar.measurements, commonVar.likelihoods, commonVar.gateThreshold, commonVar.PD, commonVar.transitionMatrix, commonVar.previousModeProbabilities)
+updatedModeProbabilities = updateModeProbabilities_PDA(commonVar.modeSs, commonVar.measurements, commonVar.likelihoods, commonVar.gateThreshold, commonVar.PD, commonVar.transitionMatrix, commonVar.previousModeProbabilities)
 print_(updatedModeProbabilities)
 print_(np.sum(updatedModeProbabilities))
 

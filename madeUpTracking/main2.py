@@ -3,7 +3,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import Scenarios.scenario as scn
-import Trackers.SingleTarget.allMe.track_singleTarget_singleModel as allMe_SingleTarget_SingleModel
+
+from Trackers.SingleTarget.allMe.track_singleTarget_singleModel import Tracker_SingleTarget_SingleModel_allMe
+from Trackers.SingleTarget.allMe.track_singleTarget_multipleModel import Tracker_SingleTarget_IMultipleModel_allMe
 
 
 def extractMeasurementsFromScenario(scenario):
@@ -37,9 +39,12 @@ scn.scenario_0.plotScenario()
 predictions = []
 
 dt = 0.1
-tracker = allMe_SingleTarget_SingleModel.Tracker_SingleTarget_SingleModel_allMe(1)
+
+#tracker = Tracker_SingleTarget_SingleModel_allMe(2)
+tracker = Tracker_SingleTarget_IMultipleModel_allMe()
 
 measurements = []
+states = []
 
 for measurementPack in measurementPacks:
     
@@ -50,14 +55,17 @@ for measurementPack in measurementPacks:
     
     if(tracker.track is not None):
         predictions.append(tracker.track.z)
+        states.append(tracker.track.x)
 
 predictions = np.squeeze(predictions)
 measurements = np.array(measurements)
+states = np.array(states)
 
 plt.plot(measurements[:,0], measurements[:,1])    
 plt.plot(predictions[:,0], predictions[:,1], linewidth=2)
 
-
+#plt.plot(states[:,2,0] / np.pi * 180)
+#plt.plot(states[:,3,0])
 
 
 

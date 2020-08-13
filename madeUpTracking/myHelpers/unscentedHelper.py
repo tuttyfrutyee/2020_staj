@@ -78,7 +78,7 @@ def calculatePredictedState(forwardFunc, dt, measureFunc, sigmaPoints, Ws, Wc, p
         Output:
             predictedStateMean : np.array(shape = (dimX,1))
             predictedStateCovariance : np.array(shape = (dimX, dimX))
-            Pzz : np.array(shape = (dimZ, dimZ))
+            S : np.array(shape = (dimZ, dimZ))
             predictedMeasureMean : np.array(shape = (dimZ,1))
             kalmanGain : np.array(shape = (dimX, dimZ))
             
@@ -110,7 +110,8 @@ def calculatePredictedState(forwardFunc, dt, measureFunc, sigmaPoints, Ws, Wc, p
     
 
     for i,sigmaStarPoint_state in enumerate(sigmaStarPoints_state):
-
+        
+        sigmaStarPoint_measure = sigmaStarPoints_measure[i]
 
         if(predictedStateCovariance is None):
             predictedStateCovariance = Wc[0] * np.dot((sigmaStarPoint_state - predictedStateMean), (sigmaStarPoint_state-predictedStateMean).T)
@@ -123,11 +124,11 @@ def calculatePredictedState(forwardFunc, dt, measureFunc, sigmaPoints, Ws, Wc, p
     
     
     predictedStateCovariance += processNoise
-    Pzz += measurementNoise
+    S = Pzz + measurementNoise
     
-    kalmanGain = np.dot(Pxz, np.linalg.pinv(Pzz))
+    kalmanGain = np.dot(Pxz, np.linalg.inv(S))
 
-    return (predictedStateMean, predictedStateCovariance, Pzz, predictedMeasureMean, kalmanGain)
+    return (predictedStateMean, predictedStateCovariance, S, predictedMeasureMean, kalmanGain)
 
 
 

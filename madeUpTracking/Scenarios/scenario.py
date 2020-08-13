@@ -2,7 +2,7 @@
 import sys
 sys.path.append("./Scenarios")
 import scenarioGenerator as scenario
-
+import numpy as np
 
 
 """
@@ -12,7 +12,7 @@ import scenarioGenerator as scenario
 """
 
 
-stds_0 = [2]
+stds_0 = [np.sqrt(2)]
 objectPathCorners_0 = [([55, 23, 51], [56,9,20])] 
 corruptions_0 = [None]
 stepSizes_0 = [0.4]

@@ -1,5 +1,7 @@
 import numpy as np
-import common as common
+import myHelpers.common as common
+from scipy.stats import norm, multivariate_normal
+
 """
     References : 
 
@@ -92,15 +94,14 @@ def fuseModelStates(stateMeans, stateCovariances, modeProbabilities): #checkCoun
 # With Data Association
 ##############################################################################
 
-def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 1
+def updateModeProbabilities_PDA(modeSs, likelihoods, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 1
 
     """
         Description : 
             It calculates the new mode probabilities using probability data association [BYL95 page211 4.4.1-2]
 
         Input:
-            modePzzs : np.array(shape = (Nr, dimZ, dimZ))
-            measurements : np.array(shape = (m_k, dimZ))
+            modeSs : np.array(shape = (Nr, dimZ, dimZ))
             likelihoods : np.array(shape = (Nr, m_k)
             gateThreshold : float between(0,1)
             PD : float between(0,1)
@@ -115,15 +116,15 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
     maximumVolume = None
 
     maxPzzDeterminant = 0
-    for modePzz in modePzzs:
-        det = np.linalg.det(modePzz)
+    for modeS in modeSs:
+        det = np.linalg.det(modeS)
         if(det > maxPzzDeterminant):
             maxPzzDeterminant = det
 
-    nz = modePzzs[0].shape[0]
+    nz = modeSs[0].shape[0]
     maximumVolume = common.calculateNDimensionalUnitVolume(nz) * np.power(gateThreshold, nz/2) * np.sqrt(maxPzzDeterminant) #[BYL95 page 130 3.4.1-6]
     
-    m_k = measurements.shape[0]
+    m_k = likelihoods.shape[1]
 
     summedLikelihoods = np.expand_dims(np.sum(likelihoods, axis = 1), axis=1)
 
@@ -144,8 +145,41 @@ def updateModeProbabilities_PDA(modePzzs, measurements, likelihoods, gateThresho
 # With Single Measurement
 ##############################################################################
 
-def updateModeProbabilities(modeStateMeans, modeStateCovariances, measurements, transitionMatrix):
-    print("todo")
+def updateModeProbabilities(modeStateMeans_measured, modeSs, measurement, transitionMatrix, previousModeProbs): #checkCount : 1
+    
+    """
+        Description : 
+            It calculates the new mode probabilities, considering single measurement
+        Input:
+            modeStateMeans_measured: np.array(shape = (Nr, dimZ))
+            modeSs : np.array(shape = (Nr, dimZ, dimZ))
+            measurement : np.array(shape = (dimZ, 1))
+            transitionMatrix : np.array(shape = (Nr, Nr))
+            previousModeProbs : np.array(shape = (Nr,1))
+
+        Output:
+            updatedModeProbabilities : np.array(shape = (Nr,1))        
+
+    """
+
+
+    Nr = modeStateMeans_measured.shape[0]
+
+    likelihoods = np.zeros((Nr,1))
+
+    for i,(modeStateMean_measured, modeS) in enumerate(zip(modeStateMeans_measured, modeSs)):    
+
+        likelihoods[i] = multivariate_normal.pdf(measurement.flatten(), modeStateMean_measured.flatten(), modeS, True)         
+
+    modeSwitch_plainMarkovProbs = np.dot(previousModeProbs.T, transitionMatrix).T
+    
+
+    updatedModeProbabilities = modeSwitch_plainMarkovProbs * likelihoods
+
+    #normalize
+    updatedModeProbabilities = updatedModeProbabilities / np.sum(updatedModeProbabilities)
+
+    return updatedModeProbabilities
 
 
 

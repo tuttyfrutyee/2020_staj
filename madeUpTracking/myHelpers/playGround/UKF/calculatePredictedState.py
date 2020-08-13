@@ -35,7 +35,7 @@ def calculatePredictedState(forwardFunc, dt, measureFunc, sigmaPoints, Ws, Wc, p
         Output:
             predictedStateMean : np.array(shape = (dimX,1))
             predictedStateCovariance : np.array(shape = (dimX, dimX))
-            Pzz : np.array(shape = (dimZ, dimZ))
+            S : np.array(shape = (dimZ, dimZ))
             predictedMeasureMean : np.array(shape = (dimZ,1))
             kalmanGain : np.array(shape = (dimX, dimZ))
             
@@ -51,7 +51,10 @@ def calculatePredictedState(forwardFunc, dt, measureFunc, sigmaPoints, Ws, Wc, p
 
         sigmaStarPoints_state.append(sigmaStarPoint_state)
         sigmaStarPoints_measure.append(sigmaStarPoint_measure)
-
+        
+    sigmaStarPoints_state = np.array(sigmaStarPoints_state)
+    sigmaStarPoints_measure = np.array(sigmaStarPoints_measure)        
+        
     predictedStateMean = Ws[0] * sigmaStarPoints_state[0] + Ws[1] * np.sum(sigmaStarPoints_state[1:], axis = 0)
     predictedMeasureMean = Ws[0] * sigmaStarPoints_measure[0] + Ws[1] * np.sum(sigmaStarPoints_measure[1:], axis = 0)
     
@@ -64,6 +67,7 @@ def calculatePredictedState(forwardFunc, dt, measureFunc, sigmaPoints, Ws, Wc, p
 
     for i,sigmaStarPoint_state in enumerate(sigmaStarPoints_state):
 
+        sigmaStarPoint_measure = sigmaStarPoints_measure[i]
 
         if(predictedStateCovariance is None):
             predictedStateCovariance = Wc[0] * np.dot((sigmaStarPoint_state - predictedStateMean), (sigmaStarPoint_state-predictedStateMean).T)
@@ -76,11 +80,11 @@ def calculatePredictedState(forwardFunc, dt, measureFunc, sigmaPoints, Ws, Wc, p
 
 
     predictedStateCovariance += processNoise
-    Pzz += measurementNoise
+    S = Pzz + measurementNoise
     
-    kalmanGain = np.dot(Pxz, np.linalg.pinv(Pzz))
+    kalmanGain = np.dot(Pxz, np.linalg.pinv(S))
 
-    return (predictedStateMean, predictedStateCovariance, Pzz, predictedMeasureMean, kalmanGain)
+    return (predictedStateMean, predictedStateCovariance, S, predictedMeasureMean, kalmanGain)
 
 
 

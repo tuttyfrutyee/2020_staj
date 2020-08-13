@@ -1,5 +1,6 @@
 from scipy.linalg import cholesky
 import numpy as np
+import matplotlib.pyplot as plt
 
 import generateUnscentedWeights as gUW
 
@@ -46,3 +47,5 @@ def generateSigmaPoints(stateMean, stateCovariance, lambda_): #checkCount : 1
 
 sigmaPoints = generateSigmaPoints(np.expand_dims(commonVar.stateMeans[0],axis=1), commonVar.stateCovariances[0], gUW.lambda_)
 print_(sigmaPoints.shape)
+
+plt.scatter(sigmaPoints[:,0,0], sigmaPoints[:,1,0])

@@ -23,14 +23,17 @@ def generateRandomCovariances_positiveDefinite(n, dim):
 stateMeans = np.random.randn(Nr, dimX)
 stateMean = np.random.randn(dimX,1)
 
+stateMeans_measured = np.random.randn(Nr, dimZ)
+
 stateCovariances = generateRandomCovariances_positiveDefinite(Nr, dimX)
+stateCovariances_measured = generateRandomCovariances_positiveDefinite(Nr, dimZ)
 
 transitionMatrix = np.array([[0.9, 0.05, 0.05], [0.1, 0.8, 0.1], [0.05, 0.05, 0.9]])
 
 modeProbs = np.array([0.1, 0.5, 0.4])
 modeProbs = np.expand_dims(modeProbs, axis=1)
 
-modePzzs = generateRandomCovariances_positiveDefinite(Nr, dimZ)
+modeSs = generateRandomCovariances_positiveDefinite(Nr, dimZ)
 
 measurements = np.random.randn(m_k, dimZ)
 

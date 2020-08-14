@@ -9,7 +9,7 @@ import myHelpers.immHelper as IMM_helper
 from Trackers.SingleTarget.allMe.track_singleTarget_singleModel import Tracker_SingleTarget_SingleModel_allMe
 # Import necessary helpers
 
-measurementNoiseStd = np.sqrt(2)
+measurementNoiseStd = np.sqrt(4)
 Q_0 = 0.005
 
 #helpers
@@ -118,78 +118,12 @@ InitialStartCovs_withoutTimeDivision = [
 ]
 
 
-#############
-# Model 0
-#############
-def f_predict_model0(x, P, dt):
 
-    F = np.array([      [1, 0, dt, 0],
-                        [0, 1, 0, dt],
-                        [0, 0, 1, 0],
-                        [0, 0, 0, 1]       ], dtype = float)
+#########
+# Fused Model
+#########
 
-    x_predict = np.dot(F, x)
-    P_predict = np.dot(F, np.dot(P, F.T)) + ProcessNoiseCovs[0]
-    
-    
-    return (x_predict, P_predict)
-
-def h_measure_model0(x):
-    return (x[0:2], np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0]
-    ]))
-
-############
-# Model 1
-############
-def f_predict_model1(x_, dt):
-
-    x = np.copy(x_)
-    
-    x[2] = putAngleInRange(x[2])
-    
-    X_new = np.copy(x)
-
-    x_new = x[0] + x[3] * dt * np.sin(x[2])
-    y_new = x[1] + x[3] * dt * np.cos(x[2])
-    
-    X_new[0] = x_new
-    X_new[1] = y_new
-
-    return X_new
-
-def h_measure_model1(x):
-    return x[0:2]
-
-############
-# Model 2
-############
-def f_predict_model2(x_, dt):
-
-    
-    x = np.copy(x_)
-    
-    x[2] = putAngleInRange(x[2])
-    x[4] = putAngleInRange(x[4])
-    
-    X_new = np.copy(x)
-            
-    x_new = x[0] + x[3] / x[4] * ( -np.sin(x[2]) + np.sin( x[2] + dt * x[4] ) )
-    y_new = x[1] + x[3] / x[4] * ( np.cos(x[2])  - np.cos( x[2] + dt * x[4] ) )
-    
-    phi_new = x[2] + dt * x[4] 
-    
-
-    phi_new = putAngleInRange(phi_new)
-    
-    X_new[0] = x_new
-    X_new[1] = y_new
-    X_new[2] = phi_new
-    
-    return X_new
-
-def h_measure_model2(x):
+def h_measure_modelFused(x):
     return x[0:2]
 
 ###########
@@ -211,20 +145,81 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
             Tracker_SingleTarget_SingleModel_allMe(1), # Constant Velocity(CV) Model 
             Tracker_SingleTarget_SingleModel_allMe(2), # Constant Turn-Rate Velocity(CTRV) Model
             Tracker_SingleTarget_SingleModel_allMe(3)  # Random Motion(RM) Model
-        ]
+        ]   
 
-        self.modeProbs = np.array([0.33, 0.33, 0.34])
+        self.modeProbs = np.expand_dims(np.array([
+            0.34, 0.33, 0.33
+        ]), axis=1)
 
         self.transitionMatrix = np.array([
-            [0.9, 0.1 ,0.1],
-            [0.1, 0.9, 0.1],
-            [0.1, 0.1, 0.9]
+            [0.9, 0.05, 0.05],
+            [0.05, 0.9, 0.05],
+            [0.05, 0.05, 0.9]
         ])
 
 
         self.measurements = []
 
         self.Ws, self.Wc, self.lambda_ = uH.generateUnscentedWeights(L = 5, alpha = 1e-3, beta = 2, kappa = 0)
+
+    def fuseStates(self):
+
+        stateMeans = []
+        stateCovariances = []
+
+        for model in self.models:
+            stateMeans.append(model.track.x)
+            stateCovariances.append(model.track.P)
+
+        stateMeans = np.squeeze(np.array(stateMeans, dtype=float))
+        stateCovariances = np.array(stateCovariances) 
+
+        fusedX, fusedP = IMM_helper.fuseModelStates(stateMeans, stateCovariances, self.modeProbs)
+
+        return (fusedX, fusedP)
+
+    def mixStates(self):
+
+        stateMeans = []
+        stateCovariances = []
+
+        for model in self.models:
+            stateMeans.append(model.track.x)
+            stateCovariances.append(model.track.P)
+
+        stateMeans = np.squeeze(np.array(stateMeans, dtype=float))
+        stateCovariances = np.array(stateCovariances, dtype=float)
+
+        mixedMeans, mixedCovariances = IMM_helper.mixStates(stateMeans, stateCovariances, self.transitionMatrix, self.modeProbs)
+        
+        for i, model in enumerate(self.models):
+            model.x = np.expand_dims(mixedMeans[i], axis=1)
+            model.P = mixedCovariances[i]
+
+    def updateModeProbabilities(self, measurement):
+
+        stateMeans_measured = []
+        stateSs = []
+
+        stateMeans = []
+        stateCovariances = []
+
+        for model in self.models:
+
+            stateMeans_measured.append(model.track.z)
+            stateSs.append(model.track.S)   
+
+            stateMeans.append(model.track.x)
+            stateCovariances.append(model.track.P)
+
+        stateMeans_measured = np.squeeze(np.array(stateMeans_measured, dtype=float))
+        stateMeans = np.squeeze(np.array(stateMeans, dtype=float))
+
+        stateSs = np.array(stateSs, dtype=float)
+        stateCovariances = np.array(stateCovariances, dtype=float)
+
+        self.modeProbs = IMM_helper.updateModeProbabilities(stateMeans_measured, stateSs, measurement, self.transitionMatrix, self.modeProbs)
+            
 
     def feedMeasurement(self, measurement, dt):
 
@@ -235,7 +230,7 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
             #just feed the measurements
             #no track inits or state updates
 
-            for model in enumerate(self.models):
+            for model in self.models:
                 model.putMeasurement(measurement)
 
 
@@ -243,8 +238,15 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
 
             #just for the init step, mixing won't happen, free run
 
-            for model in enumerate(self.models):
-                model.feedMeasurement(measurement)
+            for model in self.models:
+                model.feedMeasurement(measurement, dt)
+
+            #init track by fusing
+
+            fusedX, fusedP = self.fuseStates()
+
+            self.track = Track(fusedX, fusedP)
+            self.track.z = h_measure_modelFused(fusedX)
 
 
         elif(self.track is not None):
@@ -253,55 +255,25 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
 
             #MIXING
 
-            stateMeans = []
-            stateCovariances = []
-
-            for model in self.models:
-                stateMeans.append(model.track.x)
-                stateCovariances.append(model.track.P)
-
-            stateMeans = np.squeeze(np.array(stateMeans, dtype=float))
-            stateCovariances = np.array(stateCovariances, dtype=float)
-
-            mixedMeans, mixedCovariances = IMM_helper.mixStates(stateMeans, stateCovariances, self.transitionMatrix, self.modeProbs)
-            
-            for i, model in enumerate(self.models):
-                model.x = np.expand_dims(mixedMeans[i], axis=1)
-                model.P = mixedCovariances[i]
+            self.mixStates()
             
             #PREDICTION AND UPDATE
 
-            for model in enumerate(self.models):
-                model.feedMeasurement(measurement)            
+            for model in self.models:
+                model.feedMeasurement(measurement, dt)            
 
             #MODEL PROBS UPDATE
 
-            stateMeans_measured = []
-            stateSs = []
+            self.updateModeProbabilities(measurement)
 
-            stateMeans = []
-            stateCovariances = []
-
-            for model in self.models:
-
-                stateMeans_measured.append(model.track.z)
-                stateSs.append(model.track.S)   
-
-                stateMeans.append(model.track.x)
-                stateCovariances.append(model.track.P)
-
-            self.modeProbs = IMM_helper.updateModeProbabilities(stateMeans_measured, stateSs, measurement, self.transitionMatrix, self.modeProbs)
-                
             #FUSE STATES
 
             #this stage is necessary to update the fused track
             #though there is no use of track.P for now
             #track.x is obviously our final estimate and important
 
-            fusedX, fusedP = IMM_helper.fuseModelStates(stateMeans, stateCovariances, self.modeProbs)
-
-            if(self.track is None):
-                self.track = Track(fusedX, fusedP)
-            else:
-                self.track.x = fusedX
-                self.track.P = fusedP            
+            fusedX, fusedP = self.fuseStates()
+            
+            self.track.x = fusedX
+            self.track.P = fusedP
+            self.track.z = h_measure_modelFused(fusedX)

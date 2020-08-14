@@ -252,6 +252,29 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
     def putMeasurement(self, measurement):
         #can be used to put only measurement to self.measurements without state update
         self.measurements.append(measurement)
+    
+    def predict(self, dt):
+
+        if(self.track):
+
+            if(self.modelType == 0):
+
+                self.track.x_predict, self.track.P_predict = f_predict_model0(self.track.x, self.track.P, dt)
+
+            elif(self.modelType == 1 or self.modelType == 2 or self.modelType == 3):
+
+                self.track.P = massageToCovariance(self.track.P, 1e-8)
+
+                sigmaPoints = uH.generateSigmaPoints(self.track.x, self.track.P, self.lambda_)
+
+                if(self.modelType == 1):
+                    self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])
+                elif(self.modelType == 2):
+                    self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model2, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[2])
+                elif(self.modelType == 3):
+                    self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model3, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[3])
+
+
 
     def feedMeasurement(self, measurement, dt):
 
@@ -364,8 +387,7 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
 
             if(self.modelType == 0):
                 #prediction
-                self.track.x_predict, self.track.P_predict = f_predict_model0(self.track.x, self.track.P, dt)
-                
+                self.predict(dt)                
                 #update
                 z_predict, H = h_measure_model0(self.track.x_predict)
                 diff = (measurement - z_predict)

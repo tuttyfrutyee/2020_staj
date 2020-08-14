@@ -1,4 +1,5 @@
 import objectGenerator.objectGenerator as oG
+import matplotlib.pyplot as plt
 
 class Scenario(object):
     
@@ -47,6 +48,8 @@ class Scenario(object):
             
         
     def plotScenario(self):
+        
+        plt.figure()
         
         for object_ in self.objects:
             object_.drawObject(1)

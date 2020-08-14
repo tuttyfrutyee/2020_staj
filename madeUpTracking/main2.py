@@ -40,11 +40,15 @@ predictions = []
 
 dt = 0.1
 
-#tracker = Tracker_SingleTarget_SingleModel_allMe(2)
-tracker = Tracker_SingleTarget_IMultipleModel_allMe()
+imm = True
+if(not imm):
+    tracker = Tracker_SingleTarget_SingleModel_allMe(3)
+else:
+    tracker = Tracker_SingleTarget_IMultipleModel_allMe()
 
 measurements = []
 states = []
+modeProbs = []
 
 for measurementPack in measurementPacks:
     
@@ -56,19 +60,27 @@ for measurementPack in measurementPacks:
     if(tracker.track is not None):
         predictions.append(tracker.track.z)
         states.append(tracker.track.x)
+        if(imm):
+            modeProbs.append(tracker.modeProbs)
 
 predictions = np.squeeze(predictions)
 measurements = np.array(measurements)
 states = np.array(states)
+if(imm):
+    modeProbs = np.array(modeProbs)
 
 plt.plot(measurements[:,0], measurements[:,1])    
 plt.plot(predictions[:,0], predictions[:,1], linewidth=2)
 
 #plt.plot(states[:,2,0] / np.pi * 180)
 #plt.plot(states[:,3,0])
+if(imm):
+    plt.figure()
+    for i in range(modeProbs.shape[1]):
+        plt.plot(modeProbs[:,i], label="model "+str(i)) 
 
-
-
+    plt.legend()
+    
 
 
 

@@ -13,20 +13,22 @@ import numpy as np
 
 
 stds_0 = [np.sqrt(4)]
-# objectPathCorners_0 = [([55, 23, 51], [56,9,20])] 
-
-objectPathCorners_0 = [(None)] 
-
+objectPathCorners_0 = [([55, 23, 51], [56,9,20])]
 corruptions_0 = [None]
 stepSizes_0 = [0.4]
 colors_0 = [("b", "g")]
 
 scenario_0 = scenario.Scenario(stds_0, objectPathCorners_0, corruptions_0, stepSizes_0, colors_0)
 
+scenarios_0 = []
+
+for i in range(10):
+    scenarios_0.append(scenario.Scenario([stds_0[0] + i * 0.1], objectPathCorners_0, corruptions_0, stepSizes_0, colors_0))
+
 #scenario_0.plotScenario()
 
 
-a = 3
+
 
 ######################################################
 

@@ -31,8 +31,32 @@ def extractMeasurementsFromScenario(scenario):
     
     return measurementPacks
 
+def extractGroundTruthFromScenario(scenario):
+    groundTruthPacks = []
+    i = 0
+    exhausteds = np.zeros((len(scenario.objects)))
+    done = False
+
+    while(not done):
+        groundTruthPack = []
+        for k,object_ in enumerate(scenario.objects):
+
+            if(len(object_.xPath) > i):
+                groundTruthPack.append(np.expand_dims(np.array([object_.xPath[i], object_.yPath[i]]), axis=1))
+            else:
+                exhausteds[k] = 1
+        if(np.sum(exhausteds) > len(scenario.objects)-1):
+            done = True
+            
+        if(not done):
+            groundTruthPacks.append(groundTruthPack)
+        i += 1
+    
+    return groundTruthPacks
+
 
 measurementPacks = extractMeasurementsFromScenario(scn.scenario_0)
+groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_0)
 
 scn.scenario_0.plotScenario()
 
@@ -40,9 +64,9 @@ predictions = []
 
 dt = 0.1
 
-imm = True
+imm = False
 if(not imm):
-    tracker = Tracker_SingleTarget_SingleModel_allMe(3)
+    tracker = Tracker_SingleTarget_SingleModel_allMe(0)
 else:
     tracker = Tracker_SingleTarget_IMultipleModel_allMe()
 
@@ -50,15 +74,21 @@ measurements = []
 states = []
 modeProbs = []
 
-for measurementPack in measurementPacks:
+loss = 0
+
+for groundTruthPack, measurementPack in zip(groundTruthPacks, measurementPacks):
     
     #singleTarget
     measurement = measurementPack[0]
+    groundTruth = groundTruthPack[0]
+    
     tracker.feedMeasurement(measurement, dt)
     measurements.append(measurement)
     
     if(tracker.track is not None):
         predictions.append(tracker.track.z)
+        diff = tracker.track.z - groundTruth
+        loss += np.sqrt(np.dot(diff.T, diff))
         states.append(tracker.track.x)
         if(imm):
             modeProbs.append(tracker.modeProbs)

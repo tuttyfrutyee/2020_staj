@@ -14,6 +14,114 @@ import math
 
 """
 
+def greedyAssociateMeasurements(matureTracks, initTracks, measurements, gateThreshold, distanceThreshold):
+
+    """
+        Input:
+
+            matureTracks : np.array(shape = (Nr_mature, dimX, 1))
+            initTracks : np.array(shape = (Nr_init, dimX, 1))
+            measurements : np.array(shape = (m_k, dimZ, 1))
+            gateThreshold : float
+            distanceThreshold : float
+
+        Output:
+            
+            unMatchedMeasurements : np.array(shape = (not_known, dimZ, 1))
+            initTrackBoundedMeasurements : np.array(shape = (Nr_init, dimZ, 1))
+            distanceMatrix : np.array(shape = (Nr_mature, m_k))
+
+    """
+    
+    Nr_mature = matureTracks.shape[0]
+    Nr_init = initTracks.shape[0]
+    m_k = measurements.shape[0]
+    
+
+    #for mature tracks
+
+    distanceMatrix = np.zeros((Nr_mature, m_k))
+
+    distances = []
+    distancePairIndexes = []
+
+    for i, track in enumerate(matureTracks):
+        for j, measurement in enumerate(measurements):
+
+            distanceMatrix[i][j] = mahalanobisDistanceSquared(measurement, track.z_predict, track.S)
+
+            distances.append(distanceMatrix[i][j])
+            distancePairIndexes.append((i, j))
+
+    sorted_indexes = np.argsort(distances)    
+
+    matchedTracks = []
+    matchedMeasurements = []
+
+    for i in sorted_indexes:
+        m, n = distancePairIndexes[i]
+
+        if(m not in matchedTracks and n not in matchedMeasurements):
+            if(distances[i] < gateThreshold):
+                matchedTracks.append(m)
+                matchedMeasurements.append(n)
+
+    #for init tracks
+
+
+    leftMeasurements = []
+        
+    for i, measurement in measurements:
+        if(i not in matchedMeasurements):
+            leftMeasurements.append(measurement)
+    
+    leftDistanceMatrix = np.zeros((Nr_init, len(leftMeasurements)))
+
+    distances = []
+    distancePairIndexes = []
+
+    for i, track in enumerate(initTracks):
+        for j, measurement in enumerate(leftMeasurements):
+            diff = track.measurements[-1] - measurement
+            leftDistanceMatrix[i, j] = np.dot(diff.T, diff)
+
+            distances.append(leftDistanceMatrix[i, j])
+            distancePairIndexes.append((i, j))
+
+    sorted_indexes = np.argsort(distances)
+
+    matchedTracks = []
+    matchedMeasurements = []
+
+    for i in sorted_indexes:
+        m, n = distancePairIndexes[i]
+
+        if(m not in matchedTracks and n not in matchedMeasurements):
+            if(distances[i] < distanceThreshold):
+                matchedTracks.append(m)
+                matchedMeasurements.append(n)
+
+    #find unmatched measurements
+
+    unmatchedMeasurements = []
+        
+    for i, measurement in leftMeasurements:
+        if(i not in matchedMeasurements):
+            unmatchedMeasurements.append(measurement)   
+
+    #find initTrackBoundedMeasurements
+
+    initTrackBoundedMeasurements = []
+
+    for m, track in enumerate(initTracks):
+        if(m not in matchedTracks):
+            initTrackBoundedMeasurements.append(None)
+        else:
+            matchedMeasurements[matchedTracks.index(track)]
+
+
+    return (unmatchedMeasurements, initTrackBoundedMeasurements, distanceMatrix)
+
 
 
 def generateAssociationEvents(validationMatrix): #checkCount : 1
@@ -89,13 +197,14 @@ def generateAssociationEvents(validationMatrix): #checkCount : 1
     
     return np.array(associationEvents, dtype=int)
 
-def createValidationMatrix(measurements, tracks, gateThreshold): #checkCount : 1
+def createValidationMatrix(distanceMatrix, measurements, tracks, gateThreshold): #checkCount : 1
 
     """
         Description: 
             This function creates a validation matrix and the indexes of the measurements that are in range
 
             Inputs:
+                distanceMatrix : np.array(shape = (Nr, m_k))
                 measurements : np.array(shape =(m_k, dimZ))
                 tracks : list of len = Nr of track objects
                 gateThreshold : float(0,1)
@@ -125,9 +234,9 @@ def createValidationMatrix(measurements, tracks, gateThreshold): #checkCount : 1
         validationVector = [1] # inserting a 1 because -> [page 312, 6.2.2-1, BYL95]
         measurement = np.expand_dims(measurement, axis=1)
 
-        for track in tracks:
+        for t, track in enumerate(tracks):
 
-            mahalanobisDistanceSquared_ = mahalanobisDistanceSquared(measurement, track.z_prior, track.S_prior)
+            mahalanobisDistanceSquared_ = distanceMatrix[t, i]
 
             if(mahalanobisDistanceSquared_ < gateThreshold):
                 validationVector.append(1)
@@ -157,8 +266,6 @@ def mahalanobisDistanceSquared(x, mean, cov): #checkCount : 1, 1/2*confident
     x is 3 std from mean.
 
     """
-    if x.shape != mean.shape:
-        raise ValueError("length of input vectors must be the same")
 
     y = x - mean
     S = np.atleast_2d(cov)

@@ -74,6 +74,7 @@ measurements = []
 states = []
 modeProbs = []
 
+calLoss = False
 loss = 0
 
 for groundTruthPack, measurementPack in zip(groundTruthPacks, measurementPacks):
@@ -87,9 +88,13 @@ for groundTruthPack, measurementPack in zip(groundTruthPacks, measurementPacks):
     
     if(tracker.track is not None):
         predictions.append(tracker.track.z)
+
         diff = tracker.track.z - groundTruth
-        loss += np.sqrt(np.dot(diff.T, diff))
+
         states.append(tracker.track.x)
+        
+        if(calLoss):
+            loss += np.sqrt(np.dot(diff.T, diff))
         if(imm):
             modeProbs.append(tracker.modeProbs)
 

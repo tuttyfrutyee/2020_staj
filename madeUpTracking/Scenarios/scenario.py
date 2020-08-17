@@ -13,9 +13,9 @@ import numpy as np
 
 
 stds_0 = [np.sqrt(4)]
-# objectPathCorners_0 = [([55, 23, 51], [56,9,20])] 
+objectPathCorners_0 = [([55, 23, 51], [56,9,20])] 
 
-objectPathCorners_0 = [(None)] 
+# objectPathCorners_0 = [(None)] 
 
 corruptions_0 = [None]
 stepSizes_0 = [0.4]

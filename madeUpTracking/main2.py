@@ -7,6 +7,8 @@ import Scenarios.scenario as scn
 from Trackers.SingleTarget.allMe.track_singleTarget_singleModel import Tracker_SingleTarget_SingleModel_allMe
 from Trackers.SingleTarget.allMe.track_singleTarget_multipleModel import Tracker_SingleTarget_IMultipleModel_allMe
 
+from myHelpers.visualizeHelper import showPerimeter
+
 
 def extractMeasurementsFromScenario(scenario):
     measurementPacks = []
@@ -77,7 +79,11 @@ modeProbs = []
 calLoss = False
 loss = 0
 
-for groundTruthPack, measurementPack in zip(groundTruthPacks, measurementPacks):
+S = None
+z = None
+gateThreshold = 5
+
+for i, (groundTruthPack, measurementPack) in enumerate(zip(groundTruthPacks, measurementPacks)):
     
     #singleTarget
     measurement = measurementPack[0]
@@ -92,6 +98,10 @@ for groundTruthPack, measurementPack in zip(groundTruthPacks, measurementPacks):
         diff = tracker.track.z - groundTruth
 
         states.append(tracker.track.x)
+        
+        if(i == 100):
+            S = tracker.track.S
+            z = tracker.track.z_predict
         
         if(calLoss):
             loss += np.sqrt(np.dot(diff.T, diff))
@@ -118,8 +128,7 @@ if(imm):
     
 
 
-
-
+showPerimeter(z, np.linalg.inv(S), np.pi / 100, gateThreshold)
 
 
 

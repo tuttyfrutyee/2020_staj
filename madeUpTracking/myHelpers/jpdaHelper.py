@@ -14,13 +14,13 @@ import math
 
 """
 
-def greedyAssociateMeasurements(matureTracks, initTracks, measurements, gateThreshold, distanceThreshold):
+def greedyAssociateMeasurements(matureTrackers, initTrackers, measurements, gateThreshold, distanceThreshold):
 
     """
         Input:
 
-            matureTracks : np.array(shape = (Nr_mature, dimX, 1))
-            initTracks : np.array(shape = (Nr_init, dimX, 1))
+            matureTracks : np.array(shape = (Nr_mature,))
+            initTracks : np.array(shape = (Nr_init,))
             measurements : np.array(shape = (m_k, dimZ, 1))
             gateThreshold : float
             distanceThreshold : float
@@ -28,13 +28,13 @@ def greedyAssociateMeasurements(matureTracks, initTracks, measurements, gateThre
         Output:
             
             unMatchedMeasurements : np.array(shape = (not_known, dimZ, 1))
-            initTrackBoundedMeasurements : np.array(shape = (Nr_init, dimZ, 1))
+            initTrackerBoundedMeasurements : np.array(shape = (Nr_init, dimZ, 1))
             distanceMatrix : np.array(shape = (Nr_mature, m_k))
 
     """
     
-    Nr_mature = matureTracks.shape[0]
-    Nr_init = initTracks.shape[0]
+    Nr_mature = matureTrackers.shape[0]
+    Nr_init = initTrackers.shape[0]
     m_k = measurements.shape[0]
     
 
@@ -45,82 +45,78 @@ def greedyAssociateMeasurements(matureTracks, initTracks, measurements, gateThre
     distances = []
     distancePairIndexes = []
 
-    for i, track in enumerate(matureTracks):
+    for i, tracker in enumerate(matureTrackers):
         for j, measurement in enumerate(measurements):
 
-            distanceMatrix[i][j] = mahalanobisDistanceSquared(measurement, track.z_predict, track.S)
+            distanceMatrix[i][j] = mahalanobisDistanceSquared(measurement, tracker.track.z_predict, tracker.track.S)
 
             distances.append(distanceMatrix[i][j])
             distancePairIndexes.append((i, j))
 
     sorted_indexes = np.argsort(distances)    
 
-    matchedTracks = []
+    matchedTrackers = []
     matchedMeasurements = []
 
     for i in sorted_indexes:
         m, n = distancePairIndexes[i]
 
-        if(m not in matchedTracks and n not in matchedMeasurements):
+        if(m not in matchedTrackers and n not in matchedMeasurements):
             if(distances[i] < gateThreshold):
-                matchedTracks.append(m)
+                matchedTrackers.append(m)
                 matchedMeasurements.append(n)
 
-    #for init tracks
+    #for init trackers
 
 
     leftMeasurements = []
         
-    for i, measurement in measurements:
+    for i, measurement in enumerate(measurements):
         if(i not in matchedMeasurements):
             leftMeasurements.append(measurement)
     
-    leftDistanceMatrix = np.zeros((Nr_init, len(leftMeasurements)))
 
     distances = []
     distancePairIndexes = []
 
-    for i, track in enumerate(initTracks):
+    for i, tracker in enumerate(initTrackers):
         for j, measurement in enumerate(leftMeasurements):
-            diff = track.measurements[-1] - measurement
-            leftDistanceMatrix[i, j] = np.dot(diff.T, diff)
-
-            distances.append(leftDistanceMatrix[i, j])
+            diff = tracker.measurements[-1] - measurement
+            distances.append(np.sqrt(np.dot(diff.T, diff))[0][0])
             distancePairIndexes.append((i, j))
 
     sorted_indexes = np.argsort(distances)
 
-    matchedTracks = []
+    matchedTrackers = []
     matchedMeasurements = []
-
+    
     for i in sorted_indexes:
         m, n = distancePairIndexes[i]
 
-        if(m not in matchedTracks and n not in matchedMeasurements):
+        if(m not in matchedTrackers and n not in matchedMeasurements):
             if(distances[i] < distanceThreshold):
-                matchedTracks.append(m)
+                matchedTrackers.append(m)
                 matchedMeasurements.append(n)
 
     #find unmatched measurements
 
     unmatchedMeasurements = []
         
-    for i, measurement in leftMeasurements:
+    for i, measurement in enumerate(leftMeasurements):
         if(i not in matchedMeasurements):
             unmatchedMeasurements.append(measurement)   
 
-    #find initTrackBoundedMeasurements
+    #find initTrackerBoundedMeasurements
 
-    initTrackBoundedMeasurements = []
+    initTrackerBoundedMeasurements = []
 
-    for m, track in enumerate(initTracks):
-        if(m not in matchedTracks):
-            initTrackBoundedMeasurements.append(None)
+    for m, track in enumerate(initTrackers):
+        if(m not in matchedTrackers):
+            initTrackerBoundedMeasurements.append(None)
         else:
-            matchedMeasurements[matchedTracks.index(track)]
+            initTrackerBoundedMeasurements.append(leftMeasurements[matchedMeasurements[matchedTrackers.index(m)]])
 
-
-    return (unmatchedMeasurements, initTrackBoundedMeasurements, distanceMatrix)
+    return (unmatchedMeasurements, initTrackerBoundedMeasurements, distanceMatrix)
 
 
 
@@ -143,6 +139,9 @@ def generateAssociationEvents(validationMatrix): #checkCount : 1
     usedTrackers = None
     previousEvent = np.zeros(shape = (m_k), dtype = int) - 1
     burnCurrentEvent = None
+    
+    if(m_k == 0):
+        return None
 
     while(not exhaustedMeasurements[0]):
 
@@ -197,7 +196,7 @@ def generateAssociationEvents(validationMatrix): #checkCount : 1
     
     return np.array(associationEvents, dtype=int)
 
-def createValidationMatrix(distanceMatrix, measurements, tracks, gateThreshold): #checkCount : 1
+def createValidationMatrix(distanceMatrix, measurements, trackers, gateThreshold): #checkCount : 1
 
     """
         Description: 
@@ -234,7 +233,7 @@ def createValidationMatrix(distanceMatrix, measurements, tracks, gateThreshold):
         validationVector = [1] # inserting a 1 because -> [page 312, 6.2.2-1, BYL95]
         measurement = np.expand_dims(measurement, axis=1)
 
-        for t, track in enumerate(tracks):
+        for t, tracker in enumerate(trackers):
 
             mahalanobisDistanceSquared_ = distanceMatrix[t, i]
 
@@ -245,13 +244,13 @@ def createValidationMatrix(distanceMatrix, measurements, tracks, gateThreshold):
 
         validationVector = np.array(validationVector)
 
-        if(np.sum(validationVector) > 1): # this means that measurement is validated at least for one track -> worth to consider hence append
+        if(np.sum(validationVector) > 1): # this means that measurement is validated at least for one tracker -> worth to consider hence append
             
             validationMatrix.append(validationVector)
             validatedMeasurementIndexes.append(i)
 
     validationMatrix = np.array(validationMatrix, dtype=int)
-    validatedMeasurementIndexes = np.expand_dims(np.array(validatedMeasurementIndexes), axis=1)
+    validatedMeasurementIndexes = np.expand_dims(np.array(validatedMeasurementIndexes, dtype=int), axis=1)
 
     return (validatedMeasurementIndexes, validationMatrix)
 

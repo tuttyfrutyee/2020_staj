@@ -55,10 +55,10 @@ scenario_1 = scenario.Scenario(stds_1, objectPathCorners_1, corruptions_1, stepS
 """
 
 stds_2 = [3, 2]
-objectPathCorners_2 = [ ([55, 23, 51], [56,9,20]), None ] 
+objectPathCorners_2 = [ ([55, 23, 51], [56,9,20]), ([10,-24, 40], [0,-10,70]) ] 
 corruptions_2 = [None, None]
-stepSizes_2 = [0.4, None]
-colors_2 = [("b", "g"), None]
+stepSizes_2 = [0.4, 0.4]
+colors_2 = [("b", "g"), ("k", "c")]
 
 scenario_2 = scenario.Scenario(stds_2, objectPathCorners_2, corruptions_2, stepSizes_2, colors_2)
 
@@ -78,14 +78,14 @@ scenario_2 = scenario.Scenario(stds_2, objectPathCorners_2, corruptions_2, stepS
 
 """
 stds_3 = [3, 2]
-objectPathCorners_2 = [ ([55, 23, 51], [56,9,20]), None ] 
-corruptions_2 = [None, None]
-stepSizes_2 = [0.4, None]
-colors_2 = [("b", "g"), None]
+objectPathCorners_3 = [ ([55, 23, 51], [56,9,20]), None ] 
+corruptions_3 = [None, None]
+stepSizes_3 = [0.4, None]
+colors_3 = [("b", "g"), None]
 
-scenario_2 = scenario.Scenario(stds_2, objectPathCorners_2, corruptions_2, stepSizes_2, colors_2)
+scenario_3 = scenario.Scenario(stds_3, objectPathCorners_3, corruptions_3, stepSizes_3, colors_3)
 
-#scenario_2.plotScenario()
+#scenario_3.plotScenario()
 
 
 

@@ -3,7 +3,7 @@
 import numpy as np
 
 dimX = 5 #state dimension
-dimZ = 3 #measurement state dimension
+dimZ = 2 #measurement state dimension
 Nr = 3 #number of modes(models)
 m_k = 4 #number of measurements
 
@@ -74,7 +74,7 @@ kalmanGain = np.random.randn(dimX, dimZ)
 priorStateMean = np.random.randn(dimX,1)
 priorStateMeasuredMean = np.random.randn(dimZ,1)
 priorStateCovariance = np.random.randn(dimX, dimX)
-Pzz = np.random.randn(dimZ, dimZ)
+S = generateRandomCovariance_positiveDefinite(dimZ)
 
 #UKF
 

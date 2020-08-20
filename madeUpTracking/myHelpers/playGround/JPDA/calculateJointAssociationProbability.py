@@ -75,7 +75,7 @@ def calculateJointAssociationProbability_parametric(jAE, measurements, tracks, s
                "Detection probability"           
             
             Output:
-                associationProbability : float
+                associationProbability : float  
     """
 
     numberOfDetections = np.sum(jAE>0)

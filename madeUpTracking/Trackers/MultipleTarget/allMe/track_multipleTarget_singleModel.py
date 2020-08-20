@@ -252,9 +252,8 @@ class Track(object):
 
 class Tracker(object):
 
-    def __init__(self, x0, P0, modelType, unscentedWeights):
-        self.x = x0
-        self.P = P0
+    def __init__(self, modelType, unscentedWeights):
+
         self.modelType = modelType
 
         if(modelType == 1 or modelType == 2 or modelType == 3):
@@ -263,6 +262,9 @@ class Tracker(object):
         self.measurements = []
 
         self.track = None
+
+        self.updatedStateHistory = []
+        self.predictedStateHistory = []
 
         self.trackerStatus = 0
 
@@ -388,7 +390,7 @@ class Tracker(object):
     def feedMeasurements(self, measurements, associationProbs):
         print("todo")
 
-    def predict(self, dt):
+    def predict(self, dt, timeStamp):
 
         if(self.track):
 
@@ -402,13 +404,18 @@ class Tracker(object):
 
             elif(self.modelType == 1 or self.modelType == 2 or self.modelType == 3):
 
-                self.track.P = massageToCovariance(self.track.P, 1e-8)
+                self.track.P = massageToCovariance(self.track.P, 1e-6)
 
                 sigmaPoints = uH.generateSigmaPoints(self.track.x, self.track.P, self.lambda_)
 
                 if(self.modelType == 1):
-                    
+                    print(np.linalg.eig(self.track.P))
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
+                    print(np.linalg.eig(self.track.P_predict))
+                   
+                    self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)
+                    print(np.linalg.eig(self.track.P_predict))
+
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
                     self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model1, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[1] ) 
 
@@ -416,16 +423,18 @@ class Tracker(object):
                 elif(self.modelType == 2):
 
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model2, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[2])
+                    self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)               
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
                     self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model2, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[2] ) 
                 
                 elif(self.modelType == 3):
                     
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model3, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[3])
+                    self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)                    
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
                     self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model3, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[3] ) 
 
-
+            self.predictedStateHistory.append((self.track.z_predict, self.track.S, timeStamp))
 
 class Tracker_MultipleTarget_SingleModel_allMe(object):
   
@@ -433,6 +442,9 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
                         
         self.matureTrackers = []
         self.initTrackers = []
+
+        self.matureTrackerHistory = []
+        self.initTrackerHistory = []
 
         self.unscentedWeights = None
         self.validationMatrix = None
@@ -443,26 +455,29 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
         self.spatialDensity = spatialDensity
         self.PD = PD
 
+
         if(modelType == 1 or modelType == 2 or modelType == 3):
             self.Ws, self.Wc, self.lambda_ = uH.generateUnscentedWeights(L = 5, alpha = 1e-3, beta = 2, kappa = 0)
 
     
-    def predict(self, dt):
+    def predict(self, dt, timeStamp):
 
         for tracker in self.matureTrackers:
-            tracker.predict(dt)
+            tracker.predict(dt, timeStamp)
+
 
     def initNewTrackers(self, measurements, dt):
 
         for measurement in measurements:
             if(self.modelType == 1 or self.modelType == 2 or self.modelType == 3):
-                newTracker = Tracker(None, None, self.modelType, (self.Wc, self.Wc, self.lambda_))
+                newTracker = Tracker(self.modelType, (self.Wc, self.Wc, self.lambda_))
             else:
-                newTracker = Tracker(None, None, self.modelType, None)
+                newTracker = Tracker(self.modelType, None)
             
             newTracker.putMeasurement(measurement, dt)
 
             self.initTrackers.append(newTracker)
+            self.initTrackerHistory.append(newTracker)
 
     def deleteDeadTrackers(self):
         
@@ -492,8 +507,9 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
         for tracker in newMatureTracks:
             self.initTrackers.remove(tracker)
             self.matureTrackers.append(tracker)
+            self.matureTrackerHistory.append(tracker)
             
-    def feedMeasurements(self, measurements, dt):
+    def feedMeasurements(self, measurements, dt, timeStamp):
 
         #first delete dead trackers
         self.deleteDeadTrackers()
@@ -502,45 +518,62 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
         self.trackertify()
 
         #now predict the next state, only mature trackers will predict
-        self.predict(dt)
+        self.predict(dt, timeStamp)
 
         #greedy association to find unmatched measurements
         matureTrackers = np.array(self.matureTrackers, dtype=object)
         initTrackers = np.array(self.initTrackers, dtype = object)
         unmatchedMeasurements, initTrackerBoundedMeasurements, distanceMatrix = jH.greedyAssociateMeasurements(matureTrackers, initTrackers, measurements, self.gateThreshold, self.distanceThreshold)
 
-        """         print("measurement shape ", measurements.shape[0])
+        """ print("measurement shape ", measurements.shape[0])
         print("len(unmatchedMeasurements)", len(unmatchedMeasurements))
-        print("len(initTrackerBoundedMeasurements)", initTrackerBoundedMeasurements)
+        print("len(initTrackerBoundedMeasurements)", len(initTrackerBoundedMeasurements))
         print("len(matureTrackers)", len(self.matureTrackers))
         print("len(initTrackers)", len(self.initTrackers))
-        print("\n\n\n") """
+        print("\n\n\n") """ 
+
         #put measurements to init tracks
         for i,tracker in enumerate(self.initTrackers):
             tracker.putMeasurement(initTrackerBoundedMeasurements[i], dt)
 
         if(len(self.matureTrackers) > 0):
 
+
             #now the association probabilities will be calculated(JPDA)
 
                 #createValidationMatrix
             validatedMeasurementIndexes, validationMatrix = jH.createValidationMatrix(distanceMatrix, measurements, self.matureTrackers, self.gateThreshold)
             self.validationMatrix = validationMatrix
+
             validatedMeasurements = measurements[validatedMeasurementIndexes]
+            self.validatedMeasurements = validatedMeasurements
 
                 #generateAssociationEvents
             associationEvents = jH.generateAssociationEvents(validationMatrix)
+            self.associationEvents = associationEvents
 
                 #calculateMarginalAssociationProbs
             marginalAssociationProbabilities = jH.calculateMarginalAssociationProbabilities(associationEvents, validatedMeasurements, self.matureTrackers, self.spatialDensity, self.PD)
 
+            self.marginalAssociationProbabilities = marginalAssociationProbabilities
 
             #now pass the marginalAssocationProbs to PDA stage
             for t,tracker in enumerate(self.matureTrackers):
                 
-                associationProbs = (marginalAssociationProbabilities.T)[t]
+                if(marginalAssociationProbabilities is not None):
+                    associationProbs = (marginalAssociationProbabilities.T)[t]
+                else:
+                    associationProbs = None
                 
-                x_updated, P_updated = pH.pdaPass(tracker.track.kalmanGain, associationProbs, validatedMeasurements, tracker.track.x_predict, tracker.track.z_predict, tracker.track.P_predict, tracker.track.S)
+                x_updated, P_updated, notChanged = pH.pdaPass(tracker.track.kalmanGain, associationProbs, validatedMeasurements, tracker.track.x_predict, tracker.track.z_predict, tracker.track.P_predict, tracker.track.S)
+                
+                
+                if(notChanged):
+                    tracker.trackerStatus -= 1
+                else:
+                    tracker.trackerStatus = 5
+
+                tracker.updatedStateHistory.append((x_updated, P_updated, timeStamp))
 
                 tracker.track.x = x_updated
                 tracker.track.P = P_updated

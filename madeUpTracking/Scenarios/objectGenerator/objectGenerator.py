@@ -107,7 +107,7 @@ class Object_(object):
         plt.plot(self.xPath, self.yPath, self.colors[0], linewidth=2)
 
         #second plot noisyPath
-        plt.scatter(self.xNoisyPath, self.yNoisyPath, c=self.colors[1], linewidth=0.1)
+        #plt.plot(self.xNoisyPath, self.yNoisyPath, c=self.colors[1])
 
         #third mark the missed measurements
         plt.scatter(self.corruptedPoints_x, self.corruptedPoints_y, c="k", linewidth=3)

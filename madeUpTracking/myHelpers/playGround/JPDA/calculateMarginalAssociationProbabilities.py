@@ -88,5 +88,5 @@ def calculateMarginalAssociationProbabilities(events, measurements, tracks, spat
 
 marginalAssociationProbabilities = calculateMarginalAssociationProbabilities(gAE.associationEvents, cVM.validatedMeasurements, commonVar.tracks, commonVar.spatialDensity, commonVar.PD)
 print_("marginalAssociationProbs : ", marginalAssociationProbabilities)
-print("\n",marginalAssociationProbabilities)
+print("\n",np.sum(marginalAssociationProbabilities))
 

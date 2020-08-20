@@ -205,12 +205,12 @@ def createValidationMatrix(distanceMatrix, measurements, trackers, gateThreshold
             Inputs:
                 distanceMatrix : np.array(shape = (Nr, m_k))
                 measurements : np.array(shape =(m_k, dimZ))
-                tracks : list of len = Nr of track objects
+                trackers : list of len = Nr of track objects
                 gateThreshold : float(0,1)
 
             Output:
 
-                validateMeasurementsIndexes: np.array(shape = (numOfSuceesfulGatedMeasurements(not known in advance),1))
+                validateMeasurementsIndexes: np.array(shape = (numOfSuceesfulGatedMeasurements(not known in advance),))
                     
                      "The indexes of the measurements which are used to create the validationMatrix. The indexes indicating the
                      element index of that measurement inside the input 'measurements', the order measurements hold should not change"
@@ -250,7 +250,7 @@ def createValidationMatrix(distanceMatrix, measurements, trackers, gateThreshold
             validatedMeasurementIndexes.append(i)
 
     validationMatrix = np.array(validationMatrix, dtype=int)
-    validatedMeasurementIndexes = np.expand_dims(np.array(validatedMeasurementIndexes, dtype=int), axis=1)
+    validatedMeasurementIndexes = np.array(validatedMeasurementIndexes, dtype=int)
 
     return (validatedMeasurementIndexes, validationMatrix)
 
@@ -295,7 +295,7 @@ def calculateTheProbabilityOfTheMeasurement(measurement, z, S):
 
 
 
-def calculateJointAssociationProbability_parametric(jAE, measurements, tracks, spatialDensity, PD): #checkCount : 1
+def calculateJointAssociationProbability_parametric(jAE, measurements, trackers, spatialDensity, PD): #checkCount : 1
 
     """
         Description:
@@ -314,7 +314,7 @@ def calculateJointAssociationProbability_parametric(jAE, measurements, tracks, s
             
             measurements : np.array(shape=(m_k,1))
             
-            tracks: list of len = Nr of track objects
+            trackers: list of len = Nr of tracker objects
 
             spatialDensity : float
             "The poisson parameter that represents the number of false measurements in a unit volume" [page 317, (6.2.4-1) BYL95]
@@ -335,19 +335,21 @@ def calculateJointAssociationProbability_parametric(jAE, measurements, tracks, s
         
         if(associatedTrack != 0):
 
-            trackPriorMean = tracks[associatedTrack].z_prior
-            trackS = tracks[associatedTrack].S
-    
+            trackPriorMean = trackers[associatedTrack-1].track.z_predict
+            trackS = trackers[associatedTrack-1].track.S
+
             measurementProbabilities *= calculateTheProbabilityOfTheMeasurement(measurements[measurementIndex], trackPriorMean, trackS)
             measurementProbabilities /= spatialDensity
+    
+    
 
-    return measurementProbabilities * pow(PD, numberOfDetections) * pow(1-PD, len(tracks) - numberOfDetections)
+    return measurementProbabilities * pow(PD, numberOfDetections) * pow(1-PD, len(trackers) - numberOfDetections)
 
 
 
 
 
-def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracks, volume, PD): #checkCount : 1
+def calculateJointAssociationProbability_nonParametric(jAE, measurements, trackers, volume, PD): #checkCount : 1
 
     """
         Description:
@@ -366,7 +368,7 @@ def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracks
             
             measurements : np.array(shape=(m_k,1))
             
-            tracks: list of len = Nr of track objects
+            trackers: list of len = Nr of track objects
 
             volume : float
             "volume of the surveillance region" [page 314, (6.2.3-5) BYL95]
@@ -393,8 +395,8 @@ def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracks
         
         if(associatedTrack != 0):
 
-            trackPriorMean = tracks[associatedTrack].z_prior
-            trackS = tracks[associatedTrack].S
+            trackPriorMean = trackers[associatedTrack-1].track.z_prior
+            trackS = trackers[associatedTrack-1].track.S
     
             measurementProbabilities *= calculateTheProbabilityOfTheMeasurement(measurements[measurementIndex], trackPriorMean, trackS)
             measurementProbabilities *= volume
@@ -404,7 +406,7 @@ def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracks
 
 
 
-def calculateMarginalAssociationProbabilities(events, measurements, tracks, spatialDensity, PD): #checkCount : 1
+def calculateMarginalAssociationProbabilities(events, measurements, trackers, spatialDensity, PD): #checkCount : 1
 
     """
         Description:
@@ -421,7 +423,7 @@ def calculateMarginalAssociationProbabilities(events, measurements, tracks, spat
             
             measurements : np.array(shape = (m,))
             
-            tracks : list of len = Nr of track objects
+            trackers : list of len = Nr of track objects
             
             spatialDensity : float 
             
@@ -439,17 +441,18 @@ def calculateMarginalAssociationProbabilities(events, measurements, tracks, spat
     
     
     numberOfMeasurements = measurements.shape[0]
-    numberOfTracks = len(tracks)
+    numberOfTrackers = len(trackers)
 
+    if(events is None):
+        return None
 
-
-    marginalAssociationProbabilities = np.zeros((numberOfMeasurements, numberOfTracks))
+    marginalAssociationProbabilities = np.zeros((numberOfMeasurements, numberOfTrackers))
 
     sumOfEventProbabilities = 0 #will be used to normalize the calculated probabilities
 
     for event in events:
 
-        eventProbability = calculateJointAssociationProbability_parametric(event, measurements, tracks, spatialDensity, PD)
+        eventProbability = calculateJointAssociationProbability_parametric(event, measurements, trackers, spatialDensity, PD)
         sumOfEventProbabilities += eventProbability
 
         for measurementIndex, trackIndex in enumerate(event):

@@ -37,8 +37,34 @@ def showPerimeter(targetPoint, S_inverse, angleStep, gateThreshold):
         y_draw.append( targetPoint[1][0] + np.sin(angle) * R)
 
     plt.scatter(x_draw, y_draw, c = "m")
+    
+    
+def showRadius(targetPoint, R, angleStep):
+    """
+        Input:
+            targetPoint : np.array(shape = (dimX, 1))
+            R : float
+            angleStep : float
+    """
+
+    x_draw = []
+    y_draw = []
+
+    angle = 0
+
+    numberOfStep = int(np.pi * 2 / angleStep)
+
+    for step in range(numberOfStep):
+
+        angle = step * angleStep
+
+     
+        x_draw.append( targetPoint[0][0] + np.cos(angle) * R)
+        y_draw.append( targetPoint[1][0] + np.sin(angle) * R)
+
+    plt.scatter(x_draw, y_draw, c = "k")    
 
 
-targetX = np.array([0,0]).reshape((2,1))
+# targetX = np.array([0,0]).reshape((2,1))
 
-showPerimeter(targetX, commonVar.S, np.pi / 100, 1)
+# showPerimeter(targetX, commonVar.S, np.pi / 100, 1)

@@ -10,6 +10,7 @@ plt.xlim(0,10)
 plt.ylim(0,10)
 
 def animate(i):
+    print(i)
     a, b = [], []
     print(type(i))
     a.append(np.random.rand(1)*10)
@@ -17,7 +18,7 @@ def animate(i):
     sc.set_offsets(np.c_[a,b])
 
 ani = matplotlib.animation.FuncAnimation(fig, animate, 
-                frames=10, interval=1000, repeat=True) 
+                frames=10, interval=1000, repeat=False) 
 plt.show()
 
 

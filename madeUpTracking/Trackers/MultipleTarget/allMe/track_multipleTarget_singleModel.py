@@ -409,6 +409,7 @@ class Tracker(object):
                 sigmaPoints = uH.generateSigmaPoints(self.track.x, self.track.P, self.lambda_)
 
                 if(self.modelType == 1):
+                    
                     print(np.linalg.eig(self.track.P))
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
                     print(np.linalg.eig(self.track.P_predict))

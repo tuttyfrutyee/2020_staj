@@ -54,8 +54,8 @@ scenario_1 = scenario.Scenario(stds_1, objectPathCorners_1, corruptions_1, stepS
 
 """
 
-stds_2 = [1, 1]
-objectPathCorners_2 = [ ([70, 23, 51], [0,59,20]), ([70, 56, 40], [0,-10,70]) ] 
+stds_2 = [1.5, 1]
+objectPathCorners_2 = [ ([70, 33, 61], [0,59,5]), ([70, 56, 40], [0,-10,70]) ] 
 corruptions_2 = [None, None]
 stepSizes_2 = [0.4, 0.4]
 colors_2 = [("b", "g"), ("k", "c")]

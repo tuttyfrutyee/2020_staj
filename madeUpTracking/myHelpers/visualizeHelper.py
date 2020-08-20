@@ -75,7 +75,7 @@ def showRadius(targetPoint, R, angleStep):
     plt.scatter([targetPoint[0][0]], [targetPoint[1][0]], c = "b", linewidths=3)
     
     
-def visualizeTrackingResult(trackers, measurements, groundTruths, animate, gateThreshold):
+def visualizeTrackingResults(trackers, measurementPacks, groundTruthPacks, animate, gateThreshold):
     
     predictionPlotColor = ""
     measurementColor = ""
@@ -85,17 +85,8 @@ def visualizeTrackingResult(trackers, measurements, groundTruths, animate, gateT
         
         fig, ax = plt.subplots()  
         ax.grid()
-        
-        perimeterX = []
-        perimeterY = []
-        
-        centerX = []
-        centerY = []
-        
-        
-        time = 0
-        mode = 0 #if mode is 0 push measurement & prediction, if 1 push updated states
-        
+           
+            
         drawingTrackers = []
         
         for tracker in trackers:
@@ -105,16 +96,62 @@ def visualizeTrackingResult(trackers, measurements, groundTruths, animate, gateT
         def animation(i):
             
             
+            if not hasattr(animation, "time"):        
+                 animation.time = 0    
+            if not hasattr(animation, "mode"):        
+                 animation.mode = 0    
+
+            if not hasattr(animation, "perimeterX"):        
+                 animation.perimeterX = []    
+            if not hasattr(animation, "perimeterY"):        
+                 animation.perimeterY = []    
+
+            if not hasattr(animation, "centerXs"):        
+                 animation.centerXs = []    
+            if not hasattr(animation, "centerYs"):        
+                 animation.centerYs = []             
+
+            if not hasattr(animation, "measurementX"):        
+                 animation.measurementX = []    
+            if not hasattr(animation, "measurementY"):        
+                 animation.measurementY = []   
+
+
+
+            time = animation.time
+            mode = animation.mode  
+
+            perimeterX = animation.perimeterX
+            perimeterY = animation.perimeterY
+            
+            centerXs = animation.centerXs
+            centerYs = animation.centerYs
+            
+            measurementX = animation.measurementX
+            measurementY = animation.measurementY
+
+            print(time)
+              
+            
+            #print(time)
             #first clear screen
             ax.clear()
-            perimeterX = []
-            perimeterY = []
-            centerX = []
-            centerY = []
-            
+
+            if(mode == 0):
+
+                centerXs = []
+                centerYs = []
+
+                measurementX = []
+                measurementY = []
+
+                perimeterX = []
+                perimeterY = []
+                      
+                       
             #secondly draw the ground truths until now
-            for groundTruth in groundTruths:
-                scGT = ax.plot(groundTruth[:,0], groundTruth[:,0])
+            for groundTruthPack in groundTruthPacks:
+                ax.plot(groundTruthPack[0], groundTruthPack[1])
             
             #thirdly draw all trackers until now
             
@@ -124,13 +161,14 @@ def visualizeTrackingResult(trackers, measurements, groundTruths, animate, gateT
                 correspondingUpdateHistory = trackers[t].updatedStateHistory
                 correspondingPredictHistory = trackers[t].predictedStateHistory
                 
+                
                 if(drawingTracker[0] < len(correspondingUpdateHistory) and correspondingUpdateHistory[drawingTracker[0]][2] == time):
                     
                     x_updated = correspondingUpdateHistory[drawingTracker[0]][0]
                     
                     if(mode == 0):
                         drawingTracker[2] = (correspondingPredictHistory[drawingTracker[0]][0], correspondingPredictHistory[drawingTracker[0]][1])                        
-                    elif(mode == 1)
+                    elif(mode == 1):
                         drawingTracker[0] += 1
                         drawingTracker[1].append(x_updated)
             
@@ -138,40 +176,127 @@ def visualizeTrackingResult(trackers, measurements, groundTruths, animate, gateT
                 #also stack the predictionPerimeters
             for drawingTracker in drawingTrackers:
                 
-                states = np.array(drawingTracker[1])
-                scUp = ax.plot(states[:, 0], states[:, 1])
+                if(len(drawingTracker[1]) > 0):
+
+                    states = np.array(drawingTracker[1])
                 
-                predictionZ, predictionS = drawingTracker[2]
-                
-                x_perimeter_draw, y_perimeter_draw = getPerimeterPoints(predictionZ, np.linalg.eig(S_inverse), np.pi/180, gateThreshold)
-                
-                perimeterX += x_perimeter_draw
-                perimeterY += y_perimeter_draw
-                
-                centerX += predictionZ[0]
-                centerY += predictionZ[1]
+                    ax.plot(states[:, 0], states[:, 1])
+                    
+                    if(mode == 0):
+                        #print("##############################\n \n")
+                        #print("1")
+                        predictionZ, predictionS = drawingTracker[2]
+                        #print("2")
+                        
+                        x_perimeter_draw, y_perimeter_draw = getPerimeterPoints(predictionZ, np.linalg.inv(predictionS), np.pi/180, gateThreshold)
+                        #print("3")
+                        
+                        perimeterX += x_perimeter_draw
+                        perimeterY += y_perimeter_draw
+                        #print("4")
+
+                        centerX = []
+                        centerY = []
+                        #print("5")
+
+                        centerX.append(states[-1, 0][0]) 
+                        centerY.append(states[-1, 1][0]) 
+                        #print("6")
+
+                        centerX.append(predictionZ[0][0]) 
+                        centerY.append(predictionZ[1][0]) 
+                        #print("7")
+
+                        #print(centerX)
+                        #print(centerY)
+
+                        centerXs.append(centerX)
+                        centerYs.append(centerY)
+
+                        #print("8\n\n")
+
+
+
+
+            #print("before update measurements")
+            #update measurements if mode is 0
+            if(mode == 0): #update the measurements
             
-            #fourth, draw perimeters and centers
-            scPerimeter, = ax.scatter(perimeterX, perimeterY, c = "m")
-            scCenter, = ax.scatter(centerX, centerY, c = "k")                
-            
-            #fifth draw measurements up until now
+                measurementX = []
+                measurementY = []
+
+                measurementPack = measurementPacks[time]
                 
+                for measurement in measurementPack:
+                    measurementX.append(measurement[0])
+                    measurementY.append(measurement[1])
+  
+            #print("before draw measurements")
+            #draw measurements  
+            ax.scatter(measurementX, measurementY, c = "g")
+
+            #draw perimeters and centers
+            ax.scatter(perimeterX, perimeterY, c = "m")
+
+            #print("before draw centerX centerY")
+            for centerX, centerY in zip(centerXs, centerYs):
+                ax.scatter(centerX[-1], centerY[-1], c = "k")
+                ax.plot(centerX, centerY, c = '#07516e', linewidth = 5.0)     
+            
+            #print("before auto scaling")
+
             #finally auto scaling the screen
-            ax.relim()
-            ax.autoscale_view(True,True,True)
+            if(time == 1):
+                ax.relim()
+                ax.autoscale_view(True,True,True)
             
             if(mode == 1):
-                timeStamp += 1
+                time += 1
                 
             mode = (mode + 1) % 2
+                        
+            animation.mode = mode
+            animation.time = time
+
+            animation.perimeterX = perimeterX
+            animation.perimeterY = perimeterY 
+            
+            animation.centerXs = centerXs 
+            animation.centerYs = centerYs 
+            
+            animation.measurementX = measurementX 
+            animation.measurementY = measurementY 
+            
+            #end animation function
         
-        print("todo")
         
+        ani = matplotlib.animation.FuncAnimation(fig, animation, 
+                frames=1000, interval=100, repeat=False) 
+        
+        plt.show()
+        
+        return ani
     else:
         print("todo")
-    
-    
+                
+        for tracker in trackers:
+            
+            predictions = tracker.updatedStateHistory
+            
+            xs = []
+            Ps = []
+                    
+            for prediction in predictions:
+                xs.append(prediction[0])
+                Ps.append(prediction[1])
+                
+            xs = np.array(xs)
+            Ps = np.array(Ps)
+        
+            plt.plot(xs[:,0], xs[:,1])
+            showPerimeter(xs[-1][0:2], np.linalg.inv(Ps[-1][0:2,0:2]), np.pi/100, gateThreshold)        
+            
+            
     
     
     

@@ -246,7 +246,7 @@ def visualizeTrackingResults(trackers, measurementPacks, groundTruthPacks, anima
             #print("before auto scaling")
 
             #finally auto scaling the screen
-            if(time == 1):
+            if(time == -1):
                 ax.relim()
                 ax.autoscale_view(True,True,True)
             
@@ -271,7 +271,7 @@ def visualizeTrackingResults(trackers, measurementPacks, groundTruthPacks, anima
         
         
         ani = matplotlib.animation.FuncAnimation(fig, animation, 
-                frames=1000, interval=100, repeat=False) 
+                frames=2000, interval=60, repeat=False) 
         
         plt.show()
         

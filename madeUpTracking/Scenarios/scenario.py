@@ -12,7 +12,7 @@ import numpy as np
 """
 
 
-stds_0 = [np.sqrt(4)]
+stds_0 = [1]
 objectPathCorners_0 = [([55, 23, 51], [56,9,20])] 
 
 # objectPathCorners_0 = [(None)] 
@@ -35,9 +35,9 @@ a = 3
     Scenario 1: Single object with corruptions
 
 """
-stds_1 = [3]
+stds_1 = [1]
 objectPathCorners_1 = [([55, 23, 51], [56,9,20])] 
-corruptions_1 = [(3, 5)]
+corruptions_1 = [(3, 4)]
 stepSizes_1 = [0.4]
 colors_1 = [("b", "g")]
 
@@ -55,7 +55,7 @@ scenario_1 = scenario.Scenario(stds_1, objectPathCorners_1, corruptions_1, stepS
 """
 
 stds_2 = [1.5, 1]
-objectPathCorners_2 = [ ([70, 33, 61], [0,59,5]), ([70, 56, 40], [0,-10,70]) ] 
+objectPathCorners_2 = [ ([0, 25, 50], [50, 10, 0]), ([50, 25, 0], [50, 10, 0]) ] 
 corruptions_2 = [None, None]
 stepSizes_2 = [0.4, 0.4]
 colors_2 = [("b", "g"), ("k", "c")]

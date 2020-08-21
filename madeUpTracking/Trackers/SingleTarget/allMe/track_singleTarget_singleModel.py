@@ -255,8 +255,6 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
         self.track = None
 
         self.measurements = []
-
-        self.unscentedWeights = None
         
         if(modelType == 1 or modelType == 2 or modelType == 3):
             self.Ws, self.Wc, self.lambda_ = uH.generateUnscentedWeights(L = 5, alpha = 1e-3, beta = 2, kappa = 0)
@@ -284,11 +282,13 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
                 sigmaPoints = uH.generateSigmaPoints(self.track.x, self.track.P, self.lambda_)
 
                 if(self.modelType == 1):
-                    
-                    self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
-                    sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
-                    self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model1, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[1] ) 
 
+                    self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
+            
+
+                    sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                                       
+                    self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model1, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[1] ) 
+                    
 
                 elif(self.modelType == 2):
 

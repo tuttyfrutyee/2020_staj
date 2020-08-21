@@ -30,6 +30,9 @@ def extractMeasurementsFromScenario(scenario):
         if(not done):
             measurementPacks.append(measurementPack)
         i += 1
+        
+        if(i == 5):
+            done = True
     
     return measurementPacks
 
@@ -53,6 +56,9 @@ def extractGroundTruthFromScenario(scenario):
         if(not done):
             groundTruthPacks.append(groundTruthPack)
         i += 1
+        
+        if(i == 5):
+            done = True    
     
     return groundTruthPacks
 
@@ -68,7 +74,7 @@ dt = 0.1
 
 imm = False
 if(not imm):
-    tracker = Tracker_SingleTarget_SingleModel_allMe(0)
+    tracker = Tracker_SingleTarget_SingleModel_allMe(1)
 else:
     tracker = Tracker_SingleTarget_IMultipleModel_allMe()
 
@@ -128,7 +134,7 @@ if(imm):
     
 
 
-showPerimeter(z, np.linalg.inv(S), np.pi / 100, gateThreshold)
+#showPerimeter(z, np.linalg.inv(S), np.pi / 100, gateThreshold)
 
 
 

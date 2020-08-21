@@ -241,6 +241,7 @@ class Track(object):
     def __init__(self, x0, P0):
         self.x = x0
         self.P = P0
+        self.P_init = P0
         self.x_predict = None
         self.P_predict = None
         self.z_predict = None
@@ -268,17 +269,16 @@ class Tracker(object):
 
         self.trackerStatus = 0
 
-        self.x_predict = None
-        self.P_predict = None
-        self.z_predict = None
-        self.S = None
-        self.kalmanGain = None
+        self.trackerLifeTime = 0
+
+
         #optional
         self.H = None #only for linear kalman filter
     
     def putMeasurement(self, measurement, dt):
         #can be used to put only measurement to self.measurements without state update
           
+        self.trackerLifeTime += 1
 
         if(measurement is None):
             self.trackerStatus = 0
@@ -387,16 +387,30 @@ class Tracker(object):
                     self.track = Track(x0, P0)
                     self.track.z = h_measure_model3(self.track.x)              
 
-    def feedMeasurements(self, measurements, associationProbs):
-        print("todo")
+    def feedMeasurements(self, measurements, associationProbs, timeStamp):
+
+        x_updated, P_updated, notChanged = pH.pdaPass(self.track.kalmanGain, associationProbs, measurements, self.track.x_predict, self.track.z_predict, self.track.P_predict, self.track.S)
+
+        if(notChanged):
+            self.trackerStatus -= 1
+        else:
+            self.trackerStatus = 5
+
+        self.updatedStateHistory.append((x_updated, P_updated, timeStamp))
+
+        self.track.x = x_updated
+        self.track.P = P_updated
 
     def predict(self, dt, timeStamp):
+
+        self.trackerLifeTime += 1
 
         if(self.track):
 
             if(self.modelType == 0):
 
                 self.track.x_predict, self.track.P_predict = f_predict_model0(self.track.x, self.track.P, dt)
+                
                 self.track.z_predict, self.track.H = h_measure_model0(self.track.x_predict)
                 self.track.S = np.dot(self.track.H, np.dot(self.track.P_predict, self.track.H.T)) + MeasurementNoiseCovs[0]
                 self.track.kalmanGain = np.dot(self.track.P_predict, np.dot(self.track.H.T, np.linalg.inv(self.track.S)))                
@@ -404,42 +418,49 @@ class Tracker(object):
 
             elif(self.modelType == 1 or self.modelType == 2 or self.modelType == 3):
 
-                self.track.P = massageToCovariance(self.track.P, 1e-6)
-
+                self.track.P = massageToCovariance(self.track.P, 1e-8)
+                
                 sigmaPoints = uH.generateSigmaPoints(self.track.x, self.track.P, self.lambda_)
 
                 if(self.modelType == 1):
-                    
-                    print(np.linalg.eig(self.track.P))
-                    self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
-                    print(np.linalg.eig(self.track.P_predict))
-                   
-                    self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)
-                    print(np.linalg.eig(self.track.P_predict))
 
+
+                    
+                    self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
+                  
+                                      
+                    self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
                     self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model1, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[1] ) 
 
 
                 elif(self.modelType == 2):
+                    
 
+                    
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model2, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[2])
+
                     self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)               
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
                     self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model2, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[2] ) 
                 
+                
                 elif(self.modelType == 3):
                     
+
+                    
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model3, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[3])
+
                     self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)                    
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
                     self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model3, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[3] ) 
+
 
             self.predictedStateHistory.append((self.track.z_predict, self.track.S, timeStamp))
 
 class Tracker_MultipleTarget_SingleModel_allMe(object):
   
-    def __init__(self, modelType, gateThreshold, distanceThreshold, spatialDensity, PD):
+    def __init__(self, modelType, gateThreshold, distanceThreshold, detThreshold, spatialDensity, PD):
                         
         self.matureTrackers = []
         self.initTrackers = []
@@ -454,6 +475,7 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
         self.gateThreshold = gateThreshold
         self.distanceThreshold = distanceThreshold
         self.spatialDensity = spatialDensity
+        self.detThreshold = detThreshold
         self.PD = PD
 
 
@@ -471,7 +493,7 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
 
         for measurement in measurements:
             if(self.modelType == 1 or self.modelType == 2 or self.modelType == 3):
-                newTracker = Tracker(self.modelType, (self.Wc, self.Wc, self.lambda_))
+                newTracker = Tracker(self.modelType, (self.Ws, self.Wc, self.lambda_))
             else:
                 newTracker = Tracker(self.modelType, None)
             
@@ -487,6 +509,9 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
         
         for tracker in self.matureTrackers:
             if(tracker.trackerStatus == 0):
+                toDelete_matureTrackers.append(tracker)
+            
+            elif( tracker.trackerLifeTime > 6 and np.linalg.det(tracker.track.P) > self.detThreshold):
                 toDelete_matureTrackers.append(tracker)
             
         for tracker in self.initTrackers:
@@ -526,12 +551,6 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
         initTrackers = np.array(self.initTrackers, dtype = object)
         unmatchedMeasurements, initTrackerBoundedMeasurements, distanceMatrix = jH.greedyAssociateMeasurements(matureTrackers, initTrackers, measurements, self.gateThreshold, self.distanceThreshold)
 
-        """ print("measurement shape ", measurements.shape[0])
-        print("len(unmatchedMeasurements)", len(unmatchedMeasurements))
-        print("len(initTrackerBoundedMeasurements)", len(initTrackerBoundedMeasurements))
-        print("len(matureTrackers)", len(self.matureTrackers))
-        print("len(initTrackers)", len(self.initTrackers))
-        print("\n\n\n") """ 
 
         #put measurements to init tracks
         for i,tracker in enumerate(self.initTrackers):
@@ -565,19 +584,10 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
                     associationProbs = (marginalAssociationProbabilities.T)[t]
                 else:
                     associationProbs = None
-                
-                x_updated, P_updated, notChanged = pH.pdaPass(tracker.track.kalmanGain, associationProbs, validatedMeasurements, tracker.track.x_predict, tracker.track.z_predict, tracker.track.P_predict, tracker.track.S)
-                
-                
-                if(notChanged):
-                    tracker.trackerStatus -= 1
-                else:
-                    tracker.trackerStatus = 5
 
-                tracker.updatedStateHistory.append((x_updated, P_updated, timeStamp))
+                tracker.feedMeasurements(validatedMeasurements, associationProbs, timeStamp)
+                
 
-                tracker.track.x = x_updated
-                tracker.track.P = P_updated
 
         #finally go and init new tracks with unmatchedMeasurements
 

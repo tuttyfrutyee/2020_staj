@@ -25,7 +25,8 @@ def extractMeasurementsFromScenario(scenario):
         for k,object_ in enumerate(scenario.objects):
 
             if(len(object_.xPath) > i):
-                measurementPack.append(np.expand_dims(np.array([object_.xNoisyPath[i], object_.yNoisyPath[i]]), axis=1))
+                if(object_.xNoisyPath[i] is not None):
+                    measurementPack.append(np.expand_dims(np.array([object_.xNoisyPath[i], object_.yNoisyPath[i]]), axis=1))
             else:
                 exhausteds[k] = 1
         if(np.sum(exhausteds) > len(scenario.objects)-1):
@@ -58,15 +59,16 @@ scn.scenario_2.plotScenario()
 
 
 modelType = 1
-gateThreshold = 5
-distanceThreshold = 7
-spatialDensity = 0.4
+gateThreshold = 6
+distanceThreshold = 5
+spatialDensity = 0.2
+detThreshold = 150
 PD = 0.99
 
 dt = 0.1
 
 
-multipleTargetTracker = Tracker_MultipleTarget_SingleModel_allMe(modelType, gateThreshold, distanceThreshold, spatialDensity, PD)
+multipleTargetTracker = Tracker_MultipleTarget_SingleModel_allMe(modelType, gateThreshold, distanceThreshold, detThreshold, spatialDensity, PD)
 
 snapshot = None
 
@@ -97,8 +99,9 @@ print("validationMatrix.shape = ", multipleTargetTracker.validationMatrix.shape)
 print("associationEvents.shape = ", multipleTargetTracker.associationEvents.shape)
 
 
-
 ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, False, gateThreshold)
+
+#ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
         
         
         

@@ -94,14 +94,16 @@ def fuseModelStates(stateMeans, stateCovariances, modeProbabilities): #checkCoun
 # With Data Association
 ##############################################################################
 
-def updateModeProbabilities_PDA(modeSs, likelihoods, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 1
+def updateModeProbabilities_PDA(modeStateMeans_measured, modeSs, measurements, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 1
 
     """
         Description : 
             It calculates the new mode probabilities using probability data association [BYL95 page211 4.4.1-2]
 
         Input:
+            modeStateMeans_measured : np.array(shape = (Nr, dimZ))
             modeSs : np.array(shape = (Nr, dimZ, dimZ))
+            measurements : np.array(shape = (m_k, dimZ))
             likelihoods : np.array(shape = (Nr, m_k)
             gateThreshold : float between(0,1)
             PD : float between(0,1)
@@ -111,6 +113,18 @@ def updateModeProbabilities_PDA(modeSs, likelihoods, gateThreshold, PD, transiti
         Output:
             updatedModeProbabilities : np.array(shape = (Nr,1))
     """
+
+    Nr = modeSs.shape[0]
+    m_k = measurements.shape[0]
+
+    likelihoods = np.zeros((Nr, m_k))
+
+    for i, modeStateMean_measured in enumerate(modeStateMeans_measured):
+        for j, measurement in enumerate(measurements):
+            
+            modeS = modeSs[i]
+
+            likelihoods[i][j] =  multivariate_normal.pdf(measurement.flatten(), modeStateMean_measured.flatten(), modeS, True)     
 
 
     maximumVolume = None
@@ -139,7 +153,7 @@ def updateModeProbabilities_PDA(modeSs, likelihoods, gateThreshold, PD, transiti
     return updatedModeProbabilities
 
 
-
+    
 
 ##############################################################################
 # With Single Measurement

@@ -269,7 +269,7 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
             #FUSE STATES
 
             #this stage is necessary to update the fused track
-            #though there is no use of track.P for now
+            #though there is no use of track.P for now,
             #track.x is obviously our final estimate and important
 
             fusedX, fusedP = self.fuseStates()

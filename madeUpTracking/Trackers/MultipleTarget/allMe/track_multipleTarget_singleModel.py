@@ -394,7 +394,7 @@ class Tracker(object):
         if(notChanged):
             self.trackerStatus -= 1
         else:
-            self.trackerStatus = 5
+            self.trackerStatus = 8
 
         self.updatedStateHistory.append((x_updated, P_updated, timeStamp))
 
@@ -511,7 +511,7 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
             if(tracker.trackerStatus == 0):
                 toDelete_matureTrackers.append(tracker)
             
-            elif( tracker.trackerLifeTime > 6 and np.linalg.det(tracker.track.P) > self.detThreshold):
+            elif( tracker.trackerLifeTime > 10 and np.linalg.det(tracker.track.P) > self.detThreshold):
                 toDelete_matureTrackers.append(tracker)
             
         for tracker in self.initTrackers:

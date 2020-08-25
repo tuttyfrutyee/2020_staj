@@ -183,42 +183,42 @@ def visualizeTrackingResults(trackers, measurementPacks, groundTruthPacks, anima
                     ax.plot(states[:, 0], states[:, 1])
                     
                     if(mode == 0):
-                        print("##############################\n \n")
-                        print("1")
+                        # print("##############################\n \n")
+                        # print("1")
                         predictionZ, predictionS = drawingTracker[2]
-                        print("2")
+                        # print("2")
                         
                         x_perimeter_draw, y_perimeter_draw = getPerimeterPoints(predictionZ, np.linalg.inv(predictionS), np.pi/180, gateThreshold)
-                        print("3")
+                        # print("3")
                         
                         perimeterX += x_perimeter_draw
                         perimeterY += y_perimeter_draw
-                        print("4")
+                        # print("4")
 
                         centerX = []
                         centerY = []
-                        print("5")
+                        # print("5")
 
                         centerX.append(states[-1, 0][0]) 
                         centerY.append(states[-1, 1][0]) 
-                        print("6")
+                        # print("6")
 
                         centerX.append(predictionZ[0][0]) 
                         centerY.append(predictionZ[1][0]) 
-                        print("7")
+                        # print("7")
 
-                        print(centerX)
-                        print(centerY)
+                        # print(centerX)
+                        # print(centerY)
 
                         centerXs.append(centerX)
                         centerYs.append(centerY)
 
-                        print("8\n\n")
+                        # print("8\n\n")
 
 
 
 
-            print("before update measurements")
+            # print("before update measurements")
             #update measurements if mode is 0
             if(mode == 0): #update the measurements
             
@@ -231,19 +231,19 @@ def visualizeTrackingResults(trackers, measurementPacks, groundTruthPacks, anima
                     measurementX.append(measurement[0])
                     measurementY.append(measurement[1])
   
-            print("before draw measurements")
+            # print("before draw measurements")
             #draw measurements  
             ax.scatter(measurementX, measurementY, c = "g")
 
             #draw perimeters and centers
             ax.scatter(perimeterX, perimeterY, c = "m")
 
-            print("before draw centerX centerY")
+            # print("before draw centerX centerY")
             for centerX, centerY in zip(centerXs, centerYs):
                 ax.scatter(centerX[-1], centerY[-1], c = "k")
                 ax.plot(centerX, centerY, c = '#07516e', linewidth = 5.0)     
             
-            print("before auto scaling")
+            # print("before auto scaling")
 
             #finally auto scaling the screen
             if(time == -1):
@@ -271,7 +271,7 @@ def visualizeTrackingResults(trackers, measurementPacks, groundTruthPacks, anima
         
         
         ani = matplotlib.animation.FuncAnimation(fig, animation, 
-                frames=1000, interval=1000, repeat=False) 
+                frames=1000, interval=100, repeat=False) 
         
         plt.show()
         

@@ -213,8 +213,8 @@ def f_predict_model1(x_, dt):
     
     X_new = np.copy(x)
 
-    x_new = x[0] + x[3] * dt * np.sin(x[2])
-    y_new = x[1] + x[3] * dt * np.cos(x[2])
+    x_new = x[0] + x[3] * dt * np.cos(x[2])
+    y_new = x[1] + x[3] * dt * np.sin(x[2])
     
     X_new[0] = x_new
     X_new[1] = y_new

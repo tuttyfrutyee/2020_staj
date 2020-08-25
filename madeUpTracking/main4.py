@@ -59,11 +59,11 @@ scn.scenario_0.plotScenario()
 
 
 
-gateThreshold = 7
-distanceThreshold = 5
-spatialDensity = 0.5
-detThreshold = 200
-PD = 0.99
+gateThreshold = 10
+distanceThreshold = 10
+spatialDensity = 0.001
+detThreshold = 400
+PD = 0.999
 
 dt = 0.1
 
@@ -85,7 +85,7 @@ print("associationEvents.shape = ", multipleTargetTracker.associationEvents.shap
 
 ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
 
-# ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, False, gateThreshold)
+ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, False, gateThreshold)
         
         
         

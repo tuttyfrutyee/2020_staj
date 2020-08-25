@@ -43,36 +43,76 @@ MeasurementNoiseCov = \
 
 
 ProcessNoiseCovs = [
+    #modeltype 0
 
-    None,
-
-    #modeltype 1
     [
-        [Q_0, 0, 0, 0, 0],
-        [0, Q_0, 0, 0, 0],
-        [0, 0, Q_0 / 1e2, 0, 0],
-        [0, 0, 0, Q_0, 0],
-        [0, 0, 0, 0, 0]        
+        [ 0.0251,  0.0219, -0.0072, -0.0054],
+        [ 0.0219,  0.0199, -0.0064, -0.0049],
+        [-0.0072, -0.0064,  0.0023,  0.0016],
+        [-0.0054, -0.0049,  0.0016,  0.0017]
+        
+        # [Q_0, 0, 0, 0],
+        # [0, Q_0, 0, 0],
+        # [0, 0, Q_0 , 0],
+        # [0, 0, 0, Q_0],    
+     
+         # [0,0,0,0],
+         # [0,0,0,0],
+         # [0,0,0,0],
+         # [0,0,0,0]     
 
     ],
+    #modeltype 1
+    (np.array([
+       [0.12958419304911287,0,0,0,0],
+       [0,0.20416385918814656,0,0,0],
+       [0,0,0.008794949000079913,0,0],
+       [0,0,0,0.8057826337426066,0],
+       [0,0,0,0,0] 
+     
+        # [Q_0, 0, 0, 0, 0],
+        # [0, Q_0, 0, 0, 0],
+        # [0, 0, Q_0 / 1e2, 0, 0],
+        # [0, 0, 0, Q_0, 0],
+        # [0, 0, 0, 0, 0]       
+     
+      # [0,0,0,0,0],
+      # [0,0,0,0,0],
+      # [0,0,0,0,0],
+      # [0,0,0,0,0],
+      # [0,0,0,0,0]
+    ]) / 200).tolist(),
     #modeltype 2
-    [
-        [Q_0, 0, 0, 0, 0],
-        [0, Q_0, 0, 0, 0],
-        [0, 0, Q_0 / 1e2, 0, 0],
-        [0, 0, 0, Q_0, 0],
-        [0, 0, 0, 0, Q_0 / 1e8]             
-     ],
+    (np.array([
+        
+       [0.114736907423371,0,0,0,0],
+       [0,0.1354455356615292,0,0,0],
+       [0,0,0.6637200640035631,0,0],
+       [0,0,0,2.9248106675773875,0],
+       [0,0,0,0,0.9305139758546961]      
+     
+        # [Q_0, 0, 0, 0, 0],
+        # [0, Q_0, 0, 0, 0],
+        # [0, 0, Q_0 / 1e2, 0, 0],
+        # [0, 0, 0, Q_0, 0],
+        # [0, 0, 0, 0, Q_0 / 1e8] 
+     
+       # [0,0,0,0,0],
+       # [0,0,0,0,0],
+       # [0,0,0,0,0],
+       # [0,0,0,0,0],
+       # [0,0,0,0,0],     
+         
+     ])/ 2000).tolist(),
     #modeltype 3
     [
-        [1, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0],
-        [0, 0, 1e-2 , 0, 0],
-        [0, 0, 0, 4e-1, 0],
-        [0, 0, 0, 0, 1e-15 ]             
+        [1e-2, 0, 0, 0, 0],
+        [0, 1e-2, 0, 0, 0],
+        [0, 0, 0 , 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0 ]             
      ],     
 ]
-
 
 MeasurementNoiseCov = np.array(MeasurementNoiseCov, dtype = float)
 
@@ -144,8 +184,8 @@ def f_predict_model1(x_, dt):
     
     X_new = np.copy(x)
 
-    x_new = x[0] + x[3] * dt * np.sin(x[2])
-    y_new = x[1] + x[3] * dt * np.cos(x[2])
+    x_new = x[0] + x[3] * dt * np.cos(x[2])
+    y_new = x[1] + x[3] * dt * np.sin(x[2])
     
     X_new[0] = x_new
     X_new[1] = y_new
@@ -293,7 +333,7 @@ class TrackerModel_2(object):
         phi2 = np.arctan(dy2 / dx2)
         
         vel = np.sqrt(dx2**2, dy2**2)
-        dphi = phi2 - phi1
+        dphi = (phi2 - phi1) / dt
 
         x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], phi2, vel, dphi]).reshape((5,1))
 
@@ -346,19 +386,7 @@ class TrackerModel_3(object):
         #find x0 and P0        
 
 
-        dx1 = (initMeasurements[-2][0] - initMeasurements[-3][0]) / dt
-        dy1 = (initMeasurements[-2][1] - initMeasurements[-3][1]) / dt     
-        
-        dx2 = (initMeasurements[-1][0] - initMeasurements[-2][0]) / dt
-        dy2 = (initMeasurements[-1][1] - initMeasurements[-2][1]) / dt
-        
-        phi1 = np.arctan(dy1 / dx1)
-        phi2 = np.arctan(dy2 / dx2)
-        
-        vel = np.sqrt(dx2**2, dy2**2)
-        dphi = phi2 - phi1
-
-        x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], phi2, vel, dphi]).reshape((5,1))
+        x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], 0, 0, 0]).reshape((5,1))
 
         P0 = np.array(InitialStartCovs_withoutTimeDivision[3]) * \
             [[1,1,1,1/dt,1/dt],
@@ -516,29 +544,29 @@ class MultiModelTracker(object):
 
             if(self.trackerStatus == 3):
 
-                # model1 = TrackerModel_1(self.measurements, dt, self.unscentedWeights)
+                model1 = TrackerModel_1(self.measurements, dt, self.unscentedWeights)
                 model2 = TrackerModel_2(self.measurements, dt, self.unscentedWeights)
-                # model3 = TrackerModel_3(self.measurements, dt, self.unscentedWeights)
+                model3 = TrackerModel_3(self.measurements, dt, self.unscentedWeights)
 
-                # self.models.append(model1)
+                self.models.append(model1)
                 self.models.append(model2)
-                # self.models.append(model3)  
+                self.models.append(model3)  
 
                 self.modeProbs = np.expand_dims(np.array([
-                    # 0.34, 0.33, 0.33
+                    0.34, 0.33, 0.33
                     # 0.5, 0.5
-                    1
+                    # 1
                 ]), axis=1)
 
                 self.transitionMatrix = np.array([
-                    # [0.9, 0.05, 0.05],
-                    # [0.05, 0.9, 0.05],
-                    # [0.05, 0.05, 0.9]
+                    [0.9, 0.05, 0.05],
+                    [0.05, 0.9, 0.05],
+                    [0.2, 0.2, 0.6]
                     
                     # [0.9, 0.1],
                     # [0.1, 0.9]
                     
-                    [1]
+                    # [1]
                 ])                
 
                 fusedX, fusedP = self.fuseStates()

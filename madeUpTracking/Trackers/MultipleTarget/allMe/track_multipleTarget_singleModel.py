@@ -112,7 +112,7 @@ ProcessNoiseCovs = [
        # [0,0,0,0,0],
        # [0,0,0,0,0],     
          
-     ])/ 20000).tolist(),
+     ])/ 200).tolist(),
     #modeltype 3
     [
         [1e-2, 0, 0, 0, 0],
@@ -215,8 +215,8 @@ def f_predict_model1(x_, dt):
     
     X_new = np.copy(x)
 
-    x_new = x[0] + x[3] * dt * np.sin(x[2])
-    y_new = x[1] + x[3] * dt * np.cos(x[2])
+    x_new = x[0] + x[3] * dt * np.cos(x[2])
+    y_new = x[1] + x[3] * dt * np.sin(x[2])
     
     X_new[0] = x_new
     X_new[1] = y_new
@@ -371,7 +371,7 @@ class Tracker(object):
                     phi2 = np.arctan(dy2 / dx2)
                     
                     vel = np.sqrt(dx2**2, dy2**2)
-                    dphi = phi2 - phi1
+                    dphi = (phi2 - phi1) / dt
 
                     x0 = np.array([self.measurements[-1][0], self.measurements[-1][1], phi2, vel, dphi]).reshape((5,1))
 

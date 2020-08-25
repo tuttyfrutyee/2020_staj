@@ -57,16 +57,16 @@ def extractGroundTruthFromScenario(scenario):
     return groundTruthPacks
 
 
-measurementPacks = extractMeasurementsFromScenario(scn.scenario_5)
-groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_5)
+measurementPacks = extractMeasurementsFromScenario(scn.scenario_0)
+groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_0)
 
-scn.scenario_5.plotScenario()
+scn.scenario_0.plotScenario()
 
 predictions = []
 
 dt = 0.1
 
-imm = True
+imm = False
 if(not imm):
     tracker = Tracker_SingleTarget_SingleModel_allMe(2)
 else:

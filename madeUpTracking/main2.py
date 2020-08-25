@@ -30,10 +30,7 @@ def extractMeasurementsFromScenario(scenario):
         if(not done):
             measurementPacks.append(measurementPack)
         i += 1
-        
-        if(i == 5):
-            done = True
-    
+            
     return measurementPacks
 
 def extractGroundTruthFromScenario(scenario):
@@ -56,17 +53,14 @@ def extractGroundTruthFromScenario(scenario):
         if(not done):
             groundTruthPacks.append(groundTruthPack)
         i += 1
-        
-        if(i == 5):
-            done = True    
-    
+
     return groundTruthPacks
 
 
-measurementPacks = extractMeasurementsFromScenario(scn.scenario_0)
-groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_0)
+measurementPacks = extractMeasurementsFromScenario(scn.scenario_5)
+groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_5)
 
-scn.scenario_0.plotScenario()
+scn.scenario_5.plotScenario()
 
 predictions = []
 
@@ -74,7 +68,7 @@ dt = 0.1
 
 imm = False
 if(not imm):
-    tracker = Tracker_SingleTarget_SingleModel_allMe(1)
+    tracker = Tracker_SingleTarget_SingleModel_allMe(0)
 else:
     tracker = Tracker_SingleTarget_IMultipleModel_allMe()
 
@@ -82,12 +76,14 @@ measurements = []
 states = []
 modeProbs = []
 
-calLoss = False
+calLoss = True
 loss = 0
 
 S = None
 z = None
 gateThreshold = 5
+
+eigens = []
 
 for i, (groundTruthPack, measurementPack) in enumerate(zip(groundTruthPacks, measurementPacks)):
     
@@ -105,12 +101,14 @@ for i, (groundTruthPack, measurementPack) in enumerate(zip(groundTruthPacks, mea
 
         states.append(tracker.track.x)
         
-        if(i == 100):
+        eigens.append(np.max(np.linalg.eig(tracker.track.P)[0]))
+        
+        if(not imm and i == len(groundTruthPacks)-1):
             S = tracker.track.S
             z = tracker.track.z_predict
         
         if(calLoss):
-            loss += np.sqrt(np.dot(diff.T, diff))
+            loss += np.sqrt(np.sum(np.dot(diff.T, diff)))
         if(imm):
             modeProbs.append(tracker.modeProbs)
 
@@ -132,7 +130,9 @@ if(imm):
 
     plt.legend()
     
-
+if(not imm and 0):
+    plt.figure()
+    plt.plot(eigens[200:])
 
 #showPerimeter(z, np.linalg.inv(S), np.pi / 100, gateThreshold)
 

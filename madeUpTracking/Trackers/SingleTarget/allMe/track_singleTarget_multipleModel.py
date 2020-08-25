@@ -9,9 +9,6 @@ import myHelpers.immHelper as IMM_helper
 from Trackers.SingleTarget.allMe.track_singleTarget_singleModel import Tracker_SingleTarget_SingleModel_allMe
 # Import necessary helpers
 
-measurementNoiseStd = np.sqrt(4)
-Q_0 = 0.005
-
 #helpers
 
 def putAngleInRange(angle):
@@ -30,92 +27,6 @@ def massageToCovariance(P, scale):
 
 ########
 
-
-MeasurementNoiseCovs = [
-    #modeltype 0
-    [
-        [measurementNoiseStd * measurementNoiseStd, 0],
-        [0, measurementNoiseStd * measurementNoiseStd]
-    ],
-    #modeltype 1
-    [
-        [measurementNoiseStd * measurementNoiseStd, 0],
-        [0, measurementNoiseStd * measurementNoiseStd]
-    ],
-    #modeltype 2
-    [
-        [measurementNoiseStd * measurementNoiseStd, 0],
-        [0, measurementNoiseStd * measurementNoiseStd]
-    ],
-]
-ProcessNoiseCovs = [
-    #modeltype 0
-    [
-        [Q_0, 0, 0, 0],
-        [0, Q_0, 0, 0],
-        [0, 0, Q_0, 0],
-        [0, 0, 0, Q_0]
-    ],
-    #modeltype 1
-    [
-        [Q_0, 0, 0, 0, 0],
-        [0, Q_0, 0, 0, 0],
-        [0, 0, Q_0 / 1e2, 0, 0],
-        [0, 0, 0, Q_0, 0],
-        [0, 0, 0, 0, 0]        
-
-    ],
-    #modeltype 2
-    [
-        [Q_0, 0, 0, 0, 0],
-        [0, Q_0, 0, 0, 0],
-        [0, 0, Q_0 / 1e2, 0, 0],
-        [0, 0, 0, Q_0, 0],
-        [0, 0, 0, 0, Q_0 / 1e8]             
-     ],
-]
-
-for i,noiseCov in enumerate(MeasurementNoiseCovs):
-    MeasurementNoiseCovs[i] = np.array(noiseCov, dtype = float)
-for i, noiseCov in enumerate(ProcessNoiseCovs):
-    ProcessNoiseCovs[i] = np.array(noiseCov, dtype = float)
-
-InitialStartCovs_withoutTimeDivision = [
-    #modeltype 0
-    [
-        [MeasurementNoiseCovs[0][0][0], 0, MeasurementNoiseCovs[0][0][0], 0],
-        [0, MeasurementNoiseCovs[0][1][1], 0, MeasurementNoiseCovs[0][1][1]],
-        [MeasurementNoiseCovs[0][0][0], 0, 2*MeasurementNoiseCovs[0][0][0], 0],
-        [0, MeasurementNoiseCovs[0][1][1], 0, 2*MeasurementNoiseCovs[0][1][1]]
-    ],
-    #modeltype1
-    [
-        [1.99997780e+00, 2.49414716e-04, 1.73227766e-04, 3.88280668e-04,
-                0],
-        [2.49414716e-04, 1.99980348e+00, 6.09740973e-05, 3.55028270e-04,
-            0],
-        [1.73227766e-04, 6.09740973e-05, 8.22416384e-01, 5.66820017e-04,
-            0],
-        [3.88280668e-04, 3.55028270e-04, 5.66820017e-04, 7.99940698e+00,
-            0],
-        [0, 0, 0, 0,
-            0]
-    ],
-    #modeltype2
-    [
-        [1.99997780e+00, 2.49414716e-04, 1.73227766e-04, 3.88280668e-04,
-                2.97819194e-04],
-        [2.49414716e-04, 1.99980348e+00, 6.09740973e-05, 3.55028270e-04,
-            1.49555161e-04],
-        [1.73227766e-04, 6.09740973e-05, 8.22416384e-01, 5.66820017e-04,
-            7.52457415e-01],
-        [3.88280668e-04, 3.55028270e-04, 5.66820017e-04, 7.99940698e+00,
-            6.98653089e-04],
-        [2.97819194e-04, 1.49555161e-04, 7.52457415e-01, 6.98653089e-04,
-            1.50502254e+00]        
-    ]
-
-]
 
 
 
@@ -144,17 +55,21 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
         self.models = [
             Tracker_SingleTarget_SingleModel_allMe(1), # Constant Velocity(CV) Model 
             Tracker_SingleTarget_SingleModel_allMe(2), # Constant Turn-Rate Velocity(CTRV) Model
-            Tracker_SingleTarget_SingleModel_allMe(3)  # Random Motion(RM) Model
+            #Tracker_SingleTarget_SingleModel_allMe(3)  # Random Motion(RM) Model
         ]   
 
         self.modeProbs = np.expand_dims(np.array([
-            0.34, 0.33, 0.33
-        ]), axis=1)
+            # 0.34, 0.33, 0.33
+                0.5, 0.5
+            ]), axis=1)
 
         self.transitionMatrix = np.array([
-            [0.9, 0.05, 0.05],
-            [0.05, 0.9, 0.05],
-            [0.05, 0.05, 0.9]
+            # [0.9, 0.09, 0.01],
+            # [0.19, 0.8, 0.01],
+            # [0.25, 0.25, 0.5]
+            
+            [0.95, 0.05],
+            [0.05, 0.95]
         ])
 
 

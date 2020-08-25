@@ -1,3 +1,5 @@
+import sys
+sys.path.append("./Data/Scenarios")
 import objectGenerator.objectGenerator as oG
 import matplotlib.pyplot as plt
 

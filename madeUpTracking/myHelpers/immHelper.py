@@ -94,14 +94,16 @@ def fuseModelStates(stateMeans, stateCovariances, modeProbabilities): #checkCoun
 # With Data Association
 ##############################################################################
 
-def updateModeProbabilities_PDA(modeSs, likelihoods, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 1
+def updateModeProbabilities_PDA(modeStateMeans_measured, modeSs, measurements, gateThreshold, PD, transitionMatrix, previousModeProbabilities): #checkCount : 1
 
     """
         Description : 
             It calculates the new mode probabilities using probability data association [BYL95 page211 4.4.1-2]
 
         Input:
+            modeStateMeans_measured : np.array(shape = (Nr, dimZ))
             modeSs : np.array(shape = (Nr, dimZ, dimZ))
+            measurements : np.array(shape = (m_k, dimZ))
             likelihoods : np.array(shape = (Nr, m_k)
             gateThreshold : float between(0,1)
             PD : float between(0,1)
@@ -112,20 +114,30 @@ def updateModeProbabilities_PDA(modeSs, likelihoods, gateThreshold, PD, transiti
             updatedModeProbabilities : np.array(shape = (Nr,1))
     """
 
+    Nr = modeSs.shape[0]
+    m_k = measurements.shape[0]
+
+    likelihoods = np.zeros((Nr, m_k))
+
+    for i, modeStateMean_measured in enumerate(modeStateMeans_measured):
+        for j, measurement in enumerate(measurements):
+            
+            modeS = modeSs[i]
+
+            likelihoods[i][j] =  multivariate_normal.pdf(measurement.flatten(), modeStateMean_measured.flatten(), modeS, True)     
 
     maximumVolume = None
 
     maxPzzDeterminant = 0
     for modeS in modeSs:
         det = np.linalg.det(modeS)
+        assert(det > 0)
         if(det > maxPzzDeterminant):
             maxPzzDeterminant = det
 
     nz = modeSs[0].shape[0]
     maximumVolume = common.calculateNDimensionalUnitVolume(nz) * np.power(gateThreshold, nz/2) * np.sqrt(maxPzzDeterminant) #[BYL95 page 130 3.4.1-6]
     
-    m_k = likelihoods.shape[1]
-
     summedLikelihoods = np.expand_dims(np.sum(likelihoods, axis = 1), axis=1)
 
     modeLambdas = (1 - PD) / np.power(maximumVolume, m_k) + PD / (m_k * np.power(maximumVolume, m_k-1)) * summedLikelihoods
@@ -139,7 +151,7 @@ def updateModeProbabilities_PDA(modeSs, likelihoods, gateThreshold, PD, transiti
     return updatedModeProbabilities
 
 
-
+    
 
 ##############################################################################
 # With Single Measurement

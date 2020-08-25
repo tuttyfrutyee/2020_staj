@@ -55,21 +55,21 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
         self.models = [
             Tracker_SingleTarget_SingleModel_allMe(1), # Constant Velocity(CV) Model 
             Tracker_SingleTarget_SingleModel_allMe(2), # Constant Turn-Rate Velocity(CTRV) Model
-            #Tracker_SingleTarget_SingleModel_allMe(3)  # Random Motion(RM) Model
+            Tracker_SingleTarget_SingleModel_allMe(3)  # Random Motion(RM) Model
         ]   
 
         self.modeProbs = np.expand_dims(np.array([
-            # 0.34, 0.33, 0.33
-                0.5, 0.5
+            0.34, 0.33, 0.33
+                # 0.5, 0.5
             ]), axis=1)
 
         self.transitionMatrix = np.array([
-            # [0.9, 0.09, 0.01],
-            # [0.19, 0.8, 0.01],
-            # [0.25, 0.25, 0.5]
+            [0.9, 0.09, 0.01],
+            [0.19, 0.8, 0.01],
+            [0.25, 0.25, 0.5]
             
-            [0.95, 0.05],
-            [0.05, 0.95]
+            # [0.95, 0.05],
+            # [0.05, 0.95]
         ])
 
 
@@ -121,14 +121,11 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
 
         for model in self.models:
 
-            stateMeans_measured.append(model.track.z)
+            stateMeans_measured.append(model.track.z_predict)
             stateSs.append(model.track.S)   
 
-            stateMeans.append(model.track.x)
-            stateCovariances.append(model.track.P)
 
         stateMeans_measured = np.squeeze(np.array(stateMeans_measured, dtype=float))
-        stateMeans = np.squeeze(np.array(stateMeans, dtype=float))
 
         stateSs = np.array(stateSs, dtype=float)
         stateCovariances = np.array(stateCovariances, dtype=float)
@@ -184,7 +181,7 @@ class Tracker_SingleTarget_IMultipleModel_allMe(object):
             #FUSE STATES
 
             #this stage is necessary to update the fused track
-            #though there is no use of track.P for now
+            #though there is no use of track.P for now,
             #track.x is obviously our final estimate and important
 
             fusedX, fusedP = self.fuseStates()

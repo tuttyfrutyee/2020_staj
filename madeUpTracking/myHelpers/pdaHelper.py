@@ -31,7 +31,10 @@ def pdaPass(kalmanGain, associationProbs, measurements, priorStateMean, priorSta
 
     if(associationProbs is None or np.sum(associationProbs) == 0):
 
-        #print("\n\n\n go aheadd !!!! \n\n\n")
+        print("\n\n\n go aheadd !!!! \n\n\n")
+
+        print("priorStateMean : ", priorStateMean)
+        print("priorStateCovariance : ", priorStateCovariance)
     
         return(priorStateMean, priorStateCovariance, True)
 

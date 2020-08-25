@@ -66,9 +66,9 @@ predictions = []
 
 dt = 0.1
 
-imm = False
+imm = True
 if(not imm):
-    tracker = Tracker_SingleTarget_SingleModel_allMe(0)
+    tracker = Tracker_SingleTarget_SingleModel_allMe(2)
 else:
     tracker = Tracker_SingleTarget_IMultipleModel_allMe()
 

@@ -83,9 +83,8 @@ def predictNextState(forwardFunc, dt, sigmaPoints, Ws, Wc, processNoise):
 
     
     sigmaStarPoints_state = np.array(sigmaStarPoints_state)
-
+    
     predictedStateMean = Ws[0] * sigmaStarPoints_state[0] + Ws[1] * np.sum(sigmaStarPoints_state[1:], axis = 0)
-
 
 
     predictedStateCovariance = None 

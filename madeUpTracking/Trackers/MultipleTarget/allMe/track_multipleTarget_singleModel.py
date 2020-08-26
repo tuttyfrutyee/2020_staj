@@ -26,6 +26,14 @@ def putAngleInRange(angle):
 def massageToCovariance(P, scale):
     return 1/2*(P + P.T) + np.eye(P.shape[0]) * scale
 
+def normalizeState(x):
+    if(x.shape[0] == 5):
+
+        x[2] = putAngleInRange(x[2])
+        x[4] = putAngleInRange(x[4])
+
+    return x
+
 ########
 
 
@@ -112,7 +120,7 @@ ProcessNoiseCovs = [
        # [0,0,0,0,0],
        # [0,0,0,0,0],     
          
-     ])/ 200).tolist(),
+     ])/ 400).tolist(),
     #modeltype 3
     [
         [1e-2, 0, 0, 0, 0],
@@ -207,12 +215,8 @@ def h_measure_model0(x):
 ############
 # Model 1
 ############
-def f_predict_model1(x_, dt):
-
-    x = np.copy(x_)
-    
-    x[2] = putAngleInRange(x[2])
-    
+def f_predict_model1(x, dt):
+        
     X_new = np.copy(x)
 
     x_new = x[0] + x[3] * dt * np.cos(x[2])
@@ -229,13 +233,7 @@ def h_measure_model1(x):
 ############
 # Model 2
 ############
-def f_predict_model2(x_, dt):
-
-    
-    x = np.copy(x_)
-    
-    x[2] = putAngleInRange(x[2])
-    x[4] = putAngleInRange(x[4])
+def f_predict_model2(x, dt):    
     
     X_new = np.copy(x)
             
@@ -243,10 +241,7 @@ def f_predict_model2(x_, dt):
     y_new = x[1] + x[3] / x[4] * ( np.cos(x[2])  - np.cos( x[2] + dt * x[4] ) )
     
     phi_new = x[2] + dt * x[4] 
-    
-
-    phi_new = putAngleInRange(phi_new)
-    
+        
     X_new[0] = x_new
     X_new[1] = y_new
     X_new[2] = phi_new
@@ -428,6 +423,8 @@ class Tracker(object):
         else:
             self.trackerStatus = 8
 
+        x_updated = normalizeState(x_updated)
+
         self.updatedStateHistory.append((x_updated, P_updated, timeStamp))
 
         self.track.x = x_updated
@@ -442,6 +439,8 @@ class Tracker(object):
             if(self.modelType == 0):
 
                 self.track.x_predict, self.track.P_predict = f_predict_model0(self.track.x, self.track.P, dt)
+
+                self.track.x_predict = normalizeState(self.track.x_predict)
                 
                 self.track.z_predict, self.track.H = h_measure_model0(self.track.x_predict)
                 self.track.S = np.dot(self.track.H, np.dot(self.track.P_predict, self.track.H.T)) + MeasurementNoiseCovs[0]
@@ -460,7 +459,8 @@ class Tracker(object):
                     
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
                   
-                                      
+                    self.track.x_predict = normalizeState(self.track.x_predict)
+
                     self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
                     self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model1, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[1] ) 
@@ -472,6 +472,8 @@ class Tracker(object):
                     
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model2, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[2])
 
+                    self.track.x_predict = normalizeState(self.track.x_predict)
+
                     self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)               
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
                     self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model2, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[2] ) 
@@ -482,6 +484,8 @@ class Tracker(object):
 
                     
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model3, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[3])
+
+                    self.track.x_predict = normalizeState(self.track.x_predict)
 
                     self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)                    
                     sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    

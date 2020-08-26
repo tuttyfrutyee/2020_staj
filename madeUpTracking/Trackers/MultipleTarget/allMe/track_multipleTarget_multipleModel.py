@@ -30,6 +30,13 @@ def putAngleInRange(angle):
 def massageToCovariance(P, scale):
     return 1/2*(P + P.T) + np.eye(P.shape[0]) * scale
 
+def normalizeState(x):
+
+    x[2] = putAngleInRange(x[2])
+    x[4] = putAngleInRange(x[4])
+
+    return x
+
 
 
 ########
@@ -64,11 +71,11 @@ ProcessNoiseCovs = [
     ],
     #modeltype 1
     (np.array([
-       [0.12958419304911287,0,0,0,0],
-       [0,0.20416385918814656,0,0,0],
-       [0,0,0.008794949000079913,0,0],
-       [0,0,0,0.8057826337426066,0],
-       [0,0,0,0,0] 
+       # [0.12958419304911287,0,0,0,0],
+       # [0,0.20416385918814656,0,0,0],
+       # [0,0,0.008794949000079913,0,0],
+       # [0,0,0,0.8057826337426066,0],
+       # [0,0,0,0,0] 
      
         # [Q_0, 0, 0, 0, 0],
         # [0, Q_0, 0, 0, 0],
@@ -76,20 +83,21 @@ ProcessNoiseCovs = [
         # [0, 0, 0, Q_0, 0],
         # [0, 0, 0, 0, 0]       
      
-      # [0,0,0,0,0],
-      # [0,0,0,0,0],
-      # [0,0,0,0,0],
-      # [0,0,0,0,0],
-      # [0,0,0,0,0]
-    ]) / 200).tolist(),
+       [0,0,0,0,0],
+       [0,0,0,0,0],
+       [0,0,0,0,0],
+       [0,0,0,0,0],
+       [0,0,0,0,0]
+       
+    ]) / 400).tolist(),
     #modeltype 2
     (np.array([
         
-       [0.114736907423371,0,0,0,0],
-       [0,0.1354455356615292,0,0,0],
-       [0,0,0.6637200640035631,0,0],
-       [0,0,0,2.9248106675773875,0],
-       [0,0,0,0,0.9305139758546961]      
+       # [0.114736907423371,0,0,0,0],
+       # [0,0.1354455356615292,0,0,0],
+       # [0,0,0.6637200640035631,0,0],
+       # [0,0,0,2.9248106675773875,0],
+       # [0,0,0,0,0.9305139758546961]      
      
         # [Q_0, 0, 0, 0, 0],
         # [0, Q_0, 0, 0, 0],
@@ -97,13 +105,13 @@ ProcessNoiseCovs = [
         # [0, 0, 0, Q_0, 0],
         # [0, 0, 0, 0, Q_0 / 1e8] 
      
-       # [0,0,0,0,0],
-       # [0,0,0,0,0],
-       # [0,0,0,0,0],
-       # [0,0,0,0,0],
-       # [0,0,0,0,0],     
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],     
          
-     ])/ 2000).tolist(),
+     ])/ 800).tolist(),
     #modeltype 3
     [
         [1e-2, 0, 0, 0, 0],
@@ -176,12 +184,9 @@ InitialStartCovs_withoutTimeDivision = [
 ############
 # Model 1
 ############
-def f_predict_model1(x_, dt):
+def f_predict_model1(x, dt):
 
-    x = np.copy(x_)
-    
-    x[2] = putAngleInRange(x[2])
-    
+        
     X_new = np.copy(x)
 
     x_new = x[0] + x[3] * dt * np.cos(x[2])
@@ -198,13 +203,8 @@ def h_measure_model1(x):
 ############
 # Model 2
 ############
-def f_predict_model2(x_, dt):
+def f_predict_model2(x, dt):
 
-    
-    x = np.copy(x_)
-    
-    x[2] = putAngleInRange(x[2])
-    x[4] = putAngleInRange(x[4])
     
     X_new = np.copy(x)
             
@@ -212,10 +212,7 @@ def f_predict_model2(x_, dt):
     y_new = x[1] + x[3] / x[4] * ( np.cos(x[2])  - np.cos( x[2] + dt * x[4] ) )
     
     phi_new = x[2] + dt * x[4] 
-    
-
-    phi_new = putAngleInRange(phi_new)
-    
+        
     X_new[0] = x_new
     X_new[1] = y_new
     X_new[2] = phi_new
@@ -266,6 +263,10 @@ class TrackerModel_1(object):
 
         self.Ws, self.Wc, self.lambda_ = unscentedWeights
 
+        self.trackHistory = []
+        self.mixedStateHistory = []
+
+
         #find x0 and P0
 
         dx = (initMeasurements[-1][0] - initMeasurements[-2][0]) / dt
@@ -274,7 +275,7 @@ class TrackerModel_1(object):
         vel = np.sqrt(dx**2, dy**2)
         dphi = 0
 
-        x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], phi, vel, dphi]).reshape((5,1))
+        x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], phi, vel, dphi], dtype=float).reshape((5,1))
 
         P0 = np.array(InitialStartCovs_withoutTimeDivision[1]) * \
             [[1,1,1,1/dt,1/dt],
@@ -296,8 +297,11 @@ class TrackerModel_1(object):
         sigmaPoints = uH.generateSigmaPoints(self.track.x, self.track.P, self.lambda_)   
 
         self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
-                                            
-        self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)
+
+        self.track.x_predict = normalizeState(self.track.x_predict)
+
+
+        self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-8)
         sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
         self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model1, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCov ) 
 
@@ -305,9 +309,13 @@ class TrackerModel_1(object):
 
         x_updated, P_updated, _ = pH.pdaPass(self.track.kalmanGain, associationProbs, measurements, self.track.x_predict, self.track.z_predict, self.track.P_predict, self.track.S)
 
+        x_updated = normalizeState(x_updated)
 
         self.track.x = x_updated
         self.track.P = P_updated
+
+        self.trackHistory.append([copy.deepcopy(self.track), timeStamp])
+
 
 ################
 # 2 : (CTRV) Non-Linear Model, Constant Velocity, Nonzero Turn Rate
@@ -320,6 +328,10 @@ class TrackerModel_2(object):
         #init variables
 
         self.Ws, self.Wc, self.lambda_ = unscentedWeights
+
+        self.trackHistory = []
+        self.mixedStateHistory = []
+
 
         #find x0 and P0        
 
@@ -335,7 +347,7 @@ class TrackerModel_2(object):
         vel = np.sqrt(dx2**2, dy2**2)
         dphi = (phi2 - phi1) / dt
 
-        x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], phi2, vel, dphi]).reshape((5,1))
+        x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], phi2, vel, dphi], dtype=float).reshape((5,1))
 
         P0 = np.array(InitialStartCovs_withoutTimeDivision[2]) * \
             [[1,1,1,1/dt,1/dt],
@@ -345,7 +357,6 @@ class TrackerModel_2(object):
             [1/dt,1/dt,1/dt,1/(dt**2),1/(dt**2)]]
 
         P0 = massageToCovariance(P0, 1e-6)
-
 
         self.track = Track(x0, P0)
         self.track.z = h_measure_model2(x0)
@@ -360,7 +371,9 @@ class TrackerModel_2(object):
 
         self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model2, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[2])
 
-        self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)               
+        self.track.x_predict = normalizeState(self.track.x_predict)
+
+        self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-8)               
         sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
         self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model2, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCov ) 
     
@@ -368,8 +381,13 @@ class TrackerModel_2(object):
 
         x_updated, P_updated, _ = pH.pdaPass(self.track.kalmanGain, associationProbs, measurements, self.track.x_predict, self.track.z_predict, self.track.P_predict, self.track.S)
 
+        x_updated = normalizeState(x_updated)
+
         self.track.x = x_updated
-        self.track.P = P_updated            
+        self.track.P = P_updated    
+
+        self.trackHistory.append([copy.deepcopy(self.track), timeStamp])
+
 
 ################
 # 3 : (RM) Non-Linear Model, Random Motion
@@ -383,10 +401,13 @@ class TrackerModel_3(object):
 
         self.Ws, self.Wc, self.lambda_ = unscentedWeights
 
+        self.trackHistory = []
+        self.mixedStateHistory = []
+
         #find x0 and P0        
 
 
-        x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], 0, 0, 0]).reshape((5,1))
+        x0 = np.array([initMeasurements[-1][0], initMeasurements[-1][1], 0, 0, 0], dtype=float).reshape((5,1))
 
         P0 = np.array(InitialStartCovs_withoutTimeDivision[3]) * \
             [[1,1,1,1/dt,1/dt],
@@ -410,7 +431,9 @@ class TrackerModel_3(object):
 
         self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model3, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[3])
 
-        self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-6)                    
+        self.track.x_predict = normalizeState(self.track.x_predict)
+
+        self.track.P_predict = massageToCovariance(self.track.P_predict, 1e-8)                    
         sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                    
         self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model3, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCov ) 
 
@@ -418,8 +441,12 @@ class TrackerModel_3(object):
 
         x_updated, P_updated, _ = pH.pdaPass(self.track.kalmanGain, associationProbs, measurements, self.track.x_predict, self.track.z_predict, self.track.P_predict, self.track.S)
 
+        x_updated = normalizeState(x_updated)
+
         self.track.x = x_updated
         self.track.P = P_updated     
+
+        self.trackHistory.append([copy.deepcopy(self.track), timeStamp])
 
 
 class MultiModelTracker(object):
@@ -466,6 +493,8 @@ class MultiModelTracker(object):
 
         fusedX, fusedP = IMM_helper.fuseModelStates(stateMeans, stateCovariances, self.modeProbs)
 
+        fusedX = normalizeState(fusedX)
+
         return (fusedX, fusedP)
 
     def fuseStates_predict(self):
@@ -485,10 +514,12 @@ class MultiModelTracker(object):
 
         fusedX_predict, fusedP_predict = IMM_helper.fuseModelStates(stateMeans, stateCovariances, self.modeProbs)
 
+        fusedX_predict = normalizeState(fusedX_predict)
+
         return (fusedX_predict, fusedP_predict)
 
 
-    def mixStates(self):
+    def mixStates(self, timeStamp):
 
         stateMeans = []
         stateCovariances = []
@@ -506,8 +537,19 @@ class MultiModelTracker(object):
         mixedMeans, mixedCovariances = IMM_helper.mixStates(stateMeans, stateCovariances, self.transitionMatrix, self.modeProbs)
         
         for i, model in enumerate(self.models):
+            beforeMixX = model.track.x
+            beforeMixP = model.track.P
+
+            #real deal update
             model.track.x = np.expand_dims(mixedMeans[i], axis=1)
-            model.track.P = mixedCovariances[i]   
+            model.track.P = mixedCovariances[i] 
+
+            #normalize the state
+            model.track.x = normalizeState(model.track.x)  
+
+            #update history
+            model.mixedStateHistory.append([beforeMixX, beforeMixP, model.track.x, model.track.P, timeStamp])
+
 
     def updateModeProbabilities(self, measurements):
 
@@ -546,25 +588,25 @@ class MultiModelTracker(object):
 
                 model1 = TrackerModel_1(self.measurements, dt, self.unscentedWeights)
                 model2 = TrackerModel_2(self.measurements, dt, self.unscentedWeights)
-                model3 = TrackerModel_3(self.measurements, dt, self.unscentedWeights)
+                # model3 = TrackerModel_3(self.measurements, dt, self.unscentedWeights)
 
                 self.models.append(model1)
                 self.models.append(model2)
-                self.models.append(model3)  
+                # self.models.append(model3)  
 
                 self.modeProbs = np.expand_dims(np.array([
-                    0.34, 0.33, 0.33
-                    # 0.5, 0.5
+                    # 0.5, 0.49, 0.01
+                    0.5, 0.5
                     # 1
                 ]), axis=1)
 
                 self.transitionMatrix = np.array([
-                    [0.9, 0.05, 0.05],
-                    [0.05, 0.9, 0.05],
-                    [0.2, 0.2, 0.6]
+                    # [0.9, 0.05, 0.05],
+                    # [0.05, 0.9, 0.05],
+                    # [0.2, 0.2, 0.6]
                     
-                    # [0.9, 0.1],
-                    # [0.1, 0.9]
+                    [0.9, 0.1],
+                    [0.1, 0.9]
                     
                     # [1]
                 ])                
@@ -577,7 +619,7 @@ class MultiModelTracker(object):
 
         self.trackerLifeTime += 1
 
-        self.mixStates()
+        self.mixStates(timeStamp)
 
         for model in self.models:
             model.predict(dt)  

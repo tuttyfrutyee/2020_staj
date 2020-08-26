@@ -51,19 +51,19 @@ def extractGroundTruthFromScenario(scenario):
     return groundTruthPacks
 
 
-measurementPacks = extractMeasurementsFromScenario(scn.scenario_0)
-groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_0)
+measurementPacks = extractMeasurementsFromScenario(scn.scenario_3)
+groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_3)
 
-scn.scenario_0.plotScenario()
+scn.scenario_3.plotScenario()
 
 
 
-modelType = 2
-gateThreshold = 5
+modelType = 0
+gateThreshold = 10
 distanceThreshold = 5
-spatialDensity = 0.05
+spatialDensity = 0.001
 detThreshold = 200
-PD = 0.999
+PD = 0.99
 
 dt = 0.1
 
@@ -75,10 +75,7 @@ for i, measurementPack in enumerate(measurementPacks):
 
     measurements = np.array(measurementPack)
     multipleTargetTracker.feedMeasurements(measurements, dt, i)
-    
-
-
-    
+      
         
         
 # for initTracker in multipleTargetTracker.initTrackerHistory:

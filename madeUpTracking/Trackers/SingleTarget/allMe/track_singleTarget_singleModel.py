@@ -110,7 +110,7 @@ ProcessNoiseCovs = [
        # [0,0,0,0,0],
        # [0,0,0,0,0],     
          
-     ])/ 20000).tolist(),
+     ])/ 400).tolist(),
     #modeltype 3
     [
         [1e-2, 0, 0, 0, 0],

@@ -2,8 +2,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-sys.path.append("./Data/Scenarios/objectGenerator")
-from pathDraw import drawPath
+sys.path.append("./Data/Scenarios")
+from objectGenerator.pathDraw import drawPath
 
 
 

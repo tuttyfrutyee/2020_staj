@@ -11,7 +11,7 @@ import myHelpers.immHelper as IMM_helper
 import copy
 
 
-measurementNoiseStd = np.sqrt(2)
+measurementNoiseStd = np.sqrt(1)
 Q_0 = 0.005
 
 #helpers
@@ -89,7 +89,7 @@ ProcessNoiseCovs = [
        [0,0,0,0,0],
        [0,0,0,0,0]
        
-    ]) / 400).tolist(),
+    ]) / 100).tolist(),
     #modeltype 2
     (np.array([
         
@@ -111,7 +111,7 @@ ProcessNoiseCovs = [
         [0,0,0,0,0],
         [0,0,0,0,0],     
          
-     ])/ 800).tolist(),
+     ])/ 200).tolist(),
     #modeltype 3
     [
         [1e-2, 0, 0, 0, 0],
@@ -135,7 +135,7 @@ InitialStartCovs_withoutTimeDivision = [
     None,
 
     #modeltype1
-    [
+    (np.array([
         [1.99997780e+00, 2.49414716e-04, 1.73227766e-04, 3.88280668e-04,
                 0],
         [2.49414716e-04, 1.99980348e+00, 6.09740973e-05, 3.55028270e-04,
@@ -146,9 +146,9 @@ InitialStartCovs_withoutTimeDivision = [
             0],
         [0, 0, 0, 0,
             0]
-    ],
+    ])/10).tolist(),
     #modeltype2
-    [
+    (np.array([
         [1.99997780e+00, 2.49414716e-04, 1.73227766e-04, 3.88280668e-04,
                 2.97819194e-04],
         [2.49414716e-04, 1.99980348e+00, 6.09740973e-05, 3.55028270e-04,
@@ -159,10 +159,10 @@ InitialStartCovs_withoutTimeDivision = [
             6.98653089e-04],
         [2.97819194e-04, 1.49555161e-04, 7.52457415e-01, 6.98653089e-04,
             1.50502254e+00]        
-    ],
+    ])/10).tolist(),
 
     #modeltype3
-    [
+    (np.array([
         [1.99997780e+00, 2.49414716e-04, 1.73227766e-04, 3.88280668e-04,
                 2.97819194e-04],
         [2.49414716e-04, 1.99980348e+00, 6.09740973e-05, 3.55028270e-04,
@@ -173,7 +173,7 @@ InitialStartCovs_withoutTimeDivision = [
             6.98653089e-04],
         [2.97819194e-04, 1.49555161e-04, 7.52457415e-01, 6.98653089e-04,
             1.50502254e+00]        
-    ]    
+    ])/10).tolist()    
 
 ]
 

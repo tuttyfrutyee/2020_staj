@@ -54,7 +54,7 @@ scenario_1 = scenario.Scenario(stds_1, objectPathCorners_1, corruptions_1, stepS
 
 """
 
-stds_2 = [1, 1]
+stds_2 = [1.2, 1]
 objectPathCorners_2 = [ ([0, 25, 50], [50, 10, 0]), ([50, 25, 0], [50, 10, 0]) ] 
 corruptions_2 = [None, None]
 stepSizes_2 = [0.4, 0.4]
@@ -77,20 +77,20 @@ scenario_2 = scenario.Scenario(stds_2, objectPathCorners_2, corruptions_2, stepS
     Scenario 3: 2 object with corruptions
 
 """
-# stds_3 = [1.4, 1.4, 1.4]
-stds_3 = [1.4, 1.4]
+stds_3 = [1, 1, 1, 1, 1, 1]
+# stds_3 = [1.4, 1.4]
 
-# objectPathCorners_3 = [ None, None, None ] 
-objectPathCorners_3 = [ None, None] 
+objectPathCorners_3 = [ None, None, None, None, None, None ] 
+# objectPathCorners_3 = [ None, None] 
 
-# corruptions_3 = [None, None, None]
-corruptions_3 = [None, None]
+corruptions_3 = [None, None, None, None, None, None]
+# corruptions_3 = [None, None]
 
-# stepSizes_3 = [None, None, None]
-stepSizes_3 = [None, None]
+stepSizes_3 = [None, None, None, None, None, None]
+# stepSizes_3 = [None, None]
 
-# colors_3 = [("b", "g"), None, None]
-colors_3 = [("b", "g"), None]
+colors_3 = [("b", "g"), None, None, None, None, None]
+# colors_3 = [("b", "g"), None]
 
 
 scenario_3 = scenario.Scenario(stds_3, objectPathCorners_3, corruptions_3, stepSizes_3, colors_3)

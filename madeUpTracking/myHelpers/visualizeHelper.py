@@ -271,7 +271,7 @@ def visualizeTrackingResults(trackers, measurementPacks, groundTruthPacks, anima
         
         
         ani = matplotlib.animation.FuncAnimation(fig, animation, 
-                frames=1000, interval=2000, repeat=False) 
+                frames=1000, interval=100, repeat=False) 
         
         plt.show()
         

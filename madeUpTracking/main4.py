@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import Scenarios.scenario as scn
 import copy
+import time
 
 from Trackers.MultipleTarget.allMe.track_multipleTarget_multipleModel import Tracker_MultipleTarget_MultipleModel_allMe
 
@@ -59,31 +60,30 @@ scn.scenario_3.plotScenario()
 
 
 
-gateThreshold = 10
+gateThreshold = 20
 distanceThreshold = 5
-spatialDensity = 0.0008
-detThreshold = 400
-PD = 0.99
+spatialDensity = 0.00008
+detThreshold = 1000
+PD = 0.999
 
 dt = 0.1
 
 
 multipleTargetTracker = Tracker_MultipleTarget_MultipleModel_allMe(gateThreshold, distanceThreshold, detThreshold, spatialDensity, PD)
 
-
+start = time.time()
 for i, measurementPack in enumerate(measurementPacks):
 
     measurements = np.array(measurementPack)
     multipleTargetTracker.feedMeasurements(measurements, dt, i)
-    
-
+print("fps : ", i / (time.time() - start) )
 
         
-print("validationMatrix.shape = ", multipleTargetTracker.validationMatrix.shape)
-print("associationEvents.shape = ", multipleTargetTracker.associationEvents.shape)
+# print("validationMatrix.shape = ", multipleTargetTracker.validationMatrix.shape)
+# print("associationEvents.shape = ", multipleTargetTracker.associationEvents.shape)
 
 
-ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
+# ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
     
 ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, False, gateThreshold)
         

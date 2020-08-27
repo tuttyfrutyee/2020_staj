@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append("./Data")
-import Scenarios.scenarioGenerator as scenario
+import scenarioGenerator as scenario
 
 import numpy as np
 
@@ -54,7 +54,7 @@ def extractGroundTruthFromScenario(scenario):
 
 
 
-numberOfScenario = 100
+numberOfScenario = 3
 std = 1.2
 plotCount = 0
 

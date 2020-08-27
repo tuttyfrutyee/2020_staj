@@ -336,7 +336,7 @@ class Tracker(object):
                 dx = (self.measurements[-1][0] - self.measurements[-2][0]) / dt
                 dy = (self.measurements[-1][1] - self.measurements[-2][1]) / dt
                 phi = np.arctan(dy / dx)
-                vel = np.sqrt(dx**2, dy**2)
+                vel = np.sqrt(dx**2 + dy**2)
                 dphi = 0
 
                 x0 = np.array([self.measurements[-1][0], self.measurements[-1][1], phi, vel, dphi]).reshape((5,1))
@@ -365,7 +365,7 @@ class Tracker(object):
                     phi1 = np.arctan(dy1 / dx1)
                     phi2 = np.arctan(dy2 / dx2)
                     
-                    vel = np.sqrt(dx2**2, dy2**2)
+                    vel = np.sqrt(dx2**2 + dy2**2)
                     dphi = (phi2 - phi1) / dt
 
                     x0 = np.array([self.measurements[-1][0], self.measurements[-1][1], phi2, vel, dphi]).reshape((5,1))
@@ -396,7 +396,7 @@ class Tracker(object):
                     phi1 = np.arctan(dy1 / dx1)
                     phi2 = np.arctan(dy2 / dx2)
                     
-                    vel = np.sqrt(dx2**2, dy2**2)
+                    vel = np.sqrt(dx2**2 + dy2**2)
                     dphi = phi2 - phi1
 
                     x0 = np.array([self.measurements[-1][0], self.measurements[-1][1], phi2, vel, dphi]).reshape((5,1))

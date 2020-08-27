@@ -35,7 +35,8 @@ print(x)
 
 learning_rate = 1e-4
 
-losses = []
+losses = []torch.autograd.set_detect_anomaly(True)
+
 
 mask = Mask.apply
 

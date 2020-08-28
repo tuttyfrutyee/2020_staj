@@ -163,10 +163,10 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
                     self.losses.append(self.loss.item())
                     self.loss = 0
                     
-                    self.track.x = self.track.x.detach()
-                    self.track.P = self.track.P.detach()
-                    self.track.z = self.track.z.detach()
-                    self.track.S = self.track.S.detach()
+                    # self.track.x = self.track.x.detach()
+                    # self.track.P = self.track.P.detach()
+                    # self.track.z = self.track.z.detach()
+                    # self.track.S = self.track.S.detach()
 
                     
 

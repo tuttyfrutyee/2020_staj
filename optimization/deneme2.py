@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import deneme
+import sys
+sys.path.append("./Data/Scenarios")
 
-import Scenarios.scenario as scn
+import Data.Scenarios.scenario as scn
 
 
 import torch
@@ -119,7 +121,7 @@ processNoise = torch.mm(triangular.T, triangular)
 deneme.processNoise = processNoise
 
 
-sequenceLength = 100
+sequenceLength = 10
 
 
 dt = 0.1

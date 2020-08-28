@@ -42,6 +42,7 @@ InitialStartCov_withoutTimeDivision = \
 
 #helpers
 
+
 def putAngleInRange(angle):
     
     angle = angle % (2*np.pi)
@@ -56,12 +57,31 @@ def putAngleInRange(angle):
 def massageToCovariance(P, scale):
     return 1/2*(P + P.T) + torch.eye(P.shape[0], dtype=dtype_torch) * scale
 
-def normalizeState(x):
 
-    x[2] = putAngleInRange(x[2])
-    x[4] = putAngleInRange(x[4])
+class normalizeState(torch.autograd.Function):
+    
+    @staticmethod
+    def forward(self, state):
+        self.save_for_backward(state)
+        
+        state_ = state.clone()
+        
+        state_[2] = putAngleInRange(state_)
+        state_[4] = putAngleInRange(state_)
+        
+        return state_
 
-    return x
+    
+    @staticmethod
+    def backward(self, grad_output):
+        
+        input, = self.saved_tensors
+        
+        grad_input = grad_output.clone()
+        
+        return grad_input
+
+stateNormalizer = normalizeState.apply
 
 ########
 
@@ -76,17 +96,17 @@ def normalizeState(x):
 ############
 def f_predict_model1(x, dt):
 
-
-    x_new = x[0] + x[3] * dt * torch.cos(x[2])
-    y_new = x[1] + x[3] * dt * torch.sin(x[2])
+    x_ = x.clone()
+    x__ = x.clone()
     
-    x[0] = x_new
-    x[1] = y_new
+    x_[0] = x__[0] + x__[3] * dt * torch.cos(x__[2])
+    x_[1] = x__[1] + x__[3] * dt * torch.cos(x__[2])
 
-    return x
+    return x_
 
 def h_measure_model1(x):
-    return x[0:2]
+    x_ = x.clone()
+    return x_[0:2]
 
 
 
@@ -105,10 +125,8 @@ class Track(object):
 
 class Tracker_SingleTarget_SingleModel_CV_allMe(object):
   
-    def __init__(self, modelType):
-                
-        self.modelType = modelType         
-            
+    def __init__(self):
+                            
         self.track = None
 
         self.measurements = []
@@ -118,7 +136,8 @@ class Tracker_SingleTarget_SingleModel_CV_allMe(object):
     
     def predict(self, dt):
 
-        if(self.track):
+        if(self.track is not None):
+            
 
             self.track.P = massageToCovariance(self.track.P, 1e-8)
 
@@ -126,7 +145,7 @@ class Tracker_SingleTarget_SingleModel_CV_allMe(object):
             
 
             self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCov)                    
-            # self.track.x_predict = normalizeState(self.track.x_predict)
+            self.track.x_predict = stateNormalizer(self.track.x_predict)
 
             H = torch.tensor([[1, 0, 0, 0, 0],[0, 1, 0, 0, 0]], dtype=dtype_torch)
             self.track.S = torch.mm(H, torch.mm(self.track.P_predict, H.T)) + MeasurementNoiseCov
@@ -190,7 +209,7 @@ class Tracker_SingleTarget_SingleModel_CV_allMe(object):
             #update
             diff = measurement - self.track.z_predict
             self.track.x = self.track.x_predict + torch.mm(self.track.kalmanGain, diff)
-            # self.track.x = normalizeState(self.track.x)
+            self.track.x = stateNormalizer(self.track.x)
             self.track.P = self.track.P_predict - torch.mm(self.track.kalmanGain, torch.mm(self.track.S, self.track.kalmanGain.T))
             self.track.z = h_measure_model1(self.track.x)
             

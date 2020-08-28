@@ -58,10 +58,10 @@ scn.scenario_3.plotScenario()
 
 
 
-modelType = 2
+modelType = 0
 gateThreshold = 10
 distanceThreshold = 5
-spatialDensity = 0.001
+spatialDensity = 0.0001
 detThreshold = 200
 PD = 0.99
 

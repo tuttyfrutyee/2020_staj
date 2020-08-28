@@ -10,56 +10,74 @@ torch.autograd.set_detect_anomaly(True)
 dtype_torch = torch.float64
 
 
-x = torch.rand(5,1, requires_grad = True)
-y = torch.rand(5,1)
+def generateRandomCovariance_positiveDefinite(dim):
+    randomCovariance = np.random.randn(dim, dim)
+    randomCovariance = 0.5*(randomCovariance + randomCovariance.T) / ( np.max(abs(randomCovariance))) + dim * np.eye(dim)
+    return randomCovariance
+
+def generateRandomCovariances_positiveDefinite(n, dim):
+    covariances = []
+    for i in range(n):
+        covariances.append(generateRandomCovariance_positiveDefinite(dim))
+    return np.array(covariances, dtype="float")
 
 
-# class f_predict_model1(torch.autograd.Function):
-    
-#     @staticmethod
-#     def forward(self, input):
-#         self.save_for_backward(input)
-        
-#         x0 = torch.tensor(x[0], requires_grad = True, dtype=dtype_torch)
-#         x1 = torch.tensor(x[1], requires_grad = True, dtype=dtype_torch)
-        
-        
-#         x = input.clone()
-        
-#         x_new = x[0] + x[3] * dt * torch.cos(x[2])
-#         y_new = x[1] + x[3] * dt * torch.sin(x[2])
-        
-#         x[0] = x_new
-#         x[1] = y_new        
-        
-#         return x
-    
-#     @staticmethod
-#     def backward(self, grad_output):
-        
-#         input, = self.saved_tensors
-        
-#         grad_input = grad_output.clone()
-        
-#         willReturn = torch.tensor([[grad_input[0], grad_input[1], 0, 0]]).reshape((4,1))
-        
-#         return willReturn
-        
+
+zs = torch.rand(10,2,1)
+
+Q = torch.from_numpy(generateRandomCovariance_positiveDefinite(5)).requires_grad_(True)
+MeasurementNoise = torch.from_numpy(generateRandomCovariance_positiveDefinite(2))
+
+xs = []
+
+x0 = torch.rand(5,1)
+P0 = torch.eye(5,5)
+
+
+x_ = x.clone()
+
+
+
+
 
 def f_predict_model1(x, dt):
     
     x_new = x.clone()
     x_new2 = x.clone()
     
-    x_neww = x_new2[0] + x_new2[3] * dt * torch.cos(x_new2[2])
-    y_neww = x_new2[1] + x_new2[3] * dt * torch.sin(x_new2[2])
+    x_neww = x_new2[3] * dt * torch.cos(x_new2[2])
+    y_neww = x_new2[3] * dt * torch.sin(x_new2[2])
     
     x_new[0] = x_neww
     x_new[1] = y_neww
     
     return x_new
 
+def h_measure_model1(x):
+    x_ = x.clone()
+    return x_[0:2]
 
+
+def putAngleInRange(angle):
+    
+    angle = angle % (2*np.pi)
+    
+    if(angle > (np.pi)):
+        angle -= 2*np.pi
+    elif(angle < (-np.pi)):
+        angle += 2*np.pi
+        
+    return angle
+
+def normalizeState(x):
+    
+    normalizedPhi = putAngleInRange(x[2].data)
+    normalizedPhiDot = putAngleInRange(x[4].data)
+    
+    x[2] = normalizedPhi
+    x[4] = normalizedPhiDot
+    
+    
 
 def h_measure_model1(x):
     return x[0:2]
@@ -68,14 +86,26 @@ def h_measure_model1(x):
 print(x)
 
 learning_rate = 1e-4
+
 dt = 0.1
 
 losses = []
 
+xs = []
 
-for i in range(int(1e4)):
+    F = torch.array([      [1, 0, dt, 0],
+                        [0, 1, 0, dt],
+                        [0, 0, 1, 0],
+                        [0, 0, 0, 1]       ], dtype = dtype_torch)   
     
-    y_predict = f_predict_model1(x, dt)
+for i in range(int(5)):
+    
+    x_predict = f_predict_model1(x, dt)
+    P_predict = 
+    
+    print(x)
+    
+    y_predict = f_predict_model1(x_, dt)
     
     loss = torch.sum(torch.pow(y - y_predict , 2))
     
@@ -90,6 +120,10 @@ for i in range(int(1e4)):
         x -= x.grad * learning_rate
         
         x.grad.zero_()
+        
+    x_ = x.clone()
+    
+    normalizeState(x_)
 
 
 plt.plot(losses)

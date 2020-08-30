@@ -1,6 +1,11 @@
 import torch
 import Tracker
 import torch.optim as optim
+import math
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 import sys
 sys.path.append("../../Data/Scenarios")
@@ -8,7 +13,7 @@ sys.path.append("../../Data/Train")
 
 import trainData 
 
-dataPacks = trainData.dataPacks
+dataPacks = trainData.trainDataPacks
 
 
 dtype_torch = torch.float64
@@ -29,7 +34,7 @@ def calculateLoss(groundTruth, predictionMeasured):
 #########################################
 
 scale = torch.tensor([
-    1
+    0.192
 ], dtype= dtype_torch, requires_grad=True)
 
 
@@ -42,75 +47,101 @@ def getProcessNoiseCov():
        [0,0,0,0.8057826337426066,0],
        [0,0,0,0,0] 
      
-    ], dtype=dtype_torch) / scale
+    ], dtype=dtype_torch) * scale
 
 
 
 #########################################
-
     
 
-learningRate = 1e-3
+
+learningRate = 0.5
+
+sequenceLength = 100
 
 
+optimizer = optim.Adam([scale], lr = learningRate )
 
-optimizer = optim.Adam([scale], lr = learningRate)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience = 10, factor=0.5, verbose=True)
 
 Tracker.ProcessNoiseCov = getProcessNoiseCov()
+    
 
-
-sequenceLength = 10
 
 
 dt = 0.1
 
+minimumSliceCount = float("inf")
+batchSize = 25
+initialThreshold = math.ceil(50 / sequenceLength)
+
 losses_ = []
 
-for k in range(10):
+for dataPack in dataPacks:
+    sliceCount = int(len(dataPack[0]) / sequenceLength)
+    if(minimumSliceCount > sliceCount):
+        minimumSliceCount = sliceCount
+        
+        
 
+for epoch in range(100):
+    
     losses = []
-
-    for s, dataPack in enumerate(dataPacks):
+    trackers = []
+    
+    for _ in dataPacks:
+        trackers.append(Tracker.Tracker_SingleTarget_SingleModel_CV_allMe())
+    
+    for s in range(minimumSliceCount):
         
-        lossTotal = 0
-        loss = 0
+        totalLoss = 0
         
-        tracker = Tracker.Tracker_SingleTarget_SingleModel_CV_allMe(0)
+        batches = []
         
-        measurementPacks, groundTruthPacks = dataPack
-        
-        for i, (measurementPack, groundTruthPack) in enumerate(zip(measurementPacks, groundTruthPacks)):
+        for b in range(math.ceil(len(dataPacks)/batchSize)):
             
-            if(i != 0 and (i % sequenceLength == 0 or i == len(measurementPacks) - 1)):
-
-                z = tracker.feedMeasurement(torch.from_numpy(measurementPack[0]), dt)
-                if(z is not None):
-                    loss += calculateLoss(torch.from_numpy(groundTruthPack[0]), z)
+            if((b+1)*batchSize > batchSize):
+                batches.append(dataPacks[b*batchSize : ])
+            else:
+                batches.append(dataPacks[b*batchSize : (b+1)*batchSize])
                 
+        for b, batch in enumerate(batches):       
+            
+            loss = 0
+        
+            for l, dataPack in enumerate(batch):
+                
+                tracker = trackers[b*batchSize + l]
+                
+                measurementPacks = dataPack[0][s*sequenceLength: (s+1) * sequenceLength]
+                groundTruthPacks = dataPack[1][s*sequenceLength: (s+1) * sequenceLength]
+                
+                for i, (measurementPack, groundTruthPack) in enumerate(zip(measurementPacks, groundTruthPacks)):
+                    
+                    z = tracker.feedMeasurement(torch.from_numpy(measurementPack[0]), dt)
+                    if(z is not None and s >= initialThreshold):
+                        loss += calculateLoss(torch.from_numpy(groundTruthPack[0]), z) / len(dataPacks) / sequenceLength
+            
+            if(loss != 0):
                 loss.backward()
-                lossTotal += loss.item()
-                loss = 0
+                totalLoss += loss.item()
                 
                 optimizer.step()
                 optimizer.zero_grad()
-
-                tracker.detachTrack()
-
-                Tracker.ProcessNoiseCov = getProcessNoiseCov()
-                                                   
-                
-            else:
-                z = tracker.feedMeasurement(torch.from_numpy(measurementPack[0]), dt)
-                if(z is not None):
-                    loss += calculateLoss(torch.from_numpy(groundTruthPack[0]), z)
-
-        if(s == 0):
-            print(lossTotal)
             
-        losses.append(lossTotal)
-
-    losses_.append(losses)
+            for l, _ in enumerate(batch):                
+                tracker = trackers[b*batchSize + l]                
+                tracker.detachTrack()
                 
+            Tracker.ProcessNoiseCov = getProcessNoiseCov()
+        if(s == initialThreshold):
+            print(totalLoss)
+            print(scale)
+            scheduler.step(totalLoss)
+        losses.append(totalLoss)
+
+    
+    losses_.append(losses)
 
                
             

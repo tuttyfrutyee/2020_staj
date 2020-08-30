@@ -16,7 +16,7 @@ def findAngle(xk, xkk):
 
 
 
-dataPacks = tD.dataPacks
+dataPacks = tD.trainDataPacks
 
 qXs = []
 qYs = []

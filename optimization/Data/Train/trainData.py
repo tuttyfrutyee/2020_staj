@@ -54,12 +54,17 @@ def extractGroundTruthFromScenario(scenario):
 
 
 
-numberOfScenario = 20
+numberOfScenario = 40
 std = 1.2
 plotCount = 0
 
 scenarios = []
 dataPacks = []
+
+trainDataPacks = []
+valDataPacks = []
+
+trainRatio = 0.9
 
 for s in range(numberOfScenario):
     
@@ -79,8 +84,10 @@ for s in range(numberOfScenario):
     measurementPacks = extractMeasurementsFromScenario(scenario_)
     groundTruthPacks = extractGroundTruthFromScenario(scenario_)
     
-    dataPacks.append((measurementPacks, groundTruthPacks))
-
+    if(s < numberOfScenario * trainRatio):
+        trainDataPacks.append((measurementPacks, groundTruthPacks))
+    else:
+        valDataPacks.append((measurementPacks, groundTruthPacks))
     
     
     

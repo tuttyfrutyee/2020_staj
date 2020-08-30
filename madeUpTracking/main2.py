@@ -57,10 +57,10 @@ def extractGroundTruthFromScenario(scenario):
     return groundTruthPacks
 
 
-measurementPacks = extractMeasurementsFromScenario(scn.scenario_0)
-groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_0)
+measurementPacks = extractMeasurementsFromScenario(scn.scenario_5)
+groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_5)
 
-scn.scenario_0.plotScenario()
+scn.scenario_5.plotScenario()
 
 predictions = []
 

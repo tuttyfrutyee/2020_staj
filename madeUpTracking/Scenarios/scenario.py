@@ -12,7 +12,7 @@ import numpy as np
 """
 
 
-stds_0 = [1]
+stds_0 = [1.2]
 objectPathCorners_0 = [([55, 23, 51], [56,9,20])] 
 
 # objectPathCorners_0 = [(None)] 

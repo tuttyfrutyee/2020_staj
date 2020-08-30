@@ -14,7 +14,7 @@ dtype_torch = torch.float64
 ProcessNoiseCov = None
 
 
-measurementNoiseStd = np.sqrt(2)
+measurementNoiseStd = 1.2
 
 MeasurementNoiseCov = \
         torch.tensor([[measurementNoiseStd ** 2, 0],
@@ -66,8 +66,8 @@ class normalizeState(torch.autograd.Function):
         
         state_ = state.clone()
         
-        state_[2] = putAngleInRange(state_)
-        state_[4] = putAngleInRange(state_)
+        state_[2] = putAngleInRange(state_[2])
+        state_[4] = putAngleInRange(state_[4])
         
         return state_
 
@@ -100,7 +100,7 @@ def f_predict_model1(x, dt):
     x__ = x.clone()
     
     x_[0] = x__[0] + x__[3] * dt * torch.cos(x__[2])
-    x_[1] = x__[1] + x__[3] * dt * torch.cos(x__[2])
+    x_[1] = x__[1] + x__[3] * dt * torch.sin(x__[2])
 
     return x_
 
@@ -154,17 +154,8 @@ class Tracker_SingleTarget_SingleModel_CV_allMe(object):
 
     def detachTrack(self):
 
-        self.track.x.detach()
-        self.track.x_predict.detach()
-
-        self.track.z.detach()
-        self.track.z_predict.detach()
-
-        self.track.P.detach()
-        self.track.P_predict.detach()
-
-        self.track.kalmanGain.detach()
-        self.track.S.detach()
+        self.track.x = self.track.x.detach()
+        self.track.P = self.track.P.detach()
 
 
 

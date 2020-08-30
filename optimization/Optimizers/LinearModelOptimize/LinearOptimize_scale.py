@@ -3,13 +3,16 @@ import Tracker
 import torch.optim as optim
 import math
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 import sys
 sys.path.append("../../Data/Scenarios")
 sys.path.append("../../Data/Train")
 
 import trainData 
 
-dataPacks = trainData.dataPacks
+dataPacks = trainData.trainDataPacks
 
 
 dtype_torch = torch.float64
@@ -30,7 +33,7 @@ def calculateLoss(groundTruth, predictionMeasured):
 #########################################
 
 scale = torch.tensor([
-    1
+    7
 ], dtype= dtype_torch, requires_grad=True)
 
 
@@ -50,14 +53,14 @@ def getProcessNoiseCov():
 
     
 
-learningRate = 1
+learningRate = 0.5
 
-sequenceLength = 50
+sequenceLength = 100
 
 
-optimizer = optim.Adam([scale], lr = learningRate / sequenceLength)
+optimizer = optim.Adam([scale], lr = learningRate )
 
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience = 10, factor=0.1, verbose=True)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience = 10, factor=0.5, verbose=True)
 
 Tracker.ProcessNoiseCov = getProcessNoiseCov()
 
@@ -67,13 +70,17 @@ Tracker.ProcessNoiseCov = getProcessNoiseCov()
 dt = 0.1
 
 minimumSliceCount = float("inf")
-batchSize = 10
+batchSize = 25
+initialThreshold = math.ceil(50 / sequenceLength)
+
 losses_ = []
 
 for dataPack in dataPacks:
     sliceCount = int(len(dataPack[0]) / sequenceLength)
     if(minimumSliceCount > sliceCount):
         minimumSliceCount = sliceCount
+        
+        
 
 for epoch in range(100):
     
@@ -110,31 +117,34 @@ for epoch in range(100):
                 for i, (measurementPack, groundTruthPack) in enumerate(zip(measurementPacks, groundTruthPacks)):
                     
                     z = tracker.feedMeasurement(torch.from_numpy(measurementPack[0]), dt)
-                    if(z is not None):
-                        loss += calculateLoss(torch.from_numpy(groundTruthPack[0]), z) / len(dataPacks)
-                
-            loss.backward()
-            totalLoss += loss.item()
+                    if(z is not None and s >= initialThreshold):
+                        loss += calculateLoss(torch.from_numpy(groundTruthPack[0]), z) / len(dataPacks) / sequenceLength
             
-            optimizer.step()
-            optimizer.zero_grad()
+            if(loss != 0):
+                loss.backward()
+                totalLoss += loss.item()
+                
+                optimizer.step()
+                optimizer.zero_grad()
             
             for l, _ in enumerate(batch):                
                 tracker = trackers[b*batchSize + l]                
                 tracker.detachTrack()
                 
             Tracker.ProcessNoiseCov = getProcessNoiseCov()
-        
-        print(totalLoss)
-        print(scale)
-        scheduler.step(totalLoss)
+        if(s == initialThreshold):
+            print(totalLoss)
+            print(scale)
+            scheduler.step(totalLoss)
         losses.append(totalLoss)
 
     
     losses_.append(losses)
     
-    
 
+lossesPlot = np.array(losses_)
+plt.plot(lossesPlot[:,-1])
+ 
 # losses_ = []
 
 # for k in range(100):

@@ -1,0 +1,40 @@
+\contentsline {section}{\numberline {I}Introduction}{2}
+\contentsline {section}{\numberline {II}Problem Definition and Approach}{2}
+\contentsline {section}{\numberline {III}Objectives}{2}
+\contentsline {section}{\numberline {IV}Project Structure}{2}
+\contentsline {section}{\numberline {V}IMM-UKF-JPDAF}{2}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-A}}IMM}{2}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-A}1}Mixing}{2}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-A}2}Mode Prediction Updates}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-A}3}Mode Measurement Updates}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-A}4}New Mode Probabilities}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-A}5}Output Estimate Calculation}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-B}}UKF}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-B}1}Unscented Transform}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-B}2}Prediction}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-B}3}Update}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-C}}JPDAF}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-C}1}Association Events}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-C}2}Validation Matrix}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-C}3}Joint Association Probabilities}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-D}}PDAF}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-E}}Putting It All Together}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-E}1}Mixings}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-E}2}Predictions}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-E}3}Joint Data Association Probabilities Calculation}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-E}4}Updates}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-E}5}New Mode Probabilities Calculation}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-E}6}Final Output Estimations}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-F}}Testing of the Algorithms}{3}
+\contentsline {section}{\numberline {VI}Trackers}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-A}}Single Object Single Model Tracker}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-B}}Single Object Multiple Model Tracker}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-C}}Multiple Object Single Model Tracker}{3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-D}}Multiple Object Multiple Model Tracker}{3}
+\contentsline {section}{\numberline {VII}Trackers in Action}{3}
+\contentsline {section}{\numberline {VIII}The Need For Optimization}{3}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {VIII-}1}Optimization}{3}
+\contentsline {section}{\numberline {IX}Performance Assesment}{3}
+\contentsline {section}{\numberline {X}Fullfilment of the Objectives}{3}
+\contentsline {section}{\numberline {XI}Conclusion}{3}
+\contentsline {section}{References}{4}

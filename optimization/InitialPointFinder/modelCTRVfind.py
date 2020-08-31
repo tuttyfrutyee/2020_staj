@@ -19,7 +19,7 @@ def findAngleVel(xk, xkk, xkkk):
     return findAngle(xkk, xkkk) - findAngle(xk, xkk) / dt
 
 
-dataPacks = tD.dataPacks
+dataPacks = tD.trainDataPacks
 
 qXs = []
 qYs = []

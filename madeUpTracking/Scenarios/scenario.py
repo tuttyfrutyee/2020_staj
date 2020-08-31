@@ -135,7 +135,7 @@ a = 3
     Scenario 5: 1 complicated path object with no corruptions
 
 """
-stds_5 = [1.5]
+stds_5 = [1.2]
 objectPathCorners_5 = [ None ] 
 corruptions_5 = [None]
 stepSizes_5 = [0.4]

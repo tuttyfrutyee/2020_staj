@@ -2,6 +2,7 @@
 
 import sys
 sys.path.append("./Data")
+sys.path.append("./Data/Scenarios")
 import scenarioGenerator as scenario
 
 import numpy as np

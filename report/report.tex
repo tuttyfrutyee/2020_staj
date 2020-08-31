@@ -1,0 +1,376 @@
+%% Template for ENG 401 reports
+%% by Robin Turner
+%% Adapted from the IEEE peer review template
+
+%
+% note that the "draftcls" or "draftclsnofoot", not "draft", option
+% should be used if it is desired that the figures are to be displayed in
+% draft mode.
+
+\documentclass[peerreview]{IEEEtran}
+\usepackage{cite} % Tidies up citation numbers.
+\usepackage{url} % Provides better formatting of URLs.
+\usepackage[utf8]{inputenc} % Allows Turkish characters.
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables for horizontal lines
+\usepackage{graphicx}
+\usepackage{tabularx}
+
+\hyphenation{op-tical net-works semi-conduc-tor} % Corrects some bad hyphenation 
+
+\usepackage[margin=10pt, labelfont=bf, format=hang, textfont={small,it}]{caption} % for more interesting captions
+\captionsetup[subfigure]{style=default, margin=0pt, labelfont=bf, textfont={small,it}, singlelinecheck=true} % makes subfigure captions a bit more interesting.
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+
+%for equal hat symbol
+\usepackage{scalerel,amssymb}
+
+\newcommand\equalhat{%
+\let\savearraystretch\arraystretch
+\renewcommand\arraystretch{0.3}
+\begin{array}{c}
+\stretchto{
+    \scalerel*[\widthof{=}]{\wedge}
+    {\rule{1ex}{3ex}}%
+}{0.5ex}\\ 
+=%
+\end{array}
+\let\arraystretch\savearraystretch
+}
+%end of equal hat symbol
+
+
+%for directory visualization
+\usepackage{forest}
+
+\definecolor{folderbg}{RGB}{124,166,198}
+\definecolor{folderborder}{RGB}{110,144,169}
+
+\def\Size{4pt}
+\tikzset{
+  folder/.pic={
+    \filldraw[draw=folderborder,top color=folderbg!50,bottom color=folderbg]
+      (-1.05*\Size,0.2\Size+5pt) rectangle ++(.75*\Size,-0.2\Size-5pt);  
+    \filldraw[draw=folderborder,top color=folderbg!50,bottom color=folderbg]
+      (-1.15*\Size,-\Size) rectangle (1.15*\Size,\Size);
+  }
+}
+%end directory visualization
+
+
+\begin{document}
+%\begin{titlepage}
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{Multiple Object Tracking Intern Report}
+
+
+% author names and affiliations
+
+\author{Hasan Atakan Bedel \\
+Department of Electrical and Electronics Engineering\\
+Middle East Technical University\\
+}
+\date{31/08/2020}
+
+% make the title area
+\maketitle
+\tableofcontents
+\listoffigures
+\listoftables
+%\end{titlepage}
+
+\IEEEpeerreviewmaketitle
+
+
+
+
+
+\section{Introduction}
+Multiple object tracking is an essential part of the perception pipeline. In order to solve this problem many methods have been developed. My internship subject was to approach this problem using classical methods which are proposed in the master thesis provided to me. To be more precise used methods are: IMM(Interaction Multiple Model) for modeling object trajectories with different kinematic models, UKF(Unscented Kalman Filter) for nonlinear filtering of the obtained measurements and JPDAF(Joint Probability Data Association Filter) for a sophisticated data association method. I have implemented all of them in python and prepared mock data to assess their results. 
+
+
+
+\section{Problem Definition and Approach}
+The objective of multiple object tracking is to link and filter object detections across the sampled timeline. This way each object's trajectory and state estimation can be obtained. The difference between single object tracking and multiple object tracking is, later needs to associate object detections with existing tracks so that their states can be estimated correctly based on these  associted detections. 
+
+The supplied master thesis uses UKF(Unscented Kalman Filter) to estimate the object states. Kalman filter needs a prediction model to predict the next state. In the thesis multiple kinetic models are used; Constant Velocity(CV), Constant Turn-Rate Velocity(CTRV) Model and Random Motion Model(RM). CTRV has nonlinear nature, hence the need for UKF. In order to use these different models to give only one unified estimation IMM is used.
+
+In order to track multiple objects an data association method is required. JPDAF is used for this purpose. JPDAF is a soft data association method, meaning it does not associate the detections with existing tracks one to one. It associates all detections to all tracks based on their calculated joint association probabilities.
+
+% An example of a floating figure using the graphicx package.
+% Note that \label must occur AFTER (or within) \caption.
+% For figures, \caption should occur after the \includegraphics.
+% Note that IEEEtran v1.7 and later has special internal code that
+% is designed to preserve the operation of \label within \caption
+% even when the captionsoff option is in effect. However, because
+% of issues like this, it may be the safest practice to put all your
+% \label just after \caption rather than within \caption{}.
+%
+% Reminder: the "draftcls" or "draftclsnofoot", not "draft", class
+% option should be used if it is desired that the figures are to be
+% displayed while in draft mode.
+%
+
+
+% Note that IEEE typically puts floats only at the top, even when this
+% results in a large percentage of a column being occupied by floats.
+\section{Objectives}
+*Explain why you had to implement the algorithms yourself
+*Talk about other possible methods to solve multi object tracking problem
+
+To be honest, no clear objectives were provided in the beginning of my internship, only the master thesis. After have read the thesis and searched internet for some context I have determined the objectives myself, which were seem to be approved by my supervisor Dr. Berker Logoglu. Here is the list.
+\begin{itemize}
+\item Implementation of IMM, UKF, JPDAF algorithms
+\item Development of an test environment for the algorithms using mock data
+\item Test of the algorithms on Nuscenes dataset
+\end{itemize}
+
+\section{Project Structure}
+\vspace{10px}
+\begin{center}
+
+\begin{forest}
+  for tree={
+    font=\ttfamily,
+    grow'=0,
+    child anchor=west,
+    parent anchor=south,
+    anchor=west,
+    calign=first,
+    inner xsep=7pt,
+    edge path={
+      \noexpand\path [draw, \forestoption{edge}]
+      (!u.south west) +(7.5pt,0) |- (.child anchor) pic {folder} \forestoption{edge label};
+    },
+    before typesetting nodes={
+      if n=1
+        {insert before={[,phantom]}}
+        {}
+    },
+    fit=band,
+    before computing xy={l=15pt},
+  }  
+[2020 Staj
+  [madeUpTracking
+  	[[myHelpers]
+  	 [Scenarios]
+  	 [Trackers]
+  	]
+  ]
+  [optimization
+  	[[Data]
+  	 [Initial Point Finder]
+  	 [Optimizers]
+  	]
+  ]
+  [scans
+  ]
+  [Usefull Texts
+  ]
+]
+\end{forest}
+\end{center}
+\captionof{figure}{Project Structure}\label{tbl:Project Structure}
+
+\vspace{10px}
+
+
+\section{IMM-UKF-JPDAF}
+In this section, I will give details about the algorithms and their implementation details with some insights I have gained.
+
+\begin{center}
+
+\begin{tabularx}{0.4\textwidth }{@{}p{0.2\textwidth}X@{}}
+\toprule
+  Indices \\
+  $K$ & Number of ... \\
+  $T$ & Number of ... \\
+  Parameters \\
+  c   & something \\
+\bottomrule
+\end{tabularx}
+
+\end{center}
+
+\captionof{table}{Notation Table}\label{tbl:Notation Table}
+
+
+\subsection{IMM}
+This may be a modified version of your proposal depending on previously carried out research or any feedback received.
+
+\vspace{10px}
+
+\subsubsection{Mixing}
+
+\begin{equation}
+ \mu_{k-1|k-1}^{ji} \equalhat P(r_{k-1} = j \,|\, r_{k} = i, y_{0:k-1}) 
+\end{equation}
+
+\begin{equation}
+\mu_{k-1|k-1}^{ji} =
+\frac
+ {\pi_{ji} \; \mu_{k-1}^{j}}
+ {\sum\limits_{l=1}^{N_{r}} \pi_{li} \; \mu_{k-1}^{l}}
+\end{equation}
+
+\begin{equation}
+\hat{x}_{k-1|k-1}^{0i} = \sum\limits_{j=1}^{N_{r}} \mu_{k-1|k-1}^{ji} \; \hat{x}_{k-1|k-1}^j
+\end{equation}
+
+
+\begin{equation}
+\begin{aligned}
+&P_{k-1|k-1}^{0i} = \sum\limits_{j=1}^{N_{r}} \mu_{k-1|k-1}^{ji} \;  
+[P_{k-1|k-1}^j \;+ \\ 
+&( \hat{x}_{k-1|k-1}^j - \hat{x}_{k-1|k-1}^{0i} ) \,
+(\hat{x}_{k-1|k-1}^j - \hat{x}_{k-1|k-1}^{0i})^T ]
+\end{aligned}
+\end{equation}
+
+
+
+\vspace{10px}
+
+\subsubsection{Mode Prediction Updates}
+\subsubsection{Mode Measurement Updates}
+\subsubsection{New Mode Probabilities}
+\begin{equation}
+\mu_k^i = \frac
+{N(y_k; \hat{y}_{k|k-1}^i, S_k^i) \; \sum\limits_{j=i}^{N_r} \pi_{ji}\,\mu_{k-1}^j }
+{\sum\limits_{l=1}^{N_r} N(y_k; \hat{y}_{k|k-1}^l, S_k^l) \; \sum\limits_{j=1}^{N_r} \pi_{jl}^j }
+\end{equation}
+
+\subsubsection{Output Estimate Calculation}
+
+\begin{equation}
+\hat{x}_{k|k} = \sum\limits_{i=1}^{N_r} \mu_k^i \, \hat{x_{k|k}^i}
+\end{equation}
+
+\begin{equation}
+\begin{align}
+P_{k|k} = \sum\limits_{i=1}^{N_r} \mu_k^i \,+ \\
+[
+\begin{end}
+\end{equation}
+
+
+\subsection{UKF}
+Describe your first solution here.
+
+
+\subsubsection{Unscented Transform}
+\subsubsection{Prediction}
+\subsubsection{Update}
+
+
+\subsection{JPDAF}
+Bla Bla
+
+\subsubsection{Association Events}
+\subsubsection{Validation Matrix}
+\subsubsection{Joint Association Probabilities}
+
+\subsection{PDAF}
+Bla bla
+
+
+
+
+\subsection{Putting It All Together}
+Bla bla
+
+\subsubsection{Mixings}
+\subsubsection{Predictions}
+\subsubsection{Joint Data Association Probabilities Calculation}
+\subsubsection{Updates}
+\subsubsection{New Mode Probabilities Calculation}
+\subsubsection{Final Output Estimations}
+
+
+\subsection{Testing of the Algorithms}
+The main difference between this section and the one in your report 
+\emph{Do not include your findings in this section.}
+
+\section{Trackers}
+In order to test algorithms independently, I have created 4 different tracking classes. First I have implemented Single Object Single Model Tracker and then moved to the others until have finished the final goal Multiple Object Multiple Model Tracker.
+
+\subsection{Single Object Single Model Tracker}
+
+It is used to track single object with single model. The measurement to be fed to the tracker in each sampling time is expected to exist and be one. The algorithm of the interest to be validated is \emph{UKF}.
+
+*Reference to code location
+*How it is used
+*Rationale about the validation of the target algorithms
+
+\subsection{Single Object Multiple Model Tracker}
+*What it does and target algorithms to be validated
+*Reference to code location
+*How it is used
+*Rationale about the validation of the target algorithms
+\subsection{Multiple Object Single Model Tracker}
+*What it does and target algorithms to be validated
+*Reference to code location
+*How it is used
+*Rationale about the validation of the target algorithms
+\subsection{Multiple Object Multiple Model Tracker}
+*What it does and target algorithms to be validated
+*Reference to code location
+*How it is used
+*Rationale about the validation of the target algorithms
+
+\section{Trackers in Action}
+The main difference between this section and the one in your report 
+\emph{Do not include your findings in this section.}
+
+\section{The Need For Optimization}
+Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+
+
+\subsubsection{Optimization}
+Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+
+\section{Performance Assesment}
+Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+
+
+
+\section{Fullfilment of the Objectives}
+Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+
+\section{Conclusion}
+Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+
+
+\begin{thebibliography}{1}
+% Here are a few examples of different citations 
+% Book
+\bibitem{kopka_1999} % Note the label in the curly brackets. Use the cite the source; e.g., \cite{kopka_latex}
+H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
+  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+\bibitem{horowitz_2005}D.~Horowitz, \emph{End of Time}. New York, NY, USA: Encounter Books, 2005. [E-book] Available: ebrary, \url{http://site.ebrary.com/lib/sait/Doc?id=10080005}. Accessed on: Oct. 8, 2008.
+% Article from database
+\bibitem{castlevecchi_2008}D.~Castelvecchi, ``Nanoparticles Conspire with Free Radicals'' \emph{Science News}, vol.174, no. 6, p. 9, September 13, 2008. [Full Text]. Available: Proquest, \url{http://proquest.umi.com/pqdweb?index=52&did=1557231641&SrchMode=1&sid=3&Fmt=3&VInst=PROD&VType=PQD&RQT=309&VName=PQD&TS=1229451226&clientId=533}. Accessed on: Aug.~3, 2014.
+% Conference Paper from the Internet
+\bibitem{lach_2010}J.~Lach, ``SBFS: Steganography based file system,'' in \emph{Proceedings of the 2008 1st International Conference on Information Technology, IT 2008, 19-21 May 2008, Gdansk, Poland.} Available: IEEE Xplore, \url{http://www.ieee.org}. [Accessed: 10 Sept. 2010].
+% Web page, no author
+\bibitem{a_laymans_explanation}``A `layman's' explanation of Ultra Narrow Band technology,'' Oct.~3, 2003. [Online]. Available: \url{http://www.vmsk.org/Layman.pdf}. [Accessed: Dec.~3, 2003]. 
+\end{thebibliography}
+
+% This is a hand-made bibliography. If you want to use a BibTeX file, you're on your own ;-)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

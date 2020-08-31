@@ -83,7 +83,7 @@ print("fps : ", i / (time.time() - start) )
 # print("associationEvents.shape = ", multipleTargetTracker.associationEvents.shape)
 
 
-# ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
+ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
     
 ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, False, gateThreshold)
         

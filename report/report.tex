@@ -198,14 +198,42 @@ In this section, I will give details about the algorithms and their implementati
 
 
 \subsection{IMM}
-This may be a modified version of your proposal depending on previously carried out research or any feedback received.
+IMM is used to integrate multiple kinematic models to obtain fused estimate. All used models have their own weights(mode probabilities), which determine their influence on the fused estimate. Mode probabilities are updated at each measurement time step, based on if one mode(kinematic model) were more successfull to estimate at the previous time step then the other modes.
+
+\vspace{10px}
+
+
+\begin{center}
+
+\begin{tabularx}{0.4\textwidth }{@{}p{0.2\textwidth}X@{}}
+\toprule
+  Notation \\
+  $r_k$ & The mode at time step k \\ \\
+  $z_k$ & Measured state at k\\ \\
+  $x_k$ & State at k\\ \\
+  $\hat{x}_k$ & State mean at k\\ \\
+  $\hat{z}_k$ & State measured mean at k\\ \\
+  $\hat{x}^i_k$ & State mean at k according to mode i\\\\
+  $\hat{x}_k^{[i]}$ & Mixed state mean at k for mode i\\\\
+  $S_k$ & State innovation matrix at k\\ \\
+  $Z_k$ & The measurement at time k\\ \\
+  $\mu_k^i$ & Mode probability at k\\ \\
+  
+ 
+\bottomrule
+\end{tabularx}
+
+\end{center}
+
+\captionof{table}{IMM Notation Table}\label{tbl:IMM Notation Table}
 
 \vspace{10px}
 
 \subsubsection{Mixing}
+At each step all the models have to mix their states with each other. This is the interaction step where IMM(Interaction Multiple Model)'s 'I' take it's name. This step helps models to stay in some bound(not formal) without diverging from each other completely.
 
 \begin{equation}
- \mu_{k-1|k-1}^{ji} \equalhat P(r_{k-1} = j \,|\, r_{k} = i, y_{0:k-1}) 
+ \mu_{k-1|k-1}^{ji} \equalhat P(r_{k-1} = j \,|\, r_{k} = i, z_{0:k-1}) 
 \end{equation}
 
 \begin{equation}
@@ -216,16 +244,16 @@ This may be a modified version of your proposal depending on previously carried 
 \end{equation}
 
 \begin{equation}
-\hat{x}_{k-1|k-1}^{0i} = \sum\limits_{j=1}^{N_{r}} \mu_{k-1|k-1}^{ji} \; \hat{x}_{k-1|k-1}^j
+\hat{x}_{k-1|k-1}^{[i]} = \sum\limits_{j=1}^{N_{r}} \mu_{k-1|k-1}^{ji} \; \hat{x}_{k-1|k-1}^j
 \end{equation}
 
 
 \begin{equation}
 \begin{aligned}
-&P_{k-1|k-1}^{0i} = \sum\limits_{j=1}^{N_{r}} \mu_{k-1|k-1}^{ji} \;  
+&P_{k-1|k-1}^{i} = \sum\limits_{j=1}^{N_{r}} \mu_{k-1|k-1}^{ji} \;  
 [P_{k-1|k-1}^j \;+ \\ 
-&( \hat{x}_{k-1|k-1}^j - \hat{x}_{k-1|k-1}^{0i} ) \,
-(\hat{x}_{k-1|k-1}^j - \hat{x}_{k-1|k-1}^{0i})^T ]
+&( \hat{x}_{k-1|k-1}^j - \hat{x}_{k-1|k-1}^{[i]} ) \,
+(\hat{x}_{k-1|k-1}^j - \hat{x}_{k-1|k-1}^{[i]})^T ]
 \end{aligned}
 \end{equation}
 
@@ -234,47 +262,165 @@ This may be a modified version of your proposal depending on previously carried 
 \vspace{10px}
 
 \subsubsection{Mode Prediction Updates}
+\vspace{10px}
+In this part each model independently predicts the next state, which are state mean and state covariance.
 \subsubsection{Mode Measurement Updates}
+\vspace{10px}
+Again in this part each model independently updates their state using the measurement(s) given.
 \subsubsection{New Mode Probabilities}
+\vspace{10px}
+Here each model's mode probability is calculated. New mode probabilities are dependent on how good each model were able estimate the new state using markov chains.
 \begin{equation}
 \mu_k^i = \frac
-{N(y_k; \hat{y}_{k|k-1}^i, S_k^i) \; \sum\limits_{j=i}^{N_r} \pi_{ji}\,\mu_{k-1}^j }
-{\sum\limits_{l=1}^{N_r} N(y_k; \hat{y}_{k|k-1}^l, S_k^l) \; \sum\limits_{j=1}^{N_r} \pi_{jl}^j }
+{N(Z_k; \hat{z}_{k|k-1}^i, S_k^i) \; \sum\limits_{j=i}^{N_r} \pi_{ji}\,\mu_{k-1}^j }
+{\sum\limits_{l=1}^{N_r} N(Z_k; \hat{z}_{k|k-1}^l, S_k^l) \; \sum\limits_{j=1}^{N_r} \pi_{jl}^j }
 \end{equation}
 
 \subsubsection{Output Estimate Calculation}
-
+Finally the one unified estimate is calculated based on the new calculated mode probabilities. Each model can contribute to the unified estimate proportional to their mode probability. Note that this stage does not affect any part of the algorithm, it is only used for output.
 \begin{equation}
-\hat{x}_{k|k} = \sum\limits_{i=1}^{N_r} \mu_k^i \, \hat{x_{k|k}^i}
+\hat{x}_{k|k} = \sum\limits_{i=1}^{N_r} \mu_k^i \, \hat{x}_{k|k}^i
 \end{equation}
 
 \begin{equation}
-\begin{align}
-P_{k|k} = \sum\limits_{i=1}^{N_r} \mu_k^i \,+ \\
-[
-\begin{end}
+\begin{aligned}
+&P_{k|k} = \sum\limits_{i=1}^{N_r} \mu_k^i \, 
+[ P_{k|k}^i +   (\hat{x}_{k|k}^i - \hat{x}_{k|k}) \, (\hat{x}_{k|k}^i - \hat{x}_{k|k})^T]
+\end{aligned}
 \end{equation}
 
 
 \subsection{UKF}
-Describe your first solution here.
 
+It is used to estimate state for non-linear prediction models. Best intuitive and formal explaination is in it's original paper[REFERENCE HERE] \\
+
+\vspace{10px}
+
+\begin{center}
+
+\begin{tabularx}{0.4\textwidth }{@{}p{0.2\textwidth}X@{}}
+\toprule
+  Notation \\ \\
+  $\hat{x}_{k-1|k-1}^i$ & i'th sigma point obtained from k-1'th step \\ \\
+
+  
+ 
+\bottomrule
+\end{tabularx}
+
+\end{center}
+
+\captionof{table}{UKF Notation Table}\label{tbl:UKF Notation Table}
+
+
+\vspace{10px}
 
 \subsubsection{Unscented Transform}
-\subsubsection{Prediction}
-\subsubsection{Update}
 
+First sigma points are calculated. It is like sampling near the state mean, but in a systematic and proven way. Note that $ (\sqrt{(L+\lambda) \, P_{k-1|k-1}})_i $ is the i'th column or row of the matrix inside the parentheses. [REFERENCE HERE] But one must stick to one choice, row or column.
+
+\begin{equation}
+\begin{aligned}
+&\hat{x}_{k-1|k-1}^0 = \hat{x}_{k-1|k-1} \\
+&\hat{x}_{k-1|k-1}^i = \hat{x}_{k-1|k-1} \; + &(\sqrt{(L+\lambda) \, P_{k-1|k-1}})_i  \\
+& &i\in 1,...,L\\
+&\hat{x}_{k-1|k-1}^i = \hat{x}_{k-1|k-1} \; - &(\sqrt{(L+\lambda) \, P_{k-1|k-1}})_{\,i-L} \\
+& &i\in L+1,...,2L 
+\end{aligned}
+\end{equation}
+
+\subsubsection{Prediction}
+At this part each sigma points are passed through the prediction function. After that, each points are used to get the predicted state mean and covariance. The used parameter values in my implementation for the parameters presented here($\alpha, \kappa, \beta ...)$ can be found in the original paper. [REFERENCE HERE]
+\vspace{10px}
+\begin{equation}
+\begin{aligned}
+&\hat{x}_{k|k-1}^i = f(\hat{x}_{k-1|k-1}^i),  \; \; i\in 0,...,2L\\
+&W_s^0 = \frac{\lambda}{L + \lambda}, \; W_c^0 = \frac{\lambda}{L+\lambda} + (1-\alpha^2 + \beta)\\
+&W_s^i = W_c^i = \frac{1}{2(L+\lambda)}, \; \lambda = \alpha^2 (L+\kappa) - L \\
+&\hat{x}_{k|k-1} = \sum\limits_{i=0}^{2L} W_s^i \, \hat{x}_{k|k-1}^i \\
+&P_{k|k-1} = \sum\limits_{i=0}^{2L} W_c^i \, [\hat{x}_{k|k-1}^i-\hat{x}_{k|k-1}]\,[\hat{x}_{k|k-1}^i-\hat{x}_{k|k-1}]^T + Q 
+\end{aligned}
+\end{equation}
+\vspace{10px}
+\subsubsection{Second Unscented Transform}
+In prediction state the state covariance matrix is calculated and now it is time to find the new sigma points with respect to this new predicted state mean and covariance. Why do we need these sigma points? Reason is to make measurements on these sigma points. If the measurement function is linear than this part and next part is not necessary. Update parameters($S_k, K_k$) can be calculated using the classical kalman filter equations. This is the case with my project.
+\vspace{10px}
+\begin{equation}
+\begin{aligned}
+&\hat{x}_{k|k-1}^{*0} = \hat{x}_{k|k-1} \\
+&\hat{x}_{k|k-1}^{*i} = \hat{x}_{k|k-1} \; + &(\sqrt{(L+\lambda) \, P_{k|k-1}})_i  \\
+& &i\in 1,...,L\\
+&\hat{x}_{k|k-1}^{*i} = \hat{x}_{k|k-1} \; - &(\sqrt{(L+\lambda) \, P_{k|k-1}})_{\,i-L} \\
+& &i\in L+1,...,2L 
+\end{aligned}
+\end{equation}
+\vspace{10px}
+\subsubsection{Calculate Update Parameters}
+If the measurement function is linear, which is the case for my situation, than this part can be replaced with classical kalman filter update parameter calculations. In my implementation I have coded both of them to see the difference. Note that I have not seen any formal explaination to do this but it made sense and indeed they give the exact same result.
+\vspace{10px}
+
+\begin{equation}
+\begin{aligned}
+&\hat{z}_k^i = h(\hat{x}_{k|k-1}^i), \; i\in 0,...,2L\\
+&\hat{z}_{k|k-1} = \sum\limits_{i=0}^{2L} W_c^i \; [\hat{x}_{k|k-1}^{*i} - \hat{x}_{k|k-1}]\,[\hat{x}_{k|k-1}^{*i} - \hat{x}_{k|k-1}]^T\\
+&P_{z_{k|k-1}, z_{k|k-1}} = \sum\limits_{i=0}^{2L} W_c^i \, [\hat{z}_{k|k-1}^i - \hat{z}_{k|k-1}]\,[\hat{z}_{k|k-1}^i - \hat{z}_{k|k-1}]^T \\
+&S_k = P_{z_{k|k-1}, z_{k|k-1}} + R\\
+&P_{x_{k|k-1}, z_{k|k-1}} = \sum\limits_{i=0}^{2L} [\hat{x}_{k|k-1}^i - \hat{x}_{k|k-1}]\;[\hat{z}_{k|k-1}^i - \hat{z}_{k|k-1}]^T\\
+&K_k = P_{x_{k|k-1},z_{k|k-1}} \; S^{-1}
+\end{aligned}
+\end{equation}
+
+\vspace{10px}
+
+\subsubsection{Update}
+These are usual kalman filter update equations.
+\begin{equation}
+\begin{aligned}
+&\hat{x}_k = \hat{x}_{k|k-1} + K_k \; (Z_k - \hat{z}_{k|k-1}) \\
+&P_k = P_{k|k-1} - K_k \; S \; K_k^T
+\end{aligned}
+\end{equation}
+
+\vspace{10px}
 
 \subsection{JPDAF}
-Bla Bla
+ JPDAF is used for soft data association. It assumes that the number of existing tracks is a known, meaning it does not have power to initiate new tracks from the given measurements. It calculates the possibility of associations between each track and each measurement. This data association probability is the output of the JPDAF. Later these probabilities are passed to PDAF along with the measurements to update the each tracker. JPDAF is clearly explained in [REFERENCE], but implementation part was not clear.
+
+\vspace{10px}
+
+\subsubsection{Validation Matrix}
+"Validation Matrix" is presented here [REFERENCE HERE]. It is a binary matrix with $m_k$ number of rows and $N_r+1$ number of columns. The elements of the matrix, lets say $b_{i,j}$, represent if the i'th measurement is close to j'th track. If it is close, that element is 1 otherwise 0. Whether a measurement is close to a track is decided based on the mahalonobis distance between the track's measured state mean and the measurement, using the innovation matrix as the covariance. The rationale can be find in [REFERENCE]. Note that $j=0$ represents the possibility of that measurement is associated with no track. To include this possibility for all measurements the first column of the validation matrix is initiated as 1.
+
+\vspace{10px}
 
 \subsubsection{Association Events}
-\subsubsection{Validation Matrix}
+An association event is nothing but just one of the possibilites to associate the existing tracks and the incoming measurements. In my implementation I have written an exhaustive algorithm($O(m_k^{N_r+1})$) to try find the possible association events using the validation matrix. If the validation matrix is dense, meaning the all measurements are close to all tracks, and if there are vast number of tracks and measurements the performance of the algorithms is very bad. I measured the run time of my implementation with $m_k = 8$ and $N_r = 8$ and filling the validation matrix with all ones, as $41.797$ seconds, which is very bad. On the other hand with $m_k = 5$ and $N_r = 5$ and filling the validation matrix with all ones, as $0.036$ seconds. Note that a more sparse validation matrix really helps to time performance, but downside it can not be sparsity can not be guaranteed. [CODE REFERENCE]
+
+\vspace{10px}
+
 \subsubsection{Joint Association Probabilities}
+All possible events were generated and stored. Now it is time to calculate their probability. Now here I give the formal definition of an event.
+\begin{equation}
+\begin{aligned}
+\theta = \bigcap\limits_{j=1}^m \theta_{j,t_j}
+\end{aligned}
+\end{equation}
+
+where $\theta_{j,t_j}$ is the event that measurement j is associated with track $t_j$. Track $t_j$ is the associated track with measurement j.
+
+Now here the two way of calculation of the probability of an event
+
+\begin{equation}
+\begin{aligned}
+P(\theta|Z^k) = 1/c \; \prod\limits_j^{m_k}( \lambda^{-1} \, f_{t_j}[z_j(k)]] )^{\tau_j} \; \prod\limits_j^{m_k}( \lambda^{-1} \, f_{t_j}[z_j(k)]] )^{\tau_j}
+\end{aligned}
+\end{equation}
 
 \subsection{PDAF}
-Bla bla
-
+\begin{equation}
+\begin{aligned}
+\end{aligned}
+\end{equation}
 
 
 

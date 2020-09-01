@@ -100,7 +100,6 @@ def createValidationMatrix(measurements, tracks, gateThreshold):
     return (validatedMeasurementIndexes, validationMatrix)
 
 
-
 validatedMeasurementIndexes, validationMatrix = createValidationMatrix(commonVar.measurements, commonVar.tracks, commonVar.gateThreshold)
 if(validatedMeasurementIndexes.shape[0] > 0):
     validatedMeasurements = commonVar.measurements[validatedMeasurementIndexes[:,0]]

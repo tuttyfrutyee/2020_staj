@@ -319,8 +319,8 @@ class Tracker_SingleTarget_SingleModel_allMe(object):
                     self.track.x_predict, self.track.P_predict = uH.predictNextState(f_predict_model1, dt, sigmaPoints, self.Ws, self.Wc, ProcessNoiseCovs[1])                    
             
 
-                    #sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                                       
-                    #self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model1, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[1] ) 
+                    # sigmaPoints = uH.generateSigmaPoints(self.track.x_predict, self.track.P_predict, self.lambda_)                                       
+                    # self.track.S, self.track.kalmanGain, self.track.z_predict = uH.calculateUpdateParameters(self.track.x_predict, self.track.P_predict, h_measure_model1, sigmaPoints, self.Ws, self.Wc, MeasurementNoiseCovs[1] ) 
                     
                     H = np.array([[1, 0, 0, 0, 0],[0, 1, 0, 0, 0]])
                     self.track.S = np.dot(H, np.dot(self.track.P_predict, H.T)) + MeasurementNoiseCovs[1]

@@ -10,6 +10,9 @@ from Trackers.SingleTarget.allMe.track_singleTarget_multipleModel import Tracker
 from myHelpers.visualizeHelper import showPerimeter
 
 
+# some helper functions
+
+
 def extractMeasurementsFromScenario(scenario):
     measurementPacks = []
     i = 0
@@ -57,37 +60,40 @@ def extractGroundTruthFromScenario(scenario):
     return groundTruthPacks
 
 
+# setting parameters and data
+
+
+    #get data ready
 measurementPacks = extractMeasurementsFromScenario(scn.scenario_5)
 groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_5)
 
-scn.scenario_5.plotScenario()
 
-predictions = []
-
+loss = 0
 dt = 0.1
-
+S = None
+z = None
 imm = False
+modeType = 1
+
+
 if(not imm):
-    tracker = Tracker_SingleTarget_SingleModel_allMe(1)
+    tracker = Tracker_SingleTarget_SingleModel_allMe(modeType)
 else:
     tracker = Tracker_SingleTarget_IMultipleModel_allMe()
 
 measurements = []
 states = []
 modeProbs = []
+predictions = []
 
-calLoss = True
-loss = 0
 
-S = None
-z = None
-gateThreshold = 5
 
-eigens = []
+
+# tracking
 
 for i, (groundTruthPack, measurementPack) in enumerate(zip(groundTruthPacks, measurementPacks)):
     
-    #singleTarget
+    #since singleTarget, index 0
     measurement = measurementPack[0]
     groundTruth = groundTruthPack[0]
     
@@ -98,45 +104,41 @@ for i, (groundTruthPack, measurementPack) in enumerate(zip(groundTruthPacks, mea
         predictions.append(tracker.track.z)
 
         diff = tracker.track.z - groundTruth
+        loss += np.sqrt(np.sum(np.dot(diff.T, diff)))
+      
 
         states.append(tracker.track.x)
-        
-        eigens.append(np.max(np.linalg.eig(tracker.track.P)[0]))
         
         if(not imm and i == len(groundTruthPacks)-1):
             S = tracker.track.S
             z = tracker.track.z_predict
         
-        if(calLoss):
-            loss += np.sqrt(np.sum(np.dot(diff.T, diff)))
+        
         if(imm):
             modeProbs.append(tracker.modeProbs)
 
 predictions = np.squeeze(predictions)
 measurements = np.array(measurements)
 states = np.array(states)
-if(imm):
-    modeProbs = np.array(modeProbs)
+
+
+# plotting
+
+scn.scenario_5.plotScenario()
+
 
 plt.plot(measurements[:,0], measurements[:,1])    
 plt.plot(predictions[:,0], predictions[:,1], linewidth=2)
 
-#plt.plot(states[:,2,0] / np.pi * 180)
-#plt.plot(states[:,3,0])
+
 if(imm):
+    modeProbs = np.array(modeProbs)    
     plt.figure()
     for i in range(modeProbs.shape[1]):
         plt.plot(modeProbs[:,i], label="model "+str(i)) 
 
     plt.legend()
     
-if(not imm and 0):
-    plt.figure()
-    plt.plot(eigens[200:])
-
-#showPerimeter(z, np.linalg.inv(S), np.pi / 100, gateThreshold)
-
-
 
 
 

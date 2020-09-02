@@ -1,18 +1,19 @@
+# -*- coding: utf-8 -*-
+
 import matplotlib.pyplot as plt
 import numpy as np
 import Scenarios.scenario as scn
 import copy
+import time
 
-from Trackers.MultipleTarget.allMe.track_multipleTarget_singleModel import Tracker_MultipleTarget_SingleModel_allMe
+from Trackers.MultipleTarget.allMe.track_multipleTarget_multipleModel import Tracker_MultipleTarget_MultipleModel_allMe
 
 from myHelpers.visualizeHelper import showPerimeter
 from myHelpers.visualizeHelper import showRadius
 from myHelpers.visualizeHelper import visualizeTrackingResults
 
 
-#%matplotlib qt
-#scn.scenario_2.plotScenario()
-
+#functions for getting data out of scenarios
 
 def extractMeasurementsFromScenario(scenario):
     measurementPacks = []
@@ -51,45 +52,43 @@ def extractGroundTruthFromScenario(scenario):
     return groundTruthPacks
 
 
+
+# get data
 measurementPacks = extractMeasurementsFromScenario(scn.scenario_3)
 groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_3)
 
-scn.scenario_3.plotScenario()
 
 
-
-modelType = 0
-gateThreshold = 10
+#parameters
+gateThreshold = 20
 distanceThreshold = 5
-spatialDensity = 0.0001
-detThreshold = 200
-PD = 0.99
-
+spatialDensity = 0.00008
+detThreshold = 1000
+PD = 0.999
 dt = 0.1
 
 
-multipleTargetTracker = Tracker_MultipleTarget_SingleModel_allMe(modelType, gateThreshold, distanceThreshold, detThreshold, spatialDensity, PD)
+#get the tracker
 
+multipleTargetTracker = Tracker_MultipleTarget_MultipleModel_allMe(gateThreshold, distanceThreshold, detThreshold, spatialDensity, PD)
 
+#tracking happens here
+
+start = time.time()
 for i, measurementPack in enumerate(measurementPacks):
 
     measurements = np.array(measurementPack)
     multipleTargetTracker.feedMeasurements(measurements, dt, i)
-      
-        
-        
-# for initTracker in multipleTargetTracker.initTrackerHistory:
-      
-#     showRadius(initTracker.measurements[-1], distanceThreshold, np.pi/100)
-                
-        
-print("validationMatrix.shape = ", multipleTargetTracker.validationMatrix.shape)
-print("associationEvents.shape = ", multipleTargetTracker.associationEvents.shape)
+print("fps : ", i / (time.time() - start) )
 
+
+#plotting
+
+scn.scenario_3.plotScenario()        
 
 # ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
-
+    
 ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, False, gateThreshold)
         
         
-        
+

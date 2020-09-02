@@ -77,19 +77,19 @@ scenario_2 = scenario.Scenario(stds_2, objectPathCorners_2, corruptions_2, stepS
     Scenario 3: 2 object with corruptions
 
 """
-stds_3 = [1, 1, 1, 1, 1, 1]
+stds_3 = [1.2, 1.2, 1.2]
 # stds_3 = [1.4, 1.4]
 
-objectPathCorners_3 = [ None, None, None, None, None, None ] 
+objectPathCorners_3 = [ None, None, None ] 
 # objectPathCorners_3 = [ None, None] 
 
-corruptions_3 = [None, None, None, None, None, None]
+corruptions_3 = [(3,4), None, None]
 # corruptions_3 = [None, None]
 
-stepSizes_3 = [None, None, None, None, None, None]
+stepSizes_3 = [None, None, None]
 # stepSizes_3 = [None, None]
 
-colors_3 = [("b", "g"), None, None, None, None, None]
+colors_3 = [("b", "g"), None, None]
 # colors_3 = [("b", "g"), None]
 
 

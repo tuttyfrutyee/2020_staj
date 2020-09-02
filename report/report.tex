@@ -15,7 +15,7 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 
-\hyphenation{op-tical net-works semi-conduc-tor} % Corrects some bad hyphenation 
+
 
 \usepackage[margin=10pt, labelfont=bf, format=hang, textfont={small,it}]{caption} % for more interesting captions
 \captionsetup[subfigure]{style=default, margin=0pt, labelfont=bf, textfont={small,it}, singlelinecheck=true} % makes subfigure captions a bit more interesting.
@@ -408,17 +408,94 @@ All possible events were generated and stored. Now it is time to calculate their
 
 where $\theta_{j,t_j}$ is the event that measurement j is associated with track $t_j$. Track $t_j$ is the associated track with measurement j.
 
-Now here the two way of calculation of the probability of an event
+Now here are the two ways of calculating the probability of an event.
+\vspace{5px}
 
+Parametric calculation:
 \begin{equation}
 \begin{aligned}
-P(\theta|Z^k) = 1/c \; \prod\limits_j^{m_k}( \lambda^{-1} \, f_{t_j}[z_j(k)]] )^{\tau_j} \; \prod\limits_j^{m_k}( \lambda^{-1} \, f_{t_j}[z_j(k)]] )^{\tau_j}
+P(\theta|Z^k) = \frac{1}{c} \; \prod\limits_{j=1}^{m_k} \{ \lambda^{-1} \, f_{t_j}[z_j(k)] \} ^{\tau_j} \; \prod\limits_{t=1}^{N_r} (P_D)^{\delta_t} \, (1-P_D)^{1-\delta_t}
 \end{aligned}
 \end{equation}
 
-\subsection{PDAF}
+Nonparametric calculation:
+
 \begin{equation}
 \begin{aligned}
+P(\theta|Z^k) = \frac{1}{c^{'}} \; \phi! \; \prod\limits_{j=1}^{m_k} \{ V \, f_{t_j}[z_j(k)] \} ^{\tau_j} \; \prod\limits_{t=1}^{N_r} (P_D)^{\delta_t} \, (1-P_D)^{1-\delta_t}
+\end{aligned}
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+f_{t_j}[z_j(k)] = N[Z^j_k; \; \hat{z}^{t_j}_{k|k-1}, \; S^{t_j}_k]
+\end{aligned}
+\end{equation}
+
+\vspace{5px}
+
+The derivations can be found in [REFERENCE].
+
+\vspace{5px}
+
+\begin{center}
+
+\begin{tabularx}{0.4\textwidth }{@{}p{0.2\textwidth}X@{}}
+\toprule
+  Notation \\ \\
+  $V$ & Volume of the surveillance region \\ \\
+  $\lambda$ & Spatial density of false measurements \\ \\
+  $P_D$ & Detection probability of the detector \\ \\
+  $\delta_t$ & A binary number showing whether target t is associated with a measurement in that event\\ \\
+  $\tau_j$ & A binary number showing whether measurement j is associated with a target in that event \\ \\
+  $t_j$ & It is the index of the track which measurement j is associated with in that event \\ \\
+  $\phi$ & The number of false alarms in that event\\ \\
+  
+ 
+\bottomrule
+\end{tabularx}
+
+\end{center}
+
+\captionof{table}{JPDAF Notation Table}\label{tbl:JPDAF Notation Table}
+
+\vspace{10px}
+
+The implementation of surveillance region was not clear in [BYL95]. One solution could be to take the volume of the track with highest volume(page 211 [BYL95]), or maybe summing the max volumes of all tracks could be a solution. I haven't implemented the non-parametric version since it is ambiguous. \\
+
+Note that the calculation of event probabilities are not normalized(there is a $\frac{1}{c}$ constant in the event probability calculation). That is why we need to normalize the event probabilities now.
+
+\begin{equation}
+\begin{aligned}
+P(\theta|Z^k) = \frac{P(\theta|Z^k)}{\sum\limits_{\theta^{'}\in \, all \, events} P(\theta^{'}|Z^k)}
+\end{aligned}
+\end{equation}
+
+After normalization it is time to calculate the data association probabilities needed for the PDAF part. 
+
+\begin{equation}
+\begin{aligned}
+\beta^{jt}_k \equalhat P(\theta_{jt}|Z_k) = \sum\limits_{\theta: \; \theta_{jt} \in \theta} P(\theta | Z_k)
+\end{aligned}
+\end{equation}
+
+where $\theta_{jt}$ is the event that measurement j is associated with target t.
+
+Equation(18) is for $j\in 1,...,m_k$. For j=0, meaning no measurement is associated with the track t, here is the calculation.
+\begin{equation}
+\begin{aligned}
+\beta^{0t}_k = 1 - \sum\limits_{j=1}^{m_k} \beta^{jt}_k
+\end{aligned}
+\end{equation}
+
+
+\subsection{PDAF}
+PDAF is about updating a track with multiple measurements each of which has a association probability with that track. In fact, one of the measurements is "no measurement available for track" which also has a probability.
+ 
+\begin{equation}
+\begin{aligned}
+&v^j_k = Z^j_k - \hat{z}_{k|k-1} \\
+&v_k = \sum\limits_{j=1}^{m_k} \beta^{jt}_k \; v^j_k
 \end{aligned}
 \end{equation}
 
@@ -503,12 +580,6 @@ H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
 % Web page, no author
 \bibitem{a_laymans_explanation}``A `layman's' explanation of Ultra Narrow Band technology,'' Oct.~3, 2003. [Online]. Available: \url{http://www.vmsk.org/Layman.pdf}. [Accessed: Dec.~3, 2003]. 
 \end{thebibliography}
-
-% This is a hand-made bibliography. If you want to use a BibTeX file, you're on your own ;-)
-
-
-
-
 
 
 

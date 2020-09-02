@@ -102,8 +102,10 @@ def generateAssociationEvents(validationMatrix):
     return np.array(associationEvents, dtype=int)
 
 start = time.time()
-# associationEvents = generateAssociationEvents(cVM.validationMatrix)
-associationEvents = generateAssociationEvents(np.ones((5,6)))
+associationEvents = generateAssociationEvents(cVM.validationMatrix)
+print(cVM.validationMatrix)
+print(associationEvents)
+# associationEvents = generateAssociationEvents(np.ones((5,6)))
 
 print("Took : ", time.time() - start, " seconds")
 # print_("associationEvents : ", associationEvents)

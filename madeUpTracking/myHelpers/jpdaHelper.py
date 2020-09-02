@@ -401,7 +401,7 @@ def calculateJointAssociationProbability_nonParametric(jAE, measurements, tracke
             measurementProbabilities *= calculateTheProbabilityOfTheMeasurement(measurements[measurementIndex], trackPriorMean, trackS)
             measurementProbabilities *= volume
 
-    return measurementProbabilities * fact(m_k - numberOfDetections) * pow(PD, numberOfDetections) * pow(1-PD, len(tracks) - numberOfDetections)
+    return measurementProbabilities * fact(m_k - numberOfDetections) * pow(PD, numberOfDetections) * pow(1-PD, len(trackers) - numberOfDetections)
 
 
 

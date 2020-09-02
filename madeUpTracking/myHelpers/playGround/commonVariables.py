@@ -4,8 +4,8 @@ import numpy as np
 
 dimX = 5 #state dimension
 dimZ = 2 #measurement state dimension
-Nr = 10 #number of modes(models)
-m_k = 10 #number of measurements
+Nr = 3 #number of modes(models)
+m_k = 3 #number of measurements
 
 
 def generateRandomCovariance_positiveDefinite(dim):

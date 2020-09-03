@@ -6,6 +6,8 @@ import myHelpers.unscentedHelper as uH
 import myHelpers.jpdaHelper as jH
 import myHelpers.pdaHelper as pH
 
+import time
+
 
 measurementNoiseStd = np.sqrt(2)
 Q_0 = 0.005
@@ -59,6 +61,8 @@ MeasurementNoiseCovs = [
         [0, measurementNoiseStd * measurementNoiseStd]
     ],    
 ]
+
+
 ProcessNoiseCovs = [
     #modeltype 0
 
@@ -78,14 +82,14 @@ ProcessNoiseCovs = [
          # [0,0,0,0],
          # [0,0,0,0]     
 
-    ]) * 2.9).tolist(),
+    ]) * 4.84).tolist(),
     #modeltype 1
     (np.array([
-       [0.12958419304911287,0,0,0,0],
-       [0,0.20416385918814656,0,0,0],
-       [0,0,0.008794949000079913,0,0],
-       [0,0,0,0.8057826337426066,0],
-       [0,0,0,0,0] 
+       # [0.1319892455536184,0,0,0,0],
+       # [0,0.19014929833113914,0,0,0],
+       # [0,0,0.009662497641306406,0,0],
+       # [0,0,0,2.850971754138458,0],
+       # [0,0,0,0,0] 
      
         # [Q_0, 0, 0, 0, 0],
         # [0, Q_0, 0, 0, 0],
@@ -93,20 +97,20 @@ ProcessNoiseCovs = [
         # [0, 0, 0, Q_0, 0],
         # [0, 0, 0, 0, 0]       
      
-      # [0,0,0,0,0],
-      # [0,0,0,0,0],
-      # [0,0,0,0,0],
-      # [0,0,0,0,0],
-      # [0,0,0,0,0]
-    ]) / 200).tolist(),
+       [0,0,0,0,0],
+       [0,0,0,0,0],
+       [0,0,0,0,0],
+       [0,0,0,0,0],
+       [0,0,0,0,0]
+    ]) * 0.1152).tolist(),
     #modeltype 2
     (np.array([
         
-       [0.114736907423371,0,0,0,0],
-       [0,0.1354455356615292,0,0,0],
-       [0,0,0.6637200640035631,0,0],
-       [0,0,0,2.9248106675773875,0],
-       [0,0,0,0,0.9305139758546961]      
+       # [0.114736907423371,0,0,0,0],
+       # [0,0.1354455356615292,0,0,0],
+       # [0,0,0.6637200640035631,0,0],
+       # [0,0,0,2.9248106675773875,0],
+       # [0,0,0,0,0.9305139758546961]      
      
         # [Q_0, 0, 0, 0, 0],
         # [0, Q_0, 0, 0, 0],
@@ -114,13 +118,13 @@ ProcessNoiseCovs = [
         # [0, 0, 0, Q_0, 0],
         # [0, 0, 0, 0, Q_0 / 1e8] 
      
-       # [0,0,0,0,0],
-       # [0,0,0,0,0],
-       # [0,0,0,0,0],
-       # [0,0,0,0,0],
-       # [0,0,0,0,0],     
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],     
          
-     ])/ 400).tolist(),
+     ]) * 0.0576).tolist(),
     #modeltype 3
     [
         [1e-2, 0, 0, 0, 0],
@@ -130,6 +134,7 @@ ProcessNoiseCovs = [
         [0, 0, 0, 0, 0 ]             
      ],     
 ]
+
 
 for i,noiseCov in enumerate(MeasurementNoiseCovs):
     MeasurementNoiseCovs[i] = np.array(noiseCov, dtype = float)
@@ -513,6 +518,7 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
         self.spatialDensity = spatialDensity
         self.detThreshold = detThreshold
         self.PD = PD
+        
 
 
         if(modelType == 1 or modelType == 2 or modelType == 3):
@@ -570,6 +576,7 @@ class Tracker_MultipleTarget_SingleModel_allMe(object):
             self.initTrackers.remove(tracker)
             self.matureTrackers.append(tracker)
             self.matureTrackerHistory.append(tracker)
+                    
             
     def feedMeasurements(self, measurements, dt, timeStamp):
 

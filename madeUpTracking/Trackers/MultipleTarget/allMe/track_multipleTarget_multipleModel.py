@@ -9,6 +9,7 @@ import myHelpers.pdaHelper as pH
 import myHelpers.immHelper as IMM_helper
 
 import copy
+import time
 
 
 measurementNoiseStd = np.sqrt(1)
@@ -110,7 +111,7 @@ ProcessNoiseCovs = [
        # [0,0,0,0,0],
        # [0,0,0,0,0],     
          
-     ]) * 0.0576).tolist(),
+     ]) * 0.0025).tolist(),
     #modeltype 3
     [
         [1e-2, 0, 0, 0, 0],
@@ -674,6 +675,9 @@ class Tracker_MultipleTarget_MultipleModel_allMe(object):
         self.spatialDensity = spatialDensity
         self.detThreshold = detThreshold
         self.PD = PD
+        
+        self.timeLogs = [] # [predictTime, newTrackCheckTime, [validationMatrixTime, eventGenerationTime, calculateAssociationProbs], update ]
+        
 
 
         self.unscentedWeights = uH.generateUnscentedWeights(L = 5, alpha = 1e-3, beta = 2, kappa = 0)
@@ -742,15 +746,23 @@ class Tracker_MultipleTarget_MultipleModel_allMe(object):
 
         #second select from initTracks that are mature now
         self.trackertify()
+        
+        start = time.time()
+        timeLog = []
 
         #now predict the next state, only mature trackers will predict
         self.predict(dt, timeStamp)
+        
+        timeLog.append(time.time() - start)
+        start = time.time()
 
         #greedy association to find unmatched measurements
         matureTrackers = np.array(self.matureTrackers, dtype=object)
         initTrackers = np.array(self.initTrackers, dtype = object)
         unmatchedMeasurements, initTrackerBoundedMeasurements, distanceMatrix = jH.greedyAssociateMeasurements(matureTrackers, initTrackers, measurements, self.gateThreshold, self.distanceThreshold)
 
+        timeLog.append(time.time() - start)
+        timeLog.append([])
 
         #put measurements to init tracks
         for i,tracker in enumerate(self.initTrackers):
@@ -761,21 +773,36 @@ class Tracker_MultipleTarget_MultipleModel_allMe(object):
 
             #now the association probabilities will be calculated(JPDA)
 
+            start = time.time()
+
                 #createValidationMatrix
             validatedMeasurementIndexes, validationMatrix = jH.createValidationMatrix(distanceMatrix, measurements, self.matureTrackers, self.gateThreshold)
             self.validationMatrix = validationMatrix
+            
+            timeLog[2].append(time.time() - start)
+            
 
             validatedMeasurements = measurements[validatedMeasurementIndexes]
             self.validatedMeasurements = validatedMeasurements
 
+            start = time.time()
+            
                 #generateAssociationEvents
             associationEvents = jH.generateAssociationEvents(validationMatrix)
             self.associationEvents = associationEvents
-
+            
+            timeLog[2].append(time.time() - start)
+            
+            start = time.time()
+            
                 #calculateMarginalAssociationProbs
             marginalAssociationProbabilities = jH.calculateMarginalAssociationProbabilities(associationEvents, validatedMeasurements, self.matureTrackers, self.spatialDensity, self.PD)
 
             self.marginalAssociationProbabilities = marginalAssociationProbabilities
+            
+            timeLog[2].append(time.time() - start)
+
+            start = time.time()            
 
             #now pass the marginalAssocationProbs to PDA stage
             for t,tracker in enumerate(self.matureTrackers):
@@ -786,6 +813,12 @@ class Tracker_MultipleTarget_MultipleModel_allMe(object):
                     associationProbs = None
 
                 tracker.feedMeasurements(validatedMeasurements, associationProbs, timeStamp)
+                
+            timeLog.append(time.time() - start)
+            
+            timeLog[2] = np.array(timeLog[2])
+                
+            self.timeLogs.append(timeLog)
                 
         #finally go and init new tracks with unmatchedMeasurements
 

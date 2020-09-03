@@ -101,8 +101,12 @@ def generateAssociationEvents(validationMatrix):
     
     return np.array(associationEvents, dtype=int)
 
+customValMatrix = np.array([[1, 1, 0], [1, 1, 1], [1, 0, 1], [1, 0, 1]])
+
 start = time.time()
-associationEvents = generateAssociationEvents(cVM.validationMatrix)
+# associationEvents = generateAssociationEvents(cVM.validationMatrix)
+associationEvents = generateAssociationEvents(customValMatrix)
+
 print(cVM.validationMatrix)
 print(associationEvents)
 # associationEvents = generateAssociationEvents(np.ones((5,6)))

@@ -283,6 +283,7 @@ def visualizeTrackingResults(trackers, measurementPacks, groundTruthPacks, anima
             
             predictions = tracker.updatedStateHistory
             
+            
             xs = []
             Ps = []
                     

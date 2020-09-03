@@ -64,8 +64,8 @@ def extractGroundTruthFromScenario(scenario):
 
 
     #get data ready
-measurementPacks = extractMeasurementsFromScenario(scn.scenario_5)
-groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_5)
+measurementPacks = extractMeasurementsFromScenario(scn.scenario_4)
+groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_4)
 
 
 loss = 0
@@ -73,7 +73,7 @@ dt = 0.1
 S = None
 z = None
 imm = False
-modeType = 1
+modeType = 2
 
 
 if(not imm):
@@ -124,7 +124,7 @@ states = np.array(states)
 
 # plotting
 
-scn.scenario_5.plotScenario()
+scn.scenario_4.plotScenario()
 
 
 plt.plot(measurements[:,0], measurements[:,1])    

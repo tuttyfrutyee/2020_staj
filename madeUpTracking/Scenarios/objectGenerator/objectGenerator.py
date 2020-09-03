@@ -26,8 +26,8 @@ class Object_(object):
 
     """
 
-    maxW = 150 # -> generated x points satisfy |x| < maxW
-    maxH = 150 # -> generated y points satisfy |y| < maxH
+    maxW = 50 # -> generated x points satisfy |x| < maxW
+    maxH = 50 # -> generated y points satisfy |y| < maxH
 
 
     

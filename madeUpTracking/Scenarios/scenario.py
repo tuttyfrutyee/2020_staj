@@ -77,19 +77,19 @@ scenario_2 = scenario.Scenario(stds_2, objectPathCorners_2, corruptions_2, stepS
     Scenario 3: 2 object with corruptions
 
 """
-stds_3 = [1.2, 1.2, 1.2]
+stds_3 = [1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2]
 # stds_3 = [1.4, 1.4]
 
-objectPathCorners_3 = [ None, None, None ] 
+objectPathCorners_3 = [ None, None, None, None, None, None, None, None] 
 # objectPathCorners_3 = [ None, None] 
 
-corruptions_3 = [(3,4), None, None]
+corruptions_3 = [(3,4), None, None, None, None, None, None, None]
 # corruptions_3 = [None, None]
 
-stepSizes_3 = [None, None, None]
+stepSizes_3 = [None, None, None, None, None, None, None, None]
 # stepSizes_3 = [None, None]
 
-colors_3 = [("b", "g"), None, None]
+colors_3 = [("b", "g"), None, None, None, None, None, None, None]
 # colors_3 = [("b", "g"), None]
 
 
@@ -104,7 +104,7 @@ scenario_3 = scenario.Scenario(stds_3, objectPathCorners_3, corruptions_3, stepS
 
 """
 
-    Scenario 4: Single object with no corruptions
+    Scenario 4: Single object circle with no corruptions
 
 """
 
@@ -136,7 +136,7 @@ a = 3
 
 """
 stds_5 = [1.2]
-objectPathCorners_5 = [ None ] 
+objectPathCorners_5 = [ ([0, 100, 200], [0, 200, 400]) ] 
 corruptions_5 = [None]
 stepSizes_5 = [0.4]
 colors_5 = [("b", "g")]

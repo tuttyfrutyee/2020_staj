@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import Scenarios.scenario as scn
 import copy
+import time
 
 from Trackers.MultipleTarget.allMe.track_multipleTarget_singleModel import Tracker_MultipleTarget_SingleModel_allMe
 
@@ -14,6 +15,7 @@ from myHelpers.visualizeHelper import visualizeTrackingResults
 
 #%matplotlib qt
 
+cutMeasurementIndex = float("inf")
 
 
 #functions for getting data out of scenarios
@@ -30,7 +32,8 @@ def extractMeasurementsFromScenario(scenario):
 
             if(len(object_.xPath) > i):
                 if(object_.xNoisyPath[i] is not None):
-                    measurementPack.append(np.expand_dims(np.array([object_.xNoisyPath[i], object_.yNoisyPath[i]]), axis=1))
+                    if(i < cutMeasurementIndex):
+                        measurementPack.append(np.expand_dims(np.array([object_.xNoisyPath[i], object_.yNoisyPath[i]]), axis=1))
             else:
                 exhausteds[k] = 1
         if(np.sum(exhausteds) > len(scenario.objects)-1):
@@ -57,13 +60,13 @@ def extractGroundTruthFromScenario(scenario):
 
 # get data
 
-measurementPacks = extractMeasurementsFromScenario(scn.scenario_1)
-groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_1)
+measurementPacks = extractMeasurementsFromScenario(scn.scenario_0)
+groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_0)
 
 
 #parameters
 
-modelType = 2
+modelType = 1
 gateThreshold = 10
 distanceThreshold = 5
 spatialDensity = 0.0001
@@ -71,22 +74,22 @@ detThreshold = 200
 PD = 0.99
 dt = 0.1
 
-
 # get the tracker
 multipleTargetTracker = Tracker_MultipleTarget_SingleModel_allMe(modelType, gateThreshold, distanceThreshold, detThreshold, spatialDensity, PD)
 
-
+start = time.time()
 # tracking happens here
 for i, measurementPack in enumerate(measurementPacks):
-
+    print(str(i / len(measurementPacks) * 100) + "% complete")
     measurements = np.array(measurementPack)
     multipleTargetTracker.feedMeasurements(measurements, dt, i)
-      
 
+print("multipleTarget_singleModel fps : ", i/(time.time() - start), "with " + str(len(scn.scenario_3.objects)) + " number of tracks")
+fps = i/(time.time() - start)
 
 #plotting
 
-scn.scenario_1.plotScenario()
+scn.scenario_0.plotScenario()
 
 # ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
 

@@ -106,7 +106,7 @@ def visualizeLossSpace(scalesToTest, lossSpace, log):
 
 
 initialScale = 1e-4
-finalScale = 2
+finalScale = 5
 logStep = 2
 linearStepPointCount = 8
 dt = 0.1
@@ -115,7 +115,7 @@ scalesToTest = createScaleTestPoints(initialScale, finalScale, logStep, linearSt
 lossSpace = generateLossSpace(trainData.valDataPacks, scalesToTest, dt)
 
 visualizeLossSpace(scalesToTest, lossSpace, True)
-visualizeLossSpace(scalesToTest[-70:], lossSpace[-70:], False)
+visualizeLossSpace(scalesToTest[-40:], lossSpace[-40:], False)
 
                     
         

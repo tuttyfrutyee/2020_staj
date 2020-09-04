@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.8.31)  2 SEP 2020 13:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.8.31)  4 SEP 2020 12:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1457,13 +1457,13 @@ Underfull \hbox (badness 10000) in paragraph at lines 464--465
  []
 
 [5]
-Underfull \hbox (badness 2818) in paragraph at lines 555--556
+Underfull \hbox (badness 2818) in paragraph at lines 556--557
  \OT1/ptm/m/it/10 1) Op-ti-miza-tion: [][] \OT1/ptm/m/n/10 Use the sub-sub-sec-
 tion com-mand with
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 577--579
+Underfull \hbox (badness 10000) in paragraph at lines 578--580
 \OT1/ptm/m/n/8 SrchMode = 1 & sid = 3 & Fmt = 3 & VInst = PROD & VType = PQD & 
 RQT = 309 &
  []
@@ -1495,7 +1495,7 @@ cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></u
 sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fo
 nts/type1/urw/times/utmri8a.pfb>
-Output written on report.pdf (7 pages, 180815 bytes).
+Output written on report.pdf (7 pages, 180848 bytes).
 PDF statistics:
  90 PDF objects out of 1000 (max. 8388607)
  65 compressed objects within 1 object stream

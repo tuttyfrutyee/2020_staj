@@ -104,7 +104,7 @@ def visualizeLossSpace(scalesToTest, lossSpace, log):
 
 
 initialScale = 1e-4
-finalScale = 15
+finalScale = 10
 logStep = 2
 linearStepPointCount = 8
 dt = 0.1

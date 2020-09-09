@@ -7,12 +7,12 @@ This one suppose to be the common helper file for the other helper files. It tur
 
 ## findCovariance
 
-Main purpose is to find the covariance of the trackers when they are initialized. Do not worry this script is only run once and the results are hard coded to the tracker class files. I have added the necessary explanation to my intern report, you can read from there to see what it does.
+Main purpose is to find the covariance of the trackers when they are initialized. Do not worry this script is only run once and the results are hard coded to the tracker class files. [Estimation and Tracking Principles, page 247]
 
 ## immHelper
-
+s
 It is for IMM
-
+s
 ## jpdaHelper
 
 It is for JPDA

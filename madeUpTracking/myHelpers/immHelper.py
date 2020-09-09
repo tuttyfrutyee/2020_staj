@@ -104,7 +104,6 @@ def updateModeProbabilities_PDA(modeStateMeans_measured, modeSs, measurements, g
             modeStateMeans_measured : np.array(shape = (Nr, dimZ))
             modeSs : np.array(shape = (Nr, dimZ, dimZ))
             measurements : np.array(shape = (m_k, dimZ))
-            likelihoods : np.array(shape = (Nr, m_k)
             gateThreshold : float between(0,1)
             PD : float between(0,1)
             transitionMatrix : np.array(shape = (Nr, Nr))

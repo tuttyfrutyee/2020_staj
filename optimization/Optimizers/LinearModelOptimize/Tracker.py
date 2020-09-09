@@ -150,11 +150,3 @@ class Tracker_SingleTarget_SingleModel_Linear_allMe(object):
             
             return self.track.z
         
-        
-        
-        
-        
-        
-        
-        
-        

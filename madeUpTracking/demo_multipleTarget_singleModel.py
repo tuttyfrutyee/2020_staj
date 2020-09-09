@@ -60,8 +60,8 @@ def extractGroundTruthFromScenario(scenario):
 
 # get data
 
-measurementPacks = extractMeasurementsFromScenario(scn.scenario_0)
-groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_0)
+measurementPacks = extractMeasurementsFromScenario(scn.scenario_2)
+groundTruthPacks = extractGroundTruthFromScenario(scn.scenario_2)
 
 
 #parameters
@@ -89,7 +89,7 @@ fps = i/(time.time() - start)
 
 #plotting
 
-scn.scenario_0.plotScenario()
+scn.scenario_2.plotScenario()
 
 # ani = visualizeTrackingResults(multipleTargetTracker.matureTrackerHistory, measurementPacks, groundTruthPacks, True, gateThreshold)
 

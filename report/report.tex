@@ -1,4 +1,4 @@
-%% Template for ENG 401 reports
+	%% Template for ENG 401 reports
 %% by Robin Turner
 %% Adapted from the IEEE peer review template
 
@@ -59,6 +59,8 @@
 %end directory visualization
 
 
+
+
 \begin{document}
 %\begin{titlepage}
 % paper title
@@ -117,8 +119,6 @@ In order to track multiple objects an data association method is required. JPDAF
 % Note that IEEE typically puts floats only at the top, even when this
 % results in a large percentage of a column being occupied by floats.
 \section{Objectives}
-*Explain why you had to implement the algorithms yourself
-*Talk about other possible methods to solve multi object tracking problem
 
 To be honest, no clear objectives were provided in the beginning of my internship, only the master thesis. After have read the thesis and searched internet for some context I have determined the objectives myself, which were seem to be approved by my supervisor Dr. Berker Logoglu. Here is the list.
 \begin{itemize}
@@ -180,27 +180,8 @@ To be honest, no clear objectives were provided in the beginning of my internshi
 \section{IMM-UKF-JPDAF}
 In this section, I will give details about the algorithms and their implementation details with some insights I have gained.
 
-\begin{center}
-
-\begin{tabularx}{0.4\textwidth }{@{}p{0.2\textwidth}X@{}}
-\toprule
-  Indices \\
-  $K$ & Number of ... \\
-  $T$ & Number of ... \\
-  Parameters \\
-  c   & something \\
-\bottomrule
-\end{tabularx}
-
-\end{center}
-
-\captionof{table}{Notation Table}\label{tbl:Notation Table}
-
-
 \subsection{IMM}
 IMM is used to integrate multiple kinematic models to obtain fused estimate. All used models have their own weights(mode probabilities), which determine their influence on the fused estimate. Mode probabilities are updated at each measurement time step, based on if one mode(kinematic model) were more successfull to estimate at the previous time step then the other modes.
-
-\vspace{10px}
 
 
 \begin{center}
@@ -250,7 +231,7 @@ At each step all the models have to mix their states with each other. This is th
 
 \begin{equation}
 \begin{aligned}
-&P_{k-1|k-1}^{i} = \sum\limits_{j=1}^{N_{r}} \mu_{k-1|k-1}^{ji} \;  
+&P_{k-1|k-1}^{[i]} = \sum\limits_{j=1}^{N_{r}} \mu_{k-1|k-1}^{ji} \;  
 [P_{k-1|k-1}^j \;+ \\ 
 &( \hat{x}_{k-1|k-1}^j - \hat{x}_{k-1|k-1}^{[i]} ) \,
 (\hat{x}_{k-1|k-1}^j - \hat{x}_{k-1|k-1}^{[i]})^T ]
@@ -269,11 +250,11 @@ In this part each model independently predicts the next state, which are state m
 Again in this part each model independently updates their state using the measurement(s) given.
 \subsubsection{New Mode Probabilities}
 \vspace{10px}
-Here each model's mode probability is calculated. New mode probabilities are dependent on how good each model were able estimate the new state using markov chains.
+Here each model's mode probability is calculated. New mode probabilities are dependent on how good each model were able estimate the new state, markov chains and previous mode probabilities.
 \begin{equation}
 \mu_k^i = \frac
 {N(Z_k; \hat{z}_{k|k-1}^i, S_k^i) \; \sum\limits_{j=i}^{N_r} \pi_{ji}\,\mu_{k-1}^j }
-{\sum\limits_{l=1}^{N_r} N(Z_k; \hat{z}_{k|k-1}^l, S_k^l) \; \sum\limits_{j=1}^{N_r} \pi_{jl}^j }
+{\sum\limits_{l=1}^{N_r} N(Z_k; \hat{z}_{k|k-1}^l, S_k^l) \; \sum\limits_{j=1}^{N_r} \pi_{jl}\,\mu_{k-1} ^j }
 \end{equation}
 
 \subsubsection{Output Estimate Calculation}
@@ -292,7 +273,7 @@ Finally the one unified estimate is calculated based on the new calculated mode 
 
 \subsection{UKF}
 
-It is used to estimate state for non-linear prediction models. Best intuitive and formal explaination is in it's original paper[REFERENCE HERE] \\
+It is used to estimate state for non-linear prediction models. Best intuitive and formal explaination is in it's original paper \cite{MERWE00}. \\
 
 \vspace{10px}
 
@@ -317,7 +298,7 @@ It is used to estimate state for non-linear prediction models. Best intuitive an
 
 \subsubsection{Unscented Transform}
 
-First sigma points are calculated. It is like sampling near the state mean, but in a systematic and proven way. Note that $ (\sqrt{(L+\lambda) \, P_{k-1|k-1}})_i $ is the i'th column or row of the matrix inside the parentheses. [REFERENCE HERE] But one must stick to one choice, row or column.
+First sigma points are calculated. It is like sampling near the state mean, but in a systematic and proven way. Note that $ (\sqrt{(L+\lambda) \, P_{k-1|k-1}})_i $ is the i'th column or row of the matrix inside the parentheses \cite{UKFT}. But one must stick to one choice, row or column.
 
 \begin{equation}
 \begin{aligned}
@@ -330,7 +311,7 @@ First sigma points are calculated. It is like sampling near the state mean, but 
 \end{equation}
 
 \subsubsection{Prediction}
-At this part each sigma points are passed through the prediction function. After that, each points are used to get the predicted state mean and covariance. The used parameter values in my implementation for the parameters presented here($\alpha, \kappa, \beta ...)$ can be found in the original paper. [REFERENCE HERE]
+At this part each sigma points are passed through the prediction function. After that, each points are used to get the predicted state mean and covariance. The used parameter values in my implementation for the parameters presented here($\alpha, \kappa, \beta ...)$ can be found in the original paper \cite{MERWE00}.
 \vspace{10px}
 \begin{equation}
 \begin{aligned}
@@ -362,11 +343,11 @@ If the measurement function is linear, which is the case for my situation, than 
 \begin{equation}
 \begin{aligned}
 &\hat{z}_k^i = h(\hat{x}_{k|k-1}^i), \; i\in 0,...,2L\\
-&\hat{z}_{k|k-1} = \sum\limits_{i=0}^{2L} W_c^i \; [\hat{x}_{k|k-1}^{*i} - \hat{x}_{k|k-1}]\,[\hat{x}_{k|k-1}^{*i} - \hat{x}_{k|k-1}]^T\\
+&\hat{z}_{k|k-1} = \sum\limits_{i=0}^{2L} W_s^i \; \hat{z}_k^i \\
 &P_{z_{k|k-1}, z_{k|k-1}} = \sum\limits_{i=0}^{2L} W_c^i \, [\hat{z}_{k|k-1}^i - \hat{z}_{k|k-1}]\,[\hat{z}_{k|k-1}^i - \hat{z}_{k|k-1}]^T \\
 &S_k = P_{z_{k|k-1}, z_{k|k-1}} + R\\
-&P_{x_{k|k-1}, z_{k|k-1}} = \sum\limits_{i=0}^{2L} [\hat{x}_{k|k-1}^i - \hat{x}_{k|k-1}]\;[\hat{z}_{k|k-1}^i - \hat{z}_{k|k-1}]^T\\
-&K_k = P_{x_{k|k-1},z_{k|k-1}} \; S^{-1}
+&P_{x_{k|k-1}, z_{k|k-1}} = \sum\limits_{i=0}^{2L} W_c^i \, [\hat{x}_{k|k-1}^i - \hat{x}_{k|k-1}]\;[\hat{z}_{k|k-1}^i - \hat{z}_{k|k-1}]^T\\
+&K_k = P_{x_{k|k-1},z_{k|k-1}} \; S^{-1}_k
 \end{aligned}
 \end{equation}
 
@@ -384,22 +365,22 @@ These are usual kalman filter update equations.
 \vspace{10px}
 
 \subsection{JPDAF}
- JPDAF is used for soft data association. It assumes that the number of existing tracks is a known, meaning it does not have power to initiate new tracks from the given measurements. It calculates the possibility of associations between each track and each measurement. This data association probability is the output of the JPDAF. Later these probabilities are passed to PDAF along with the measurements to update the each tracker. JPDAF is clearly explained in [REFERENCE], but implementation part was not clear.
+ JPDAF is used for soft data association. It assumes that the number of existing tracks is a known, meaning it does not have power to initiate new tracks from the given measurements. It calculates the possibility of associations between each track and each measurement. This data association probability is the output of the JPDAF. Later these probabilities are passed to PDAF along with the measurements to update the each tracker. JPDAF is clearly explained in \cite{BYL95}, but implementation part was not clear.
 
 \vspace{10px}
 
 \subsubsection{Validation Matrix}
-"Validation Matrix" is presented here [REFERENCE HERE]. It is a binary matrix with $m_k$ number of rows and $N_r+1$ number of columns. The elements of the matrix, lets say $b_{i,j}$, represent if the i'th measurement is close to j'th track. If it is close, that element is 1 otherwise 0. Whether a measurement is close to a track is decided based on the mahalonobis distance between the track's measured state mean and the measurement, using the innovation matrix as the covariance. The rationale can be find in [REFERENCE]. Note that $j=0$ represents the possibility of that measurement is associated with no track. To include this possibility for all measurements the first column of the validation matrix is initiated as 1.
+"Validation Matrix" is presented here \cite[p.312]{BYL95}. It is a binary matrix with $m_k$ number of rows and $N_r+1$ number of columns. The elements of the matrix, lets say $b_{i,j}$, represent if the i'th measurement is close to j'th track. If it is close, that element is 1 otherwise 0. Whether a measurement is close to a track is decided based on the mahalonobis distance between the track's measured state mean and the measurement, using the innovation matrix as the covariance. The rationale can be find in \cite[p.312]{BYL95}. Note that $j=0$ represents the possibility of that measurement is associated with no track. To include this possibility for all measurements the first column of the validation matrix is initiated as 1.
 
 \vspace{10px}
 
 \subsubsection{Association Events}
-An association event is nothing but just one of the possibilites to associate the existing tracks and the incoming measurements. In my implementation I have written an exhaustive algorithm($O(m_k^{N_r+1})$) to try find the possible association events using the validation matrix. If the validation matrix is dense, meaning the all measurements are close to all tracks, and if there are vast number of tracks and measurements the performance of the algorithms is very bad. I measured the run time of my implementation with $m_k = 8$ and $N_r = 8$ and filling the validation matrix with all ones, as $41.797$ seconds, which is very bad. On the other hand with $m_k = 5$ and $N_r = 5$ and filling the validation matrix with all ones, as $0.036$ seconds. Note that a more sparse validation matrix really helps to time performance, but downside it can not be sparsity can not be guaranteed. [CODE REFERENCE]
+An association event is nothing but just one of the possibilites to associate the existing tracks and the incoming measurements. In my implementation I have written an exhaustive algorithm($O(m_k^{N_r+1})$) to try find the possible association events using the validation matrix. If the validation matrix is dense, meaning the all measurements are close to all tracks, and if there are vast number of tracks and measurements, the performance of the algorithms is very bad. I measured the run time of my implementation with $m_k = 8$ and $N_r = 8$ and filling the validation matrix with all ones, as $41.797$ seconds, which is very bad. On the other hand with $m_k = 5$ and $N_r = 5$ and filling the validation matrix with all ones, as $0.036$ seconds. Note that a more sparse validation matrix really helps to time performance, but downside is the sparsity can not be guaranteed.
 
 \vspace{10px}
 
 \subsubsection{Joint Association Probabilities}
-All possible events were generated and stored. Now it is time to calculate their probability. Now here I give the formal definition of an event.
+All possible events were generated and stored. Now it is time to calculate their probability. Now here I give the formal definition of an event ${\theta}$.
 \begin{equation}
 \begin{aligned}
 \theta = \bigcap\limits_{j=1}^m \theta_{j,t_j}
@@ -434,7 +415,7 @@ f_{t_j}[z_j(k)] = N[Z^j_k; \; \hat{z}^{t_j}_{k|k-1}, \; S^{t_j}_k]
 
 \vspace{5px}
 
-The derivations can be found in [REFERENCE].
+The derivations can be found in \cite[p.317]{BYL95}.
 
 \vspace{5px}
 
@@ -461,7 +442,7 @@ The derivations can be found in [REFERENCE].
 
 \vspace{10px}
 
-The implementation of surveillance region was not clear in [BYL95]. One solution could be to take the volume of the track with highest volume(page 211 [BYL95]), or maybe summing the max volumes of all tracks could be a solution. I haven't implemented the non-parametric version since it is ambiguous. \\
+The implementation of surveillance region was not clear in \cite{BYL95}. One solution could be to take the volume of the track with highest volume\cite[p.211]{BYL95}, or maybe summing the max volumes of all tracks could be a solution. That is why I haven't implemented the non-parametric version, it is ambiguous. \\
 
 Note that the calculation of event probabilities are not normalized(there is a $\frac{1}{c}$ constant in the event probability calculation). That is why we need to normalize the event probabilities now.
 
@@ -490,96 +471,295 @@ Equation(18) is for $j\in 1,...,m_k$. For j=0, meaning no measurement is associa
 
 
 \subsection{PDAF}
-PDAF is about updating a track with multiple measurements each of which has a association probability with that track. In fact, one of the measurements is "no measurement available for track" which also has a probability. [BYL95 page 130]
+PDAF is about updating a track t with multiple measurements each of which has a association probability with that track t. In fact, one of the measurements is "no measurement available for track" which also has a probability \cite[p.130]{BYL95}.\\
 
-Here 
+Note that, I will omit the superscript "t" from the equations, which would represent the equations are for track t. \\
+
+Here are some variables to be used in the state update equations.\\
 \begin{equation}
 \begin{aligned}
 &v^j_k = Z^j_k - \hat{z}_{k|k-1} \\
-&v_k = \sum\limits_{j=1}^{m_k} \beta^{jt}_k \; v^j_k
+&v_k = \sum\limits_{j=1}^{m_k} \beta^{jt}_k \; v^j_k \\
+&P^c_{k|k} = P_{k|k-1} - K_k \, S_k \, K_k^T \\
+&\tilde{P}_k \equalhat K_k \; [\sum\limits_{j=1}^{m_k} \beta^{jt}_k \, v^j_k \, (v^j_k)^T \; - \; v_k \, v_k^T ] \; K_k^T
 \end{aligned}
 \end{equation}
+
+Now the state update equations. \\
+
+\begin{equation}
+\begin{aligned}
+&\hat{x}_{k|k} = \hat{x}_{k|k-1} + K_k \, v_k \\
+&P_{k|k} = \beta^{0t}_k \, P_{k|k-1} + 	[1-\beta^{0t}_k] \, P^c_{k|k} + \tilde{P}_k
+\end{aligned}
+\end{equation}
+
+The explanation and derivation can be find in \cite[p.130]{BYL95}.
+
+
 
 
 
 \subsection{Putting It All Together}
-Bla bla
+I will now summarize how to use all these algorithms together. Note that only change will be in IMM algorithm in the calculation of new mode probabilities. \\
+
+\vspace{5px}
 
 \subsubsection{Mixings}
+This part is not different. For each track, independently from other tracks, different models will mix their states based on their mode probabilities.
+
+\vspace{10px}
+
 \subsubsection{Predictions}
+This part is not different. Each track's, independently from other tracks and independent from other models inside that track, will predict the next state using UKF algorithm.
+
+\vspace{10px} 
+ 
 \subsubsection{Joint Data Association Probabilities Calculation}
+This part is tricky with IMM. Each track should have a state, whereas with IMM they have models. That is why for the event probability calculations one needs to fuse these models to get one state for each track. This fusing is same as the output stage of the IMM, but using the predictions of the models and the previous stage mode probabilities, at least this is what I have implemented. I could not find any information how to implement this part elsewhere.
+
+\vspace{10px} 
+
 \subsubsection{Updates}
+In this part using the data association probabilities and measurements calculated from JPDAF stage, each track's models will update their states.
+
+\vspace{10px}
+
 \subsubsection{New Mode Probabilities Calculation}
+This is the part where new equation is needed, since there isn't just one measurement but measurements, hence mode probability calculation must be altered. Here is the equations from \cite[p.211]{BYL95} and \cite[p.53]{AAR17}.
+
+\begin{equation}
+\begin{aligned}
+\mu^i_k = \frac{\wedge^i_k[Z_k] \; \sum\limits_{j=1}^{N_r} \pi_{ji} \, \mu^j_{k-1}}{\sum\limits_{l=1}^{N_r} \{  \wedge^l_k[Z_k] \, \sum\limits_{j=1}^{N_r} \pi_{jl} \, \mu^j_{k-1} \} } 
+\end{aligned}
+\end{equation}
+
+
+where
+\begin{equation}
+\begin{aligned}
+\wedge^j[Z_k] = \frac{1 - P_D}{V^{m_k}} + \frac{P_D}{m_k \, V^{m_k -1}} \; \sum\limits_{i=1}^{m_k} N[Z^i_k; \, \hat{z}^j_{k|k-1}, \, S^j_k] 
+\end{aligned}
+\end{equation}
+
+Note that, in my implementation I have used the highest volume among the models as the volume V, surveillance region. The volume calculation can be found here \cite[p.130]{BYL95}.
+
+\vspace{10px}
+
 \subsubsection{Final Output Estimations}
+
+Each track will fuse their models using the new calculated model probabilities to get an updated estimate for their states.
 
 
 \subsection{Testing of the Algorithms}
-The main difference between this section and the one in your report 
-\emph{Do not include your findings in this section.}
+In order to verify and validate my implementation I have created mock data and implemented tracker classes to track these generated data.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=.3]{mockData.png}}
+\caption{This is an image of a randomly generated scene. Blue path is ground truth and green lines are noisy measurements generated by adding gaussian noise added upon to the ground truth.}
+\label{fig}
+\end{figure}
+
+Unfortunately, I did not have time to test them on a real data set.
 
 \section{Trackers}
-In order to test algorithms independently, I have created 4 different tracking classes. First I have implemented Single Object Single Model Tracker and then moved to the others until have finished the final goal Multiple Object Multiple Model Tracker.
+I have implemented 4 different tracker classes to test my algorithms. I have run them on randomly generated scenes to see if they actually work or how good they work.
+
+Note that I have implemented track initialization based on the simple algorithm presented here, \cite[p.247]{BYL01}
 
 \subsection{Single Object Single Model Tracker}
 
-It is used to track single object with single model. The measurement to be fed to the tracker in each sampling time is expected to exist and be one. The algorithm of the interest to be validated is \emph{UKF}.
+This class can be found inside "madeUpTrackers/Trackers/SingleTarget/allMe" folder. \\
 
-*Reference to code location
-*How it is used
-*Rationale about the validation of the target algorithms
+It is used to track single object with single model. The measurement to be fed to the tracker in each sampling time is expected to exist and be one. Usage of this class can be found in "demo\_singleTarget.py". \\
+
+The algorithm of the interest to be validated is \emph{UKF}. I have implemented 3 different models; Constant Velocity(CV), Constant Velocity Turn Rate(CVTR), Random Motion(RM). I have implemented CV in two different ways, both with classic kalman filter and  unscented kalman filter, since CV is a linear model. I have checked different implementations online(e.g. filterpy) to make sure I have implemented correctly. Both comparing with different implementation and testing it on mock data, I have concluded, it is correct.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=.3]{singleTarget_singleModel_test.png}}
+\caption{This is the result of the tracking using "Single Object Single Model" tracker class with model "CV" using unscented kalman implementation on a randomly generated scene. Light blue line is measurements dark blue line is ground truth and orange line is the estimates of the tracker}
+\label{fig}
+\end{figure}
 
 \subsection{Single Object Multiple Model Tracker}
-*What it does and target algorithms to be validated
-*Reference to code location
-*How it is used
-*Rationale about the validation of the target algorithms
-\subsection{Multiple Object Single Model Tracker}
-*What it does and target algorithms to be validated
-*Reference to code location
-*How it is used
-*Rationale about the validation of the target algorithms
-\subsection{Multiple Object Multiple Model Tracker}
-*What it does and target algorithms to be validated
-*Reference to code location
-*How it is used
-*Rationale about the validation of the target algorithms
+This class can be found inside "madeUpTrackers/Trackers/SingleTarget/allMe" folder. \\
 
-\section{Trackers in Action}
-The main difference between this section and the one in your report 
-\emph{Do not include your findings in this section.}
+It is used to track single object with multiple model. The measurement to be fed to the tracker in each sampling time is expected to exist and be one. Usage of this class can be found in "demo\_singleTarget.py". \\
+
+The algorithms of the interest to be validated are \emph{UKF} and \emph{IMM}. I have combined "CV" and "CVTR" models. Previously I have added "RM" model too, but the results were not satisfying. In the master thesis it was added, maybe after process noise optimization it would give nice results. You can change the class to add more models. Just add new model forward and measurement functions. Also you would need to change the markov chain matrix and initial mode probabilities. Make sure that sum of the initial mode probabilities add up to 1.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=.5]{immPath_singleTarget.png}}
+\caption{This is the result of the tracking using "Single Object Multiple Model" tracker class with models "CV" and "CVTR" combined using unscented kalman implementation on a randomly generated scene. Light blue line is measurements dark blue line is ground truth and orange line is the estimates of the tracker}
+\label{fig}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=.5]{immProbabilities.png}}
+\caption{Here are the model probabilities of the imm tracker in figure 4. The legend "model 0" corresponds to "CV" model, and "model 1" corresponds to "CVTR" model.}
+\label{fig}
+\end{figure}
+
+
+
+\subsection{Multiple Object Single Model Tracker}
+This class can be found inside "madeUpTrackers/Trackers/MultipleTarget/allMe" folder. \\
+
+It is used to track multiple object with single model. The measurements to be fed to the tracker in each sampling time can be of any number, including 0. Usage of this class can be found in "demo\_multipleTarget\_singleTarget.py". \\
+
+The algorithms of the interest to be validated are \emph{UKF} and \emph{JPDAF}. I have implemented 3 different models; Constant Velocity(CV), Constant Velocity Turn Rate(CVTR), Random Motion(RM). I have implemented CV in two different ways, both with classic kalman filter and  unscented kalman filter, since CV is a linear model. I could not find any reliable source for the JPDAF implementation. On the other hand, results on mock data indicate my JPDAF implementation is correct.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=.3]{multiTarget_singleModel_cross.png}}
+\caption{This is the result of the tracking using "Multiple Object Single Model" tracker class with model "CVTR" using unscented kalman implementation on a randomly generated scene. In this plot the measurements are not shown. Purple circles shows the gating region of the trackers, the regions where trackers are allowed to associate measurements with.}
+\label{fig}
+\end{figure}
+
+\subsection{Multiple Object Multiple Model Tracker}
+
+This class can be found inside "madeUpTrackers/Trackers/MultipleTarget/allMe" folder. \\
+
+It is used to track multiple object with multiple model. The measurements to be fed to the tracker in each sampling time can be of any number, including 0. Usage of this class can be found in "demo\_multipleTarget\_multipleTarget.py". \\
+
+The algorithms of the interest to be validated are \emph{UKF}, \emph{IMM} and \emph{JPDAF}. I have implemented 3 different models; Constant Velocity(CV), Constant Velocity Turn Rate(CVTR), Random Motion(RM). Although the results of imm with single target were satisfactory, this is not the case for multiple target. \\ \\ Sometimes, the predictions of the tracker increases the state covariance too much, causing the tracker to diverge. Another issue is that, there are high frequency oscillations in the tracker paths. I did not have enough time to investigate these problems. I suspect, these problems would be resolved if process noise and some other parameters in the algorithms were set right. But it could also be an implementation error, which I have checked several times and could not find.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=.4]{multiTarget_multipleModel_cross.png}}
+\caption{This is the result of the tracking using "Multiple Object Multiple Model" tracker class with models "CV" and "CVTR" using unscented kalman implementation on a randomly generated scene. In this plot the measurements are not shown. Purple circles shows the gating region of the trackers, the regions where trackers are allowed to associate measurements with.}
+\label{fig}
+\end{figure}
+
 
 \section{The Need For Optimization}
-Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+Each model needs to have a process noise matrix, which is added to the state prediction covariance matrix in every step, accounts for the model's imperfectness. If the objects to be tracked behaved exactly like the models suggest, then we would not need to add process noise, but they don't and we have to add it. \\ \\
 
+In each iteration existing tracks' magnitude of the state covariances decreases. After few iterations their values become small enough to discard the information coming from the measurements. But if the process noise is added to these state covariances after each prediction, their magnitude does not converge to zero but to that of process noise. This way trackers don't become overconfident to discard the incoming measurements. \\ \\
+
+Obviously, the selected values in the process noise matrix are critical. Hand picking these values can be difficult, though it is not impossible. The dynamics of the interactions between these values can give rise to counter-intuitive results that makes it hard to do. This is why one needs an optimization technique to find the best process noise possible for each models for a given data-set or environment dynamics.
+
+\vspace{10px}
 
 \subsubsection{Optimization}
-Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+I could not spend much time on finding the best optimization technique. Because of it's simplicity I have used the optimization technique used in [reference here] with a minor modification. \\ \\
 
+First, I find the process noise for each model using the method given in [reference]. Then, by multiplying this matrix with scalar values selected from a interval and plotting it, I decide for the best scale for each model. At first I have tried to use back-propagation to find this best scale, but it takes to much time, and does not give me chance to see a visualization of the loss space of the complete interval. Another idea, that I have came out with is to use this scaled process noise matrix as a initial point for an back-propagation training of all the entries of the process noise. Again it took too much time to back-propagate, and I stopped working on it. If you want to work on this, make sure that with each iteration of the back-propagation, process noise matrix stays positive-definite. The way to do is generating(Cholesky decomposition) process noise from a lower or a upper triangular matrix with positive diagonal entries. While back-propagating to the lower(or upper) matrix, make sure that diagonal entries stay positive, clamp the elements of the gradient if it makes it negative. I had used the L2 distance between the updated estimates of the track and ground-truth as my loss function. \\ \\
+
+Here is how I calculated the initial process noise covariance matrix for model "CVTR", based on the technique in [reference]. \\
+
+First write down the model's prediction equations.
+\begin{equation}
+\begin{aligned}
+x_{k+1|k} &= x_k + \frac{v_k}{\dot{\phi}_k} \; (-sin(\phi_k) \, + \, sin(\Delta t * \dot{\phi}_k + \phi_k )) + \boldsymbol{q_x} \\ \\
+y_{k+1|k} &= y_k + \frac{v_k}{\dot{\phi}_k} \; (cos(\phi_k) \, - \, cos(\Delta t * \dot{\phi}_k + \phi_k )) + \boldsymbol{q_y} \\ \\
+\phi_{k+1|k} &= \phi_k + \Delta t * \dot{\phi}_k + \boldsymbol{q_{\phi}} \\ \\
+v_{k+1|k} &= v_k + \boldsymbol{q_v} \\ \\
+\dot{\phi}_{k+1|k} &= \dot{\phi}_k + \boldsymbol{q_{\dot{\phi}}} 
+\end{aligned}
+\end{equation}
+
+Now leave the process noises alone and find the variance of the right hand side by approximating the states using ground-truth data. Here are the approximations of the states. I will use capital letter to denote the ground truth data.\\
+
+\begin{equation}
+\begin{aligned}
+&x_k \approx X_k \\ 
+&y_k \approx Y_k \\ 
+&v_k \approx \frac{\sqrt{(X_k - X_{k-1})^2 + (Y_k - Y_{k-1})^2}}{\Delta t} \\  
+&\phi_k \approx tan^{-1}( \frac{Y_{k} - Y_{k-1}}{X_{k} - X_{k-1}}) \\ 
+&\dot{\phi}_k =  \frac{\phi_k - \phi_{k-1}}{\Delta t} \\
+&x_{k+1|k} \approx X_{k+1} \\ 
+&y_{k+1|k} \approx Y_{k+1} \\ 
+&v_{k+1|k} \approx V_{k+1} \\
+&\phi_{k+1|k} \approx \phi_{k+1} \\
+&\dot{\phi_{k+1|k}} \approx \dot{\phi_{k+1}} \\
+\end{aligned}
+\end{equation}
+
+\vspace{5px}
 \section{Performance Assesment}
-Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+\vspace{5px}
+
+\begin{center}
+\begin{tabular}{ |p{1cm}||p{2cm}|p{1.8cm}| p{1.8cm}| }
+ \hline
+ \multicolumn{4}{|c|}{Time Performances} \\
+ \hline
+ Object Count & CV(Non-linear) Model & CV(Linear) Model & IMM(CV \& CVTR)\\
+ \hline
+ 
+ 3   & 209 FPS    &441 FPS& 99 FPS  \\
+ 4   & 152 FPS    &222 FPS& 59 FPS  \\
+ 5   & 75 FPS    &104 FPS& 42 FPS  \\
+ 7   & 22 FPS    &19 FPS& 15 FPS  \\
+ 
+ \hline
+\end{tabular}
+
+\end{center}
+
+\captionof{table}{Tracker Performances Table}\label{tbl:Tracker Performances Table}
+\vspace{10px}
+When compared, linear model is faster than non-linear model and imm. But this gap shrinks when the number of objects increases, since the over-head of JPDAF algorithms start to dominate. When the number of objects increases, performance of the trackers decreases dramatically. Main reason is that, as the objects increases, number of joint association event count increases, hence the time spent on calculation of those events. Here I give the average percentage time spent on different parts of IMM-UKF-JPDAF tracker.
+
+\vspace{10px}
+\begin{center}
+\begin{tabular}{ |p{3cm}||p{1.8cm}| p{1.8cm}| }
+ \hline
+ \multicolumn{3}{|c|}{Spended Time on Different Parts} \\
+ \hline
+ Part& Average Time & Percentage\\
+ \hline
+ 
+ Prediction   & 0.013s & 8.63\%   \\ \\
+ New Track Check   & 0.00113s & 0.74\%  \\\\
+ Construction of Validation Matrix   & 0.000175s & 0.11\%   \\\\
+ Event Generation   & 0.00732s & 4.83\%  \\\\
+ Event Probability Calculations   & 0.112s & 74.50\%  \\\\
+ Update   & 0.0169s & 11.16\%   \\
+ 
+ 
+ \hline
+\end{tabular}
+
+\end{center}
+
+\captionof{table}{Spended Time for tracking 8 objects with 6fps}\label{tbl:Spended Time}
+
+
 
 
 
 \section{Fullfilment of the Objectives}
-Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+I have fulfilled my objectives partially. I have completed the implementation of the algorithms and the trackers using them step by step to test my implementations on mock data. But I could not test my trackers on a real data-set.
 
 \section{Conclusion}
-Use the subsubsection command with caution---you probably won't need it at, but I'm including it this an example.
+I have completed the implementation and the integration of IMM, UKF and JPDAF algorithms and successfully used them on my tracker classes. I have tried to test my implementations on mock data. I was satisfied with the results of tracker classes; "singleTarget-singleModel", "singleTarget-multipleModel", "multipleTarget-singleModel". But I am not sure if "multipleTarget-multipleModel" class is working right. The problem might be the wrong integration of IMM with JPDAF, though I have spent time to make sure it is right. Other possibility is parameters I have used are not tuned right. For this I did not spend the necessary time.
 
 
 \begin{thebibliography}{1}
 % Here are a few examples of different citations 
 % Book
-\bibitem{kopka_1999} % Note the label in the curly brackets. Use the cite the source; e.g., \cite{kopka_latex}
-H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
-\bibitem{horowitz_2005}D.~Horowitz, \emph{End of Time}. New York, NY, USA: Encounter Books, 2005. [E-book] Available: ebrary, \url{http://site.ebrary.com/lib/sait/Doc?id=10080005}. Accessed on: Oct. 8, 2008.
-% Article from database
-\bibitem{castlevecchi_2008}D.~Castelvecchi, ``Nanoparticles Conspire with Free Radicals'' \emph{Science News}, vol.174, no. 6, p. 9, September 13, 2008. [Full Text]. Available: Proquest, \url{http://proquest.umi.com/pqdweb?index=52&did=1557231641&SrchMode=1&sid=3&Fmt=3&VInst=PROD&VType=PQD&RQT=309&VName=PQD&TS=1229451226&clientId=533}. Accessed on: Aug.~3, 2014.
-% Conference Paper from the Internet
-\bibitem{lach_2010}J.~Lach, ``SBFS: Steganography based file system,'' in \emph{Proceedings of the 2008 1st International Conference on Information Technology, IT 2008, 19-21 May 2008, Gdansk, Poland.} Available: IEEE Xplore, \url{http://www.ieee.org}. [Accessed: 10 Sept. 2010].
-% Web page, no author
-\bibitem{a_laymans_explanation}``A `layman's' explanation of Ultra Narrow Band technology,'' Oct.~3, 2003. [Online]. Available: \url{http://www.vmsk.org/Layman.pdf}. [Accessed: Dec.~3, 2003]. 
+\bibitem{BYL95} 
+Y. Bar-Shalom and X.-R. Li, \emph{Multitarget-Multisensor Tracking Princibles and Techniques}, 3rd~ed. 1995.
+
+\bibitem{BYL01} 
+Y. Bar-Shalom, X.-R. Li and T.Kirubarajan, \emph{Estimation with Application to Tracking and Navigation}, New York, USA: John Wiley \& Sons, Inc., 2001.
+
+
+\bibitem{MERWE00} 
+E. a. Wan, R. van der Merwe, and A. Nelson, “Dual estimation and the unscented
+transformation,” Nips, no. January 2000, pp. 1–7, 2000.
+
+\bibitem{AAR17} 
+A.S. Abdul Rachman, 2017. 3D-LIDAR Multi Object Tracking for Autonomous Driving, Multi-target Detection and Tracking under Urban Road
+Uncertainties. Delft University of Technology, Netherlands.
+
+\bibitem{UKFT} 
+Gabriel A. Terejanu. Unscented Kalman Filter Tutorial. University at Buffalo, Buffalo.
+
+
+
+
 \end{thebibliography}
 
 

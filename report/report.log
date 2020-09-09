@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.8.31)  4 SEP 2020 12:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.9.7)  10 SEP 2020 02:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1255,21 +1255,37 @@ Package: inlinedef 2008/07/10 v1.0 Inlined expansions within definitions
 \forest@externalize@max@outer@n=\count316
 \forest@externalize@inner@n=\count317
 )
-(./report.aux)
+(./report.aux
+
+LaTeX Warning: Label `fig' multiply defined.
+
+
+LaTeX Warning: Label `fig' multiply defined.
+
+
+LaTeX Warning: Label `fig' multiply defined.
+
+
+LaTeX Warning: Label `fig' multiply defined.
+
+
+LaTeX Warning: Label `fig' multiply defined.
+
+)
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
 
 -- Lines per column: 58 (exact).
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
@@ -1358,12 +1374,12 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \tf@toc=\write5
 \openout5 = `report.toc'.
 
- (./report.lof)
+ (./report.lof
+[0{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}])
 \tf@lof=\write6
 \openout6 = `report.lof'.
 
-
-[0{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./report.lot)
+ (./report.lot)
 \tf@lot=\write7
 \openout7 = `report.lot'.
 
@@ -1380,71 +1396,76 @@ Package caption Warning: \captionsetup{type*=...} or \captionof
 See the caption package documentation for explanation.
 
 
-Underfull \hbox (badness 1968) in paragraph at lines 224--224
+Underfull \hbox (badness 1968) in paragraph at lines 205--205
 []|\OT1/ptm/m/n/10 The mea-sure-ment at
  []
 
 
-Underfull \vbox (badness 1394) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [2
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 295--296
+Underfull \hbox (badness 10000) in paragraph at lines 276--277
 
  []
 
 [3]
+Overfull \hbox (2.80309pt too wide) detected at line 352
+[][]
+ []
+
+
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [4]
-Overfull \hbox (3.37024pt too wide) detected at line 419
+Overfull \hbox (3.37024pt too wide) detected at line 400
 [][]
  []
 
 
-Overfull \hbox (8.90256pt too wide) detected at line 427
+Overfull \hbox (8.90256pt too wide) detected at line 408
 [][]
  []
 
 
-Underfull \hbox (badness 3547) in paragraph at lines 456--456
+Underfull \hbox (badness 3547) in paragraph at lines 437--437
 []|\OT1/ptm/m/n/10 Detection prob-a-bil-ity
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 456--456
+Underfull \hbox (badness 10000) in paragraph at lines 437--437
 []|\OT1/ptm/m/n/10 A bi-nary num-ber
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 456--456
+Underfull \hbox (badness 10000) in paragraph at lines 437--437
 \OT1/ptm/m/n/10 show-ing whether
  []
 
 
-Underfull \hbox (badness 2401) in paragraph at lines 456--456
+Underfull \hbox (badness 2401) in paragraph at lines 437--437
 \OT1/ptm/m/n/10 with a mea-sure-ment
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 456--456
+Underfull \hbox (badness 10000) in paragraph at lines 437--437
 []|\OT1/ptm/m/n/10 A bi-nary num-ber
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 456--456
+Underfull \hbox (badness 10000) in paragraph at lines 437--437
 \OT1/ptm/m/n/10 show-ing whether
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 456--456
+Underfull \hbox (badness 10000) in paragraph at lines 437--437
 \OT1/ptm/m/n/10 mea-sure-ment j is
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 456--456
+Underfull \hbox (badness 10000) in paragraph at lines 437--437
 \OT1/ptm/m/n/10 as-so-ci-ated with a
  []
 
@@ -1452,53 +1473,271 @@ Underfull \hbox (badness 10000) in paragraph at lines 456--456
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 464--465
+Underfull \hbox (badness 10000) in paragraph at lines 445--446
 
  []
 
 [5]
-Underfull \hbox (badness 2818) in paragraph at lines 556--557
- \OT1/ptm/m/it/10 1) Op-ti-miza-tion: [][] \OT1/ptm/m/n/10 Use the sub-sub-sec-
-tion com-mand with
+Underfull \hbox (badness 10000) in paragraph at lines 474--475
+
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 578--580
-\OT1/ptm/m/n/8 SrchMode = 1 & sid = 3 & Fmt = 3 & VInst = PROD & VType = PQD & 
-RQT = 309 &
+Underfull \hbox (badness 10000) in paragraph at lines 476--477
+
  []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 478--479
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 488--489
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 504--505
+
+ []
+
+<mockData.png, id=40, 744.381pt x 562.2606pt>
+File: mockData.png Graphic file (type png)
+<use mockData.png>
+Package pdftex.def Info: mockData.png  used on input line 558.
+(pdftex.def)             Requested size: 223.31602pt x 168.67947pt.
+[6 <./mockData.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 572--573
+[]\OT1/ptm/m/n/10 This class can be found in-side "made-Up-Track-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 572--573
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 574--575
+
+ []
+
+<singleTarget_singleModel_test.png, id=47, 836.1639pt x 522.5121pt>
+File: singleTarget_singleModel_test.png Graphic file (type png)
+<use singleTarget_singleModel_test.png>
+Package pdftex.def Info: singleTarget_singleModel_test.png  used on input line 
+579.
+(pdftex.def)             Requested size: 250.8511pt x 156.75484pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 585--586
+[]\OT1/ptm/m/n/10 This class can be found in-side "made-Up-Track-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 585--586
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 587--588
+
+ []
+
+<immPath_singleTarget.png, id=48, 462.528pt x 346.896pt>
+File: immPath_singleTarget.png Graphic file (type png)
+<use immPath_singleTarget.png>
+Package pdftex.def Info: immPath_singleTarget.png  used on input line 592.
+(pdftex.def)             Requested size: 231.26343pt x 173.44757pt.
+<immProbabilities.png, id=49, 462.528pt x 346.896pt>
+File: immProbabilities.png Graphic file (type png)
+<use immProbabilities.png>
+Package pdftex.def Info: immProbabilities.png  used on input line 599.
+(pdftex.def)             Requested size: 231.26343pt x 173.44757pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 607--608
+[]\OT1/ptm/m/n/10 This class can be found in-side "made-Up-Track-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 607--608
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 609--610
+
+ []
+
+[7 <./singleTarget_singleModel_test.png> <./immPath_singleTarget.png> <./immPro
+babilities.png>]
+<multiTarget_singleModel_cross.png, id=56, 673.5564pt x 542.7477pt>
+File: multiTarget_singleModel_cross.png Graphic file (type png)
+<use multiTarget_singleModel_cross.png>
+Package pdftex.def Info: multiTarget_singleModel_cross.png  used on input line 
+614.
+(pdftex.def)             Requested size: 202.06847pt x 162.82556pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 621--622
+[]\OT1/ptm/m/n/10 This class can be found in-side "made-Up-Track-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 621--622
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 623--624
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 625--626
+
+ []
+
+
+Underfull \hbox (badness 1661) in paragraph at lines 625--626
+\OT1/ptm/m/n/10 Sometimes, the pre-dic-tions of the tracker in-creases the
+ []
+
+<multiTarget_multipleModel_cross.png, id=57, 462.528pt x 346.896pt>
+File: multiTarget_multipleModel_cross.png Graphic file (type png)
+<use multiTarget_multipleModel_cross.png>
+Package pdftex.def Info: multiTarget_multipleModel_cross.png  used on input lin
+e 628.
+(pdftex.def)             Requested size: 185.0079pt x 138.75594pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 635--636
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 635--636
+
+ []
+
+
+Underfull \hbox (badness 2608) in paragraph at lines 637--638
+\OT1/ptm/m/n/10 co-vari-ances de-creases. Af-ter few it-er-a-tions their val-ue
+s
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 637--638
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 637--638
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 644--645
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 644--645
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 646--647
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 646--647
+
+ []
+
+[8 <./multiTarget_singleModel_cross.png> <./multiTarget_multipleModel_cross.png
+>]
+Underfull \hbox (badness 1810) in paragraph at lines 648--649
+\OT1/ptm/m/n/10 ma-trix for model "CVTR", based on the tech-nique in
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 648--649
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 661--662
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 687--687
+[]|\OT1/ptm/m/n/10 Object
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 687--687
+[]|\OT1/ptm/m/n/10 CV(Non-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 687--687
+[]|\OT1/ptm/m/n/10 CV(Linear)
+ []
+
+
+Underfull \vbox (badness 2913) has occurred while \output is active []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 710--710
+[]|\OT1/ptm/m/n/10 Average
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 717--717
+[]|\OT1/ptm/m/n/10 Event Prob-a-bil-ity
+ []
+
+[9]
 
 Package caption Warning: Unused \captionsetup[subfigure] on input line 21.
 See the caption package documentation for explanation.
 
-[6] (./report.aux) ) 
+[10
+
+] (./report.aux)
+
+LaTeX Warning: There were multiply-defined labels.
+
+ ) 
 Here is how much of TeX's memory you used:
- 34793 strings out of 492982
- 778890 string characters out of 6134896
- 823777 words of memory out of 5000000
- 37956 multiletter control sequences out of 15000+600000
- 568891 words of font info for 96 fonts, out of 8000000 for 9000
+ 34824 strings out of 492982
+ 779777 string characters out of 6134897
+ 822710 words of memory out of 5000000
+ 37979 multiletter control sequences out of 15000+600000
+ 566864 words of font info for 91 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  143i,19n,183p,10358b,2715s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/
-share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/
-texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
-cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/urw/times/utmri8a.pfb>
-Output written on report.pdf (7 pages, 180848 bytes).
+{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmmib10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cmextra/cmmib7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ti
+mes/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
+>
+Output written on report.pdf (11 pages, 528201 bytes).
 PDF statistics:
- 90 PDF objects out of 1000 (max. 8388607)
- 65 compressed objects within 1 object stream
+ 127 PDF objects out of 1000 (max. 8388607)
+ 83 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 19 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 49 words of extra memory for PDF output out of 10000 (max. 10000000)
 

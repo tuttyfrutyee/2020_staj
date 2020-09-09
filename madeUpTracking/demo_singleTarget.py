@@ -72,8 +72,8 @@ loss = 0
 dt = 0.1
 S = None
 z = None
-imm = True
-modeType = 2
+imm = False
+modeType = 1
 
 
 if(not imm):

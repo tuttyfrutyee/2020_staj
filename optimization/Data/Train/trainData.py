@@ -55,7 +55,7 @@ def extractGroundTruthFromScenario(scenario):
 
 
 
-numberOfScenario = 40
+numberOfScenario = 30
 std = 1.2
 plotCount = 0
 

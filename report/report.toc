@@ -29,14 +29,13 @@
 \contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-E}6}Final Output Estimations}{6}
 \contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-F}}Testing of the Algorithms}{6}
 \contentsline {section}{\numberline {VI}Trackers}{6}
-\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-A}}Single Object Single Model Tracker}{6}
-\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-B}}Single Object Multiple Model Tracker}{6}
-\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-C}}Multiple Object Single Model Tracker}{6}
-\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-D}}Multiple Object Multiple Model Tracker}{6}
-\contentsline {section}{\numberline {VII}Trackers in Action}{6}
-\contentsline {section}{\numberline {VIII}The Need For Optimization}{6}
-\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {VIII-}1}Optimization}{6}
-\contentsline {section}{\numberline {IX}Performance Assesment}{6}
-\contentsline {section}{\numberline {X}Fullfilment of the Objectives}{6}
-\contentsline {section}{\numberline {XI}Conclusion}{6}
-\contentsline {section}{References}{6}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-A}}Single Object Single Model Tracker}{7}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-B}}Single Object Multiple Model Tracker}{7}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-C}}Multiple Object Single Model Tracker}{7}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-D}}Multiple Object Multiple Model Tracker}{8}
+\contentsline {section}{\numberline {VII}The Need For Optimization}{8}
+\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {VII-}1}Optimization}{8}
+\contentsline {section}{\numberline {VIII}Performance Assesment}{9}
+\contentsline {section}{\numberline {IX}Fullfilment of the Objectives}{9}
+\contentsline {section}{\numberline {X}Conclusion}{9}
+\contentsline {section}{References}{10}

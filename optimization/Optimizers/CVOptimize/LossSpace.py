@@ -18,10 +18,17 @@ dtype_torch = torch.float64
 def getProcessNoiseCovScale(scale):
 
     return    torch.tensor([
-        [ 0.0251,  0.0219, -0.0072, -0.0054],
-        [ 0.0219,  0.0199, -0.0064, -0.0049],
-        [-0.0072, -0.0064,  0.0023,  0.0016],
-        [-0.0054, -0.0049,  0.0016,  0.0017]
+       # [0.1319892455536184,0,0,0,0],
+       # [0,0.19014929833113914,0,0,0],
+       # [0,0,0.009662497641306406,0,0],
+       # [0,0,0,2.850971754138458,0],
+       # [0,0,0,0,0] 
+        
+       [0.1319892455536184,0,0,0,0],
+       [0,0.19014929833113914,0,0,0],
+       [0,0,0.034722325672501414,0,0],
+       [0,0,0,2.850971754138458,0],
+       [0,0,0,0,0]         
      
     ], dtype=dtype_torch) * scale
 
@@ -68,7 +75,7 @@ def generateLossSpace(dataPacks, scalesToTest, dt):
     
     for i,scale in enumerate(scalesToTest):
 
-        print(str(i / len(scalesToTest) * 100) + "% has been complete")
+        print(str(i / len(scalesToTest) * 100) + "% has been completed")
         
         loss = 0
         
@@ -77,7 +84,7 @@ def generateLossSpace(dataPacks, scalesToTest, dt):
         
         for dataPack in dataPacks:
             
-            tracker = Tracker.Tracker_SingleTarget_SingleModel_Linear_allMe()
+            tracker = Tracker.Tracker_SingleTarget_SingleModel_CV_allMe()
             measurementPacks, groundTruthPacks = dataPack
             
             for i, (measurementPack, groundTruthPack) in enumerate(zip(measurementPacks, groundTruthPacks)):
@@ -103,7 +110,7 @@ def visualizeLossSpace(scalesToTest, lossSpace, log):
 
 
 initialScale = 1e-4
-finalScale = 5
+finalScale = 10
 logStep = 2
 linearStepPointCount = 8
 dt = 0.1
@@ -112,8 +119,9 @@ scalesToTest = createScaleTestPoints(initialScale, finalScale, logStep, linearSt
 lossSpace = generateLossSpace(trainData.valDataPacks, scalesToTest, dt)
 
 visualizeLossSpace(scalesToTest, lossSpace, True)
- visualizeLossSpace(scalesToTest[-30:], lossSpace[-30:], False)
+#visualizeLossSpace(scalesToTest[-70:], lossSpace[-70:], False)
 
+print(scalesToTest[np.argmin(lossSpace)])
                     
         
         
